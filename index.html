@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyecto Supabase - Control de Acceso</title>
+    <title>Kuroda Activos - Sistema de Auditoría</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Librerías Externas -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         :root{
@@ -18,6 +23,7 @@
             --radius:18px; --radius-sm:12px;
             --shadow:0 20px 27px 0 rgba(0,0,0,.05);
             --shadow-colored:0 4px 20px 0 rgba(0,0,0,.14),0 7px 10px -5px rgba(94,114,228,.4);
+            --shadow-lg:0 8px 26px -4px rgba(20,30,60,.12),0 8px 9px -5px rgba(20,30,60,.06);
         }
         body {
             font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -37,394 +43,171 @@
             width: 100%;
             transition: max-width 0.3s ease;
         }
-        #app-view { max-width: 800px; }
+        #app-view { max-width: 900px; }
         h2, h3 { margin-bottom: 20px; color: var(--txt); text-align: center; }
-        form { display: flex; flex-direction: column; gap: 15px; }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            background: var(--bg);
-            color: var(--txt);
-            font-family: inherit;
-        }
-        input:focus {
-            outline: none;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px var(--blue-soft);
-        }
-        button {
-            background: linear-gradient(135deg, var(--blue), var(--blue2));
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: var(--shadow-colored);
-            transition: box-shadow 0.2s, transform 0.1s;
-            font-family: inherit;
-        }
-        button:hover { box-shadow: 0 6px 18px -2px rgba(94,114,228,.55); }
-        button:active { transform: scale(.98); }
-        button:disabled {
-            background: var(--muted);
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        /* --- Card de login con borde animado (paleta del dashboard) --- */
-        @property --angle {
-            syntax: '<angle>';
-            initial-value: 0deg;
-            inherits: false;
-        }
-        #login-view {
-            max-width: 420px;
-            padding: 2px;
-            border-radius: 20px;
-            background: conic-gradient(from var(--angle), var(--blue), var(--blue2), var(--blue) 60%);
-            animation: girar 5s linear infinite;
-            box-shadow: var(--shadow);
-        }
-        @keyframes girar { to { --angle: 360deg; } }
-        .login-inner {
-            background: var(--white);
-            border-radius: 18px;
-            padding: 36px 32px;
-        }
-        .login-logo {
-            width: 52px;
-            height: 52px;
-            margin: 0 auto 16px;
-            border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, var(--blue), var(--blue2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 800;
-            font-size: 20px;
-            box-shadow: var(--shadow-colored);
-        }
-        .login-inner h2 { margin-bottom: 4px; font-weight: 700; }
-        .login-sub {
-            text-align: center;
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 24px;
-            font-weight: 500;
-        }
-        .field label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--txt);
-            margin-bottom: 6px;
-        }
-        .login-error {
-            font-size: 13px;
-            color: var(--red);
-            text-align: center;
-            min-height: 18px;
-            font-weight: 600;
-        }
-        @media (prefers-reduced-motion: reduce) { #login-view { animation: none; } }
+        
         .hidden { display: none !important; }
 
-        /* Estilos de la aplicación interna */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
+        /* ═══════════ PÁGINA DE LOGIN (Estilo Kuroda) ═══════════ */
+        #login-page {
+            position: fixed; inset: 0; background: var(--bg); display: flex; 
+            align-items: stretch; justify-content: center; z-index: 9999;
         }
-        .user-profile span { font-weight: 700; color: var(--blue); }
-        .btn-outline {
-            background-color: transparent;
-            color: var(--red);
-            border: 1px solid var(--red-soft);
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 700;
-            box-shadow: none;
+        .lp-panel {
+            width: 320px; min-width: 320px; background: linear-gradient(160deg,var(--blue),var(--blue2)); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            gap: 0; padding: 40px 32px; flex-shrink: 0;
         }
-        .btn-outline:hover { background-color: var(--red-soft); box-shadow: none; }
+        .lp-panel-logo {
+            width: 96px; height: 96px; background: #fff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; margin-bottom: 18px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        }
+        .lp-panel-logo img { width: 86px; height: 86px; object-fit: contain; }
+        .lp-panel-name { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: .02em; margin-bottom: 4px; }
+        .lp-panel-div { width: 56px; height: 2px; background: rgba(255,255,255,.5); margin-bottom: 8px; }
+        .lp-panel-tag { font-size: 11px; color: rgba(255,255,255,.85); text-align: center; line-height: 1.5; }
+        .lp-panel-foot { margin-top: auto; font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: .08em; text-transform: uppercase; }
+        
+        .lp-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px; background: var(--bg); }
+        .lp-card {
+            background: transparent; border-radius: var(--radius); border: none; box-shadow: var(--shadow-lg); 
+            padding: 38px 38px 30px; width: 100%; max-width: 420px; display: flex; flex-direction: column; 
+            position: relative; overflow: hidden; isolation: isolate; max-height: 168px; cursor: pointer; 
+            transition: max-height .6s cubic-bezier(.4,0,.2,1);
+        }
+        .lp-card:hover, .lp-card:focus-within, .lp-card.lp-open { max-height: 720px; cursor: default; }
+        .lp-badge { font-size: 11px; font-weight: 800; letter-spacing: .18em; color: var(--blue); margin-top: 10px; padding: 5px 0; border-top: 1px dashed var(--border); text-transform: uppercase; }
+        
+        .lp-card > :where(:not(.lp-title):not(.lp-sub):not(.lp-badge)) { opacity: 0; transition: opacity .35s ease .18s; }
+        .lp-card:hover > *, .lp-card:focus-within > *, .lp-card.lp-open > * { opacity: 1; }
+        .lp-sub::after { content: ' · pasa el cursor o toca para ingresar'; font-size: 11px; color: var(--muted); opacity: .8; }
+        .lp-card:hover .lp-sub::after, .lp-card:focus-within .lp-sub::after, .lp-card.lp-open .lp-sub::after { content: ''; }
+        
+        @media(max-width:768px),(hover:none),(pointer:coarse){
+            .lp-card { max-height: 174px; cursor: pointer; }
+            .lp-card.lp-open, .lp-card:focus-within { max-height: none; cursor: default; }
+            .lp-card.lp-open > *, .lp-card:focus-within > * { opacity: 1; }
+            .lp-sub::after { content: ' · toca para ingresar'; }
+            .lp-card.lp-open .lp-sub::after, .lp-card:focus-within .lp-sub::after { content: ''; }
+        }
+
+        /* Efecto neón */
+        .lp-card::before {
+            content: ""; position: absolute; inset: 50%; width: 170cqmax; height: 170cqmax; 
+            translate: -50% -50%; rotate: 0deg;
+            background: conic-gradient(from 0deg, transparent 0deg 36deg, #e02128 36deg 48deg, transparent 48deg 126deg, #1b82c5 126deg 138deg, transparent 138deg 216deg, #e02128 216deg 228deg, transparent 228deg 306deg, #1b82c5 306deg 318deg, transparent 318deg 360deg);
+            filter: blur(1px) drop-shadow(0 0 12px #e8a33d); animation: neon-rotate 5s linear infinite; z-index: -2;
+        }
+        .lp-card::after { content: ""; position: absolute; inset: 3px; background: var(--white,#fff); border-radius: calc(var(--radius) - 3px); z-index: -1; }
+        @keyframes neon-rotate { to { rotate: 360deg; } }
+        @media (prefers-reduced-motion:reduce){ .lp-card::before{animation:none} .lp-card{transition:none} }
+        
+        .lp-title { font-size: 25px; font-weight: 700; color: var(--txt); letter-spacing: -.01em; margin-bottom: 4px; }
+        .lp-sub { font-size: 12.5px; color: var(--muted); margin-bottom: 0; }
+        .lp-divider { height: 1px; background: var(--border); margin: 18px 0; }
+        .lp-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+        .lp-field label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+        .lp-field input { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; color: var(--txt); outline: none; background: var(--soft); }
+        .lp-field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); background: #fff; }
+        .lp-pass-wrap { position: relative; }
+        .lp-pass-wrap input { width: 100%; padding-right: 40px; }
+        .lp-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 15px; padding: 2px; line-height: 1; }
+        .lp-eye:hover { color: var(--txt); }
+        .lp-show { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); margin-bottom: 14px; cursor: pointer; user-select: none; }
+        .lp-show input[type=checkbox] { accent-color: var(--blue); width: 13px; height: 13px; cursor: pointer; }
+        
+        .lp-btn { width: 100%; padding: 12px; background: linear-gradient(135deg,var(--blue),var(--blue2)); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: .01em; box-shadow: 0 4px 14px -2px rgba(94,114,228,.5); }
+        .lp-btn:hover { box-shadow: 0 6px 18px -2px rgba(94,114,228,.6); }
+        .lp-btn:active { transform: scale(.98); }
+        .lp-btn:disabled { background: #c2cdf7; cursor: not-allowed; box-shadow: none; }
+        .lp-err { font-size: 12px; color: var(--red); text-align: center; min-height: 16px; margin-top: 6px; font-weight: 600;}
+        
+        .lp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+        .lp-foot-txt { font-size: 10.5px; color: #c0c8d4; }
+        .lp-foot-logo { width: 18px; height: 18px; object-fit: contain; opacity: .5; }
+
+        @media(max-width:768px){
+            #login-page { flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+            .lp-panel { width: 100%; min-width: 0; flex-direction: row; padding: 16px 20px; gap: 14px; min-height: auto; justify-content: flex-start; flex-shrink: 0; }
+            .lp-panel-logo { width: 48px; height: 48px; min-width: 48px; margin-bottom: 0; }
+            .lp-panel-logo img { width: 42px; height: 42px; }
+            .lp-panel-name { font-size: 16px; margin-bottom: 0; }
+            .lp-panel-div, .lp-panel-tag, .lp-panel-foot { display: none; }
+            .lp-right { padding: 18px 14px; align-items: flex-start; }
+            .lp-card { padding: 24px 20px 20px; max-width: 100%; }
+            .lp-field input { font-size: 16px; padding: 12px 14px; }
+            .lp-btn { padding: 14px; font-size: 15px; }
+        }
+
+        /* --- Estilos de la aplicación interna --- */
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .user-profile span { font-weight: 700; color: var(--blue); text-transform: uppercase; }
+        
         nav { display: flex; gap: 8px; margin-bottom: 20px; }
-        .nav-link {
-            text-decoration: none;
-            color: var(--muted);
-            padding: 8px 14px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            font-size: 13.5px;
-        }
+        .nav-link { text-decoration: none; color: var(--muted); padding: 8px 14px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13.5px; cursor: pointer; }
         .nav-link.active { background: var(--blue-soft); color: var(--blue); }
-        .subview {
-            background: var(--bg);
-            padding: 20px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-        }
-        .datos-estado { color: var(--muted); font-size: 14px; }
-        .tabla-activos { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-        .tabla-activos th, .tabla-activos td {
-            text-align: left;
-            padding: 10px 10px;
-            border-bottom: 1px solid var(--border);
-        }
-        .tabla-activos th { color: var(--txt); font-weight: 700; }
-        .estado-badge {
-            padding: 3px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-        .estado-activo { background: var(--green-soft); color: #1a7a52; }
-        .estado-baja { background: var(--red-soft); color: #c11c46; }
-        .estado-mantenimiento { background: var(--amber-soft); color: #92670e; }
+        
+        .subview { background: var(--white); padding: 20px 0; }
+        
+        .btn-outline { background: transparent; color: var(--blue); border: 2px solid var(--blue); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer;}
+        .btn-outline:hover { background: var(--blue-soft); }
+        .btn-grey { background: var(--bg); color: var(--txt); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer;}
+        .btn-grey:hover { background: var(--border); }
+        .btn-logout { border-color: var(--red-soft); color: var(--red); padding: 8px 16px; font-size: 13px; border-radius: var(--radius-sm); background: transparent; cursor: pointer; font-weight: 700;}
+        .btn-logout:hover { background-color: var(--red-soft); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        input { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; background: var(--bg); color: var(--txt); font-family: inherit; }
+        input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+
+        .badge { display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .badge-in-progress { background-color: var(--amber-soft); color: var(--amber); }
+        .badge-paused { background-color: var(--border); color: var(--muted); }
+        .badge-inactive { background-color: var(--bg); color: var(--txt); }
+
+        .levantamiento-header { text-align: center; margin-bottom: 25px; padding: 20px; background: var(--bg); border-radius: var(--radius-sm); }
+        .action-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; }
+        .action-buttons button { min-width: 120px; }
+        
+        .search-area { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        .search-buttons { display: flex; gap: 10px; }
+        .search-buttons button { flex: 1; padding: 12px; border-radius: var(--radius-sm); font-weight: 700; border: none;}
+        #btn-buscar { background: linear-gradient(135deg, var(--blue), var(--blue2)); color: white; }
+        
+        #lector-qr-container { margin-top: 20px; }
+        #reader { width: 100%; border-radius: var(--radius-sm); overflow: hidden; border: 2px dashed var(--blue); }
+
+        .filter-row { display: flex; gap: 15px; margin-bottom: 25px; }
+        .filter-row button { padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 700; border: none; background: linear-gradient(135deg, var(--blue), var(--blue2)); color: white;}
+        .filter-row .btn-outline { background: transparent; color: var(--blue); border: 2px solid var(--blue);}
+        .report-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; background-color: var(--bg); border-radius: var(--radius-sm); margin-bottom: 10px; font-size: 14px;}
+        .report-info strong { color: var(--txt); }
+        .report-info { color: var(--muted); }
     </style>
 </head>
 <body>
 
-    <!-- 1. VISTA DE INICIO DE SESIÓN -->
-    <div id="login-view">
-        <div class="login-inner">
-            <div class="login-logo">SB</div>
-            <h2>Iniciar Sesión</h2>
-            <p class="login-sub">Ingresa con tu cuenta para continuar</p>
-            <form>
-                <div class="field">
-                    <label for="login-email">Usuario</label>
-                    <input id="login-email" type="text" placeholder="Ej. FGUERRERO" required autocomplete="username">
-                </div>
-                <div class="field">
-                    <label for="login-password">Contraseña</label>
-                    <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
-                </div>
-                <p class="login-error"></p>
-                <button type="submit">Iniciar sesión</button>
-            </form>
-        </div>
-    </div>
+    <!-- ==================== VISTA: LOGIN (Diseño Kuroda) ==================== -->
+    <div id="login-page">
+        <!-- Panel izquierdo corporativo Kuroda -->
+        <div class="lp-panel">
+            <div class="lp-panel-logo">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAAFeCAYAAADNK3caAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyNpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ4IDc5LjE2NDAzNiwgMjAxOS8wOC8xMy0wMTowNjo1NyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjAgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkYxRDRBRTc1MTUyNjExRUVCODRFOEMxRjU0RkUyRTIwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkYxRDRBRTc2MTUyNjExRUVCODRFOEMxRjU0RkUyRTIwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RjFENEFFNzMxNTI2MTFFRUI4NEU4QzFGNTRGRTJFMjAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RjFENEFFNzQxNTI2MTFFRUI4NEU4QzFGNTRGRTJFMjAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4zyQ/qAABCJUlEQVR42uydB3wU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OYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYOYO" crossorigin="utf-8
+    </p>
 
-    <!-- 2. VISTA DE LA APLICACIÓN PRINCIPAL (OCULTA HASTA LOGUEARSE) -->
-    <div id="app-view" class="container hidden">
-        <header>
-            <div class="user-profile">Usuario activo: <span></span></div>
-            <div class="nav-right">
-                <button class="btn-outline">Cerrar Sesión</button>
-            </div>
-        </header>
+<!-- Generated by Django 3.2.14 on 2021-03-31 03:07 -->
 
-        <nav>
-            <a href="#" class="nav-link active" data-target="vista-inicio">Inicio</a>
-            <a href="#" class="nav-link" data-target="vista-datos">Datos</a>
-        </nav>
+<record>
+  <Product id="699">
+    <Name>Refrigerador Samsung 341 L Inverter Frost Free C/ Congelador De Abajo B.</Name>
+    <Description>Refrigera todos los alimentos que necesites sin preocuparte por el espacio gracias a la amplia capacidad de tu heladera Samsung de 12 pies cúbicos, diseñada en su acabado Platinum Inox color Silver que resaltará en la elegancia de tu hogar.
 
-        <!-- Subvistas intercambiables -->
-        <div id="vista-inicio" class="subview">
-            <h3>Panel Principal</h3>
-            <p>¡Conexión exitosa! Has ingresado correctamente al entorno integrado con Supabase.</p>
-        </div>
+Cuenta con tecnología Silver Deodorizer para eliminar olores mediante filtros con carbono natural que logran erradicar hasta las bacterias en un 99.9%, de esta manera, tus alimentos conservarán su frescura por mucho más tiempo y estarán limpios, sin dejar malos aromas en el aire de tu nevera. Además, podrás organizar de la mejor manera tus víveres en los tres resistentes estantes en su interior fabricados con material de cristal templado, por lo que soportarán el peso de la olla con comida sin temor a que el peso los rompa.
 
-        <div id="vista-datos" class="subview hidden">
-            <h3>Activos por Tienda</h3>
-            <p id="activos-estado" class="datos-estado">Cargando activos...</p>
-            <table id="activos-tabla" class="tabla-activos hidden">
-                <thead>
-                    <tr>
-                        <th>Tienda</th>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>N° Serie</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Carga del SDK oficial de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-
-    <script>
-        // --- CONFIGURACIÓN DE CREDENCIALES ---
-        // ¡¡IMPORTANTE!!: Pega aquí tus claves reales de Supabase (Settings > API)
-        const supabaseUrl = 'https://xlygkolfmetytowixtnb.supabase.co';
-        const supabaseAnonKey = 'sb_publishable_qMc5NuOO1HUzYvQzFEr2fA_vVqBzXND';
-
-        // Evita que el script truene si aún quedan los valores de ejemplo
-        const credencialesValidas = /^https:\/\/.+\.supabase\.co$/.test(supabaseUrl) && supabaseAnonKey.length > 20;
-
-        let supabaseClient = null;
-        if (credencialesValidas) {
-            try {
-                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-            } catch (err) {
-                console.error('No se pudo inicializar Supabase:', err);
-            }
-        } else {
-            console.warn('Supabase no está configurado: reemplaza supabaseUrl y supabaseAnonKey con tus claves reales.');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginView = document.getElementById('login-view');
-            const appView = document.getElementById('app-view');
-            const loginForm = document.querySelector('#login-view form');
-            const logoutBtn = document.querySelector('.nav-right .btn-outline');
-            const userEmailDisplay = document.querySelector('.user-profile span');
-
-            if (!supabaseClient) {
-                const errorMsg = loginForm ? loginForm.querySelector('.login-error') : null;
-                if (errorMsg) errorMsg.textContent = 'Falta configurar Supabase (URL/clave) en el código.';
-                const submitBtn = loginForm ? loginForm.querySelector('button[type="submit"]') : null;
-                if (submitBtn) submitBtn.disabled = true;
-                return;
-            }
-
-            // --- GESTIÓN DE SESIÓN ACTIVA ---
-            supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    mostrarApp(session.user);
-                }
-            });
-
-            supabaseClient.auth.onAuthStateChange((_event, session) => {
-                if (session) {
-                    mostrarApp(session.user);
-                } else {
-                    mostrarLogin();
-                }
-            });
-
-            // --- LOGIN DE USUARIOS ---
-            const DOMINIO_INTERNO = 'kurodaapp.local'; // dominio invisible para el usuario
-            if (loginForm) {
-                loginForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const usuarioInput = document.getElementById('login-email').value.trim().toLowerCase();
-                    const passwordInput = loginForm.querySelector('input[type="password"]').value;
-                    const submitBtn = loginForm.querySelector('button[type="submit"]');
-                    const errorMsg = loginForm.querySelector('.login-error');
-
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Autenticando...';
-                    if (errorMsg) errorMsg.textContent = '';
-
-                    const emailInterno = `${usuarioInput}@${DOMINIO_INTERNO}`;
-
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email: emailInterno,
-                        password: passwordInput,
-                    });
-
-                    if (error) {
-                        if (errorMsg) errorMsg.textContent = 'No se pudo iniciar sesión. Verifica tus datos.';
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Iniciar sesión';
-                    }
-                });
-            }
-
-            // --- LOGOUT DE USUARIOS ---
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    await supabaseClient.auth.signOut();
-                });
-            }
-
-            // --- MANIPULACIÓN DEL DOM PARA INTERCAMBIO DE VISTAS ---
-            function mostrarApp(user) {
-                if(loginView) loginView.classList.add('hidden');
-                if(appView) appView.classList.remove('hidden');
-                if(userEmailDisplay) userEmailDisplay.textContent = user.email.split('@')[0].toUpperCase();
-            }
-
-            function mostrarLogin() {
-                if(appView) appView.classList.add('hidden');
-                if(loginView) loginView.classList.remove('hidden');
-                if(loginForm) {
-                    loginForm.reset();
-                    const submitBtn = loginForm.querySelector('button[type="submit"]');
-                    const errorMsg = loginForm.querySelector('.login-error');
-                    if(submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Iniciar sesión';
-                    }
-                    if(errorMsg) errorMsg.textContent = '';
-                }
-            }
-
-            // --- NAVEGACIÓN INTERNA ---
-            const navLinks = document.querySelectorAll('.nav-link');
-            const subviews = document.querySelectorAll('.subview');
-            let activosCargados = false;
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetId = link.getAttribute('data-target');
-                    if (!targetId) return;
-
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    link.classList.add('active');
-
-                    subviews.forEach(view => view.classList.add('hidden'));
-                    const targetView = document.getElementById(targetId);
-                    if(targetView) targetView.classList.remove('hidden');
-
-                    if (targetId === 'vista-datos' && !activosCargados) {
-                        activosCargados = true;
-                        cargarActivos();
-                    }
-                });
-            });
-
-            // --- CARGA DE ACTIVOS (tabla "activos", filtrada por RLS/razón social) ---
-            async function cargarActivos() {
-                const estado = document.getElementById('activos-estado');
-                const tabla = document.getElementById('activos-tabla');
-                const tbody = tabla ? tabla.querySelector('tbody') : null;
-
-                const { data, error } = await supabaseClient
-                    .from('activos')
-                    .select('tienda, nombre, tipo, numero_serie, estado')
-                    .order('tienda', { ascending: true });
-
-                if (error) {
-                    if (estado) estado.textContent = 'No se pudo cargar el listado de activos.';
-                    console.error('Error al cargar activos:', error);
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    if (estado) estado.textContent = 'Todavía no hay activos registrados.';
-                    return;
-                }
-
-                if (tbody) {
-                    tbody.innerHTML = data.map(a => `
-                        <tr>
-                            <td>${a.tienda ?? ''}</td>
-                            <td>${a.nombre ?? ''}</td>
-                            <td>${a.tipo ?? '-'}</td>
-                            <td>${a.numero_serie ?? '-'}</td>
-                            <td><span class="estado-badge estado-${a.estado}">${a.estado}</span></td>
-                        </tr>
-                    `).join('');
-                }
-                if (estado) estado.classList.add('hidden');
-                if (tabla) tabla.classList.remove('hidden');
-            }
-        });
-    </script>
-</body>
-</html>
+En la puerta inferior se ubica el congelador con tres estantes en donde puedes acomodar tus alimentos sin problema, incluyendo una charola de hielos para refrescar todas tus bebidas.</Description>
+    <URL>https://www.chedraui.com.mx/refrigerador-samsung-341-l-inverter-frost-free-c-congelador-de-abajo-b-3444007/p</URL>
+    <Image>https://chedrauimx.vtexassets.com/arquivos/ids/6015509/8806090400030_00.jpg?v=638148720172600000</Image>
+    <Category>Mascotas/Gatos/Juguetes</Category>
+  </Product>
+</record>
