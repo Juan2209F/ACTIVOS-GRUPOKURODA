@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Supabase - Control de Acceso</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            transition: max-width 0.3s ease;
+        }
+        #login-view {
+            max-width: 450px;
+        }
+        #app-view {
+            max-width: 800px;
+        }
+        h2, h3 {
+            margin-bottom: 20px;
+            color: #111827;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* Estilos de la aplicación interna */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+        .user-profile span {
+            font-weight: 600;
+            color: #2563eb;
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .btn-outline:hover {
+            background-color: #fef2f2;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #4b5563;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .nav-link.active {
+            background-color: #e0e7ff;
+            color: #4338ca;
+        }
+        .subview {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. VISTA DE INICIO DE SESIÓN -->
+    <div id="login-view" class="container">
+        <h2>Iniciar Sesión</h2>
+        <form>
+            <div>
+                <input type="email" placeholder="Correo electrónico" required autocomplete="email">
+            </div>
+            <div>
+                <input type="password" placeholder="Contraseña" required autocomplete="current-password">
+            </div>
+            <button type="submit">INICIAR SESIÓN</button>
+        </form>
+    </div>
+
+    <!-- 2. VISTA DE LA APLICACIÓN PRINCIPAL (OCULTA HASTA LOGUEARSE) -->
+    <div id="app-view" class="container hidden">
+        <header>
+            <div class="user-profile">Usuario activo: <span></span></div>
+            <div class="nav-right">
+                <button class="btn-outline">Cerrar Sesión</button>
+            </div>
+        </header>
+        
+        <nav>
+            <a href="#" class="nav-link active" data-target="vista-inicio">Inicio</a>
+            <a href="#" class="nav-link" data-target="vista-datos">Datos</a>
+        </nav>
+
+        <!-- Subvistas intercambiables -->
+        <div id="vista-inicio" class="subview">
+            <h3>Panel Principal</h3>
+            <p>¡Conexión exitosa! Has ingresado correctamente al entorno integrado con Supabase.</p>
+        </div>
+        
+        <div id="vista-datos" class="subview hidden">
+            <h3>Visualización de Métricas</h3>
+            <p>Este espacio queda disponible para renderizar bases de datos o registrar información operacional.</p>
+        </div>
+    </div>
+
+    <!-- Carga del SDK oficial de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // --- CONFIGURACIÓN DE CREDENCIALES ---
+        // IMPORTANTE: Reemplaza las cadenas de texto de abajo con tus datos de Supabase (Settings > API)
+        const supabaseUrl = 'https://TU_PROYECTO.supabase.co';
+        const supabaseAnonKey = 'TU_ANON_KEY';
+        
+        // Inicialización segura renombrada para evitar colisiones sintácticas
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginView = document.getElementById('login-view');
+            const appView = document.getElementById('app-view');
+            const loginForm = document.querySelector('#login-view form');
+            const logoutBtn = document.querySelector('.nav-right .btn-outline');
+            const userEmailDisplay = document.querySelector('.user-profile span');
+
+            // --- GESTIÓN DE SESIÓN ACTIVA ---
+            supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    mostrarApp(session.user);
+                }
+            });
+
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                if (session) {
+                    mostrarApp(session.user);
+                } else {
+                    mostrarLogin();
+                }
+            });
+
+            // --- LOGIN DE USUARIOS ---
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const emailInput = loginForm.querySelector('input[type="email"]').value;
+                    const passwordInput = loginForm.querySelector('input[type="password"]').value;
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Autenticando...';
+
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: emailInput,
+                        password: passwordInput,
+                    });
+
+                    if (error) {
+                        alert('Error al autenticar: ' + error.message);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'INICIAR SESIÓN';
+                    }
+                });
+            }
+
+            // --- LOGOUT DE USUARIOS ---
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await supabaseClient.auth.signOut();
+                });
+            }
+
+            // --- MANIPULACIÓN DEL DOM PARA INTERCAMBIO DE VISTAS ---
+            function mostrarApp(user) {
+                if(loginView) loginView.classList.add('hidden');
+                if(appView) appView.classList.remove('hidden');
+                if(userEmailDisplay) userEmailDisplay.textContent = user.email;
+            }
+
+            function mostrarLogin() {
+                if(appView) appView.classList.add('hidden');
+                if(loginView) loginView.classList.remove('hidden');
+                if(loginForm) {
+                    loginForm.reset();
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    if(submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'INICIAR SESIÓN';
+                    }
+                }
+            }
+
+            // --- NAVEGACIÓN INTERNA ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const subviews = document.querySelectorAll('.subview');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+                    if (!targetId) return;
+
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    subviews.forEach(view => view.classList.add('hidden'));
+                    const targetView = document.getElementById(targetId);
+                    if(targetView) targetView.classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
