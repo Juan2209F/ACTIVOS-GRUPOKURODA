@@ -4,16 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Supabase - Control de Acceso</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root{
+            --bg:#f8f9fc; --white:#ffffff;
+            --border:#eef1f7; --txt:#344767; --muted:#8392ab;
+            --blue:#5e72e4; --blue2:#825ee4; --blue-soft:#eef0fd;
+            --green:#2dce89; --green-soft:#e6f9f1;
+            --red:#f5365c; --red-soft:#fde8ec;
+            --amber:#fbb140; --amber-soft:#fff8e9;
+            --radius:18px; --radius-sm:12px;
+            --shadow:0 20px 27px 0 rgba(0,0,0,.05);
+            --shadow-colored:0 4px 20px 0 rgba(0,0,0,.14),0 7px 10px -5px rgba(94,114,228,.4);
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--txt);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,58 +30,53 @@
             padding: 20px;
         }
         .container {
-            background-color: #ffffff;
+            background-color: var(--white);
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             width: 100%;
             transition: max-width 0.3s ease;
         }
-        #app-view {
-            max-width: 800px;
-        }
-        h2, h3 {
-            margin-bottom: 20px;
-            color: #111827;
-            text-align: center;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        #app-view { max-width: 800px; }
+        h2, h3 { margin-bottom: 20px; color: var(--txt); text-align: center; }
+        form { display: flex; flex-direction: column; gap: 15px; }
         input {
             width: 100%;
             padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
             font-size: 14px;
+            background: var(--bg);
+            color: var(--txt);
+            font-family: inherit;
         }
         input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--blue-soft);
         }
         button {
-            background-color: #3b82f6;
+            background: linear-gradient(135deg, var(--blue), var(--blue2));
             color: white;
             padding: 12px;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s;
+            box-shadow: var(--shadow-colored);
+            transition: box-shadow 0.2s, transform 0.1s;
+            font-family: inherit;
         }
-        button:hover {
-            background-color: #2563eb;
-        }
+        button:hover { box-shadow: 0 6px 18px -2px rgba(94,114,228,.55); }
+        button:active { transform: scale(.98); }
         button:disabled {
-            background-color: #9ca3af;
+            background: var(--muted);
+            box-shadow: none;
             cursor: not-allowed;
         }
 
-        /* --- Card de login con borde animado --- */
+        /* --- Card de login con borde animado (paleta del dashboard) --- */
         @property --angle {
             syntax: '<angle>';
             initial-value: 0deg;
@@ -81,132 +85,109 @@
         #login-view {
             max-width: 420px;
             padding: 2px;
-            border-radius: 16px;
-            background: conic-gradient(from var(--angle), #3b82f6, #818cf8, #3b82f6 60%);
+            border-radius: 20px;
+            background: conic-gradient(from var(--angle), var(--blue), var(--blue2), var(--blue) 60%);
             animation: girar 5s linear infinite;
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+            box-shadow: var(--shadow);
         }
-        @keyframes girar {
-            to { --angle: 360deg; }
-        }
+        @keyframes girar { to { --angle: 360deg; } }
         .login-inner {
-            background: #ffffff;
-            border-radius: 14px;
+            background: var(--white);
+            border-radius: 18px;
             padding: 36px 32px;
         }
         .login-logo {
             width: 52px;
             height: 52px;
             margin: 0 auto 16px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--blue), var(--blue2));
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 20px;
+            box-shadow: var(--shadow-colored);
         }
-        .login-inner h2 {
-            margin-bottom: 4px;
-        }
+        .login-inner h2 { margin-bottom: 4px; font-weight: 700; }
         .login-sub {
             text-align: center;
-            color: #6b7280;
+            color: var(--muted);
             font-size: 13px;
             margin-bottom: 24px;
+            font-weight: 500;
         }
         .field label {
             display: block;
             font-size: 13px;
             font-weight: 600;
-            color: #374151;
+            color: var(--txt);
             margin-bottom: 6px;
         }
         .login-error {
             font-size: 13px;
-            color: #dc2626;
+            color: var(--red);
             text-align: center;
             min-height: 18px;
+            font-weight: 600;
         }
-        @media (prefers-reduced-motion: reduce) {
-            #login-view { animation: none; }
-        }
-        .hidden {
-            display: none !important;
-        }
+        @media (prefers-reduced-motion: reduce) { #login-view { animation: none; } }
+        .hidden { display: none !important; }
+
         /* Estilos de la aplicación interna */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-bottom: 15px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 20px;
         }
-        .user-profile span {
-            font-weight: 600;
-            color: #2563eb;
-        }
+        .user-profile span { font-weight: 700; color: var(--blue); }
         .btn-outline {
             background-color: transparent;
-            color: #dc2626;
-            border: 1px solid #dc2626;
+            color: var(--red);
+            border: 1px solid var(--red-soft);
             padding: 8px 16px;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: none;
         }
-        .btn-outline:hover {
-            background-color: #fef2f2;
-        }
-        nav {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+        .btn-outline:hover { background-color: var(--red-soft); box-shadow: none; }
+        nav { display: flex; gap: 8px; margin-bottom: 20px; }
         .nav-link {
             text-decoration: none;
-            color: #4b5563;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-weight: 500;
+            color: var(--muted);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 13.5px;
         }
-        .nav-link.active {
-            background-color: #e0e7ff;
-            color: #4338ca;
-        }
+        .nav-link.active { background: var(--blue-soft); color: var(--blue); }
         .subview {
-            background: #f9fafb;
+            background: var(--bg);
             padding: 20px;
-            border-radius: 6px;
-            border: 1px solid #e5e7eb;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
         }
-        .datos-estado {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        .tabla-activos {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
+        .datos-estado { color: var(--muted); font-size: 14px; }
+        .tabla-activos { width: 100%; border-collapse: collapse; font-size: 13.5px; }
         .tabla-activos th, .tabla-activos td {
             text-align: left;
-            padding: 8px 10px;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 10px 10px;
+            border-bottom: 1px solid var(--border);
         }
-        .tabla-activos th {
-            color: #374151;
-            font-weight: 600;
-        }
+        .tabla-activos th { color: var(--txt); font-weight: 700; }
         .estado-badge {
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
         }
-        .estado-activo { background: #dcfce7; color: #166534; }
-        .estado-baja { background: #fee2e2; color: #991b1b; }
-        .estado-mantenimiento { background: #fef3c7; color: #92400e; }
+        .estado-activo { background: var(--green-soft); color: #1a7a52; }
+        .estado-baja { background: var(--red-soft); color: #c11c46; }
+        .estado-mantenimiento { background: var(--amber-soft); color: #92670e; }
     </style>
 </head>
 <body>
@@ -219,8 +200,8 @@
             <p class="login-sub">Ingresa con tu cuenta para continuar</p>
             <form>
                 <div class="field">
-                    <label for="login-email">Correo electrónico</label>
-                    <input id="login-email" type="email" placeholder="tucorreo@empresa.com" required autocomplete="email">
+                    <label for="login-email">Usuario</label>
+                    <input id="login-email" type="text" placeholder="Ej. FGUERRERO" required autocomplete="username">
                 </div>
                 <div class="field">
                     <label for="login-password">Contraseña</label>
@@ -240,7 +221,7 @@
                 <button class="btn-outline">Cerrar Sesión</button>
             </div>
         </header>
-        
+
         <nav>
             <a href="#" class="nav-link active" data-target="vista-inicio">Inicio</a>
             <a href="#" class="nav-link" data-target="vista-datos">Datos</a>
@@ -251,7 +232,7 @@
             <h3>Panel Principal</h3>
             <p>¡Conexión exitosa! Has ingresado correctamente al entorno integrado con Supabase.</p>
         </div>
-        
+
         <div id="vista-datos" class="subview hidden">
             <h3>Activos por Tienda</h3>
             <p id="activos-estado" class="datos-estado">Cargando activos...</p>
@@ -272,11 +253,11 @@
 
     <!-- Carga del SDK oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-    
+
     <script>
         // --- CONFIGURACIÓN DE CREDENCIALES ---
         // ¡¡IMPORTANTE!!: Pega aquí tus claves reales de Supabase (Settings > API)
-        const supabaseUrl = 'https://xlygkolfmetytowixtnb.supabase.co'; 
+        const supabaseUrl = 'https://xlygkolfmetytowixtnb.supabase.co';
         const supabaseAnonKey = 'sb_publishable_qMc5NuOO1HUzYvQzFEr2fA_vVqBzXND';
 
         // Evita que el script truene si aún quedan los valores de ejemplo
@@ -324,10 +305,11 @@
             });
 
             // --- LOGIN DE USUARIOS ---
+            const DOMINIO_INTERNO = 'kurodaapp.local'; // dominio invisible para el usuario
             if (loginForm) {
                 loginForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const emailInput = loginForm.querySelector('input[type="email"]').value;
+                    const usuarioInput = document.getElementById('login-email').value.trim().toLowerCase();
                     const passwordInput = loginForm.querySelector('input[type="password"]').value;
                     const submitBtn = loginForm.querySelector('button[type="submit"]');
                     const errorMsg = loginForm.querySelector('.login-error');
@@ -336,8 +318,10 @@
                     submitBtn.textContent = 'Autenticando...';
                     if (errorMsg) errorMsg.textContent = '';
 
+                    const emailInterno = `${usuarioInput}@${DOMINIO_INTERNO}`;
+
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email: emailInput,
+                        email: emailInterno,
                         password: passwordInput,
                     });
 
@@ -361,7 +345,7 @@
             function mostrarApp(user) {
                 if(loginView) loginView.classList.add('hidden');
                 if(appView) appView.classList.remove('hidden');
-                if(userEmailDisplay) userEmailDisplay.textContent = user.email;
+                if(userEmailDisplay) userEmailDisplay.textContent = user.email.split('@')[0].toUpperCase();
             }
 
             function mostrarLogin() {
