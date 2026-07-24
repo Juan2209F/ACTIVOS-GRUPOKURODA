@@ -28,9 +28,6 @@
             width: 100%;
             transition: max-width 0.3s ease;
         }
-        #login-view {
-            max-width: 450px;
-        }
         #app-view {
             max-width: 800px;
         }
@@ -73,6 +70,67 @@
         button:disabled {
             background-color: #9ca3af;
             cursor: not-allowed;
+        }
+
+        /* --- Card de login con borde animado --- */
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        #login-view {
+            max-width: 420px;
+            padding: 2px;
+            border-radius: 16px;
+            background: conic-gradient(from var(--angle), #3b82f6, #818cf8, #3b82f6 60%);
+            animation: girar 5s linear infinite;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+        }
+        @keyframes girar {
+            to { --angle: 360deg; }
+        }
+        .login-inner {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 36px 32px;
+        }
+        .login-logo {
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .login-inner h2 {
+            margin-bottom: 4px;
+        }
+        .login-sub {
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .login-error {
+            font-size: 13px;
+            color: #dc2626;
+            text-align: center;
+            min-height: 18px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #login-view { animation: none; }
         }
         .hidden {
             display: none !important;
@@ -122,22 +180,56 @@
             border-radius: 6px;
             border: 1px solid #e5e7eb;
         }
+        .datos-estado {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .tabla-activos {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .tabla-activos th, .tabla-activos td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .tabla-activos th {
+            color: #374151;
+            font-weight: 600;
+        }
+        .estado-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .estado-activo { background: #dcfce7; color: #166534; }
+        .estado-baja { background: #fee2e2; color: #991b1b; }
+        .estado-mantenimiento { background: #fef3c7; color: #92400e; }
     </style>
 </head>
 <body>
 
     <!-- 1. VISTA DE INICIO DE SESIÓN -->
-    <div id="login-view" class="container">
-        <h2>Iniciar Sesión</h2>
-        <form>
-            <div>
-                <input type="email" placeholder="Correo electrónico" required autocomplete="email">
-            </div>
-            <div>
-                <input type="password" placeholder="Contraseña" required autocomplete="current-password">
-            </div>
-            <button type="submit">INICIAR SESIÓN</button>
-        </form>
+    <div id="login-view">
+        <div class="login-inner">
+            <div class="login-logo">SB</div>
+            <h2>Iniciar Sesión</h2>
+            <p class="login-sub">Ingresa con tu cuenta para continuar</p>
+            <form>
+                <div class="field">
+                    <label for="login-email">Correo electrónico</label>
+                    <input id="login-email" type="email" placeholder="tucorreo@empresa.com" required autocomplete="email">
+                </div>
+                <div class="field">
+                    <label for="login-password">Contraseña</label>
+                    <input id="login-password" type="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <p class="login-error"></p>
+                <button type="submit">Iniciar sesión</button>
+            </form>
+        </div>
     </div>
 
     <!-- 2. VISTA DE LA APLICACIÓN PRINCIPAL (OCULTA HASTA LOGUEARSE) -->
@@ -161,22 +253,45 @@
         </div>
         
         <div id="vista-datos" class="subview hidden">
-            <h3>Visualización de Métricas</h3>
-            <p>Este espacio queda disponible para renderizar bases de datos o registrar información operacional.</p>
+            <h3>Activos por Tienda</h3>
+            <p id="activos-estado" class="datos-estado">Cargando activos...</p>
+            <table id="activos-tabla" class="tabla-activos hidden">
+                <thead>
+                    <tr>
+                        <th>Tienda</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>N° Serie</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
     <!-- Carga del SDK oficial de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
     
     <script>
         // --- CONFIGURACIÓN DE CREDENCIALES ---
-        // IMPORTANTE: Reemplaza las cadenas de texto de abajo con tus datos de Supabase (Settings > API)
-        const supabaseUrl = 'https://TU_PROYECTO.supabase.co';
-        const supabaseAnonKey = 'TU_ANON_KEY';
-        
-        // Inicialización segura renombrada para evitar colisiones sintácticas
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        // ¡¡IMPORTANTE!!: Pega aquí tus claves reales de Supabase (Settings > API)
+        const supabaseUrl = 'https://xlygkolfmetytowixtnb.supabase.co'; 
+        const supabaseAnonKey = 'sb_publishable_qMc5NuOO1HUzYvQzFEr2fA_vVqBzXND';
+
+        // Evita que el script truene si aún quedan los valores de ejemplo
+        const credencialesValidas = /^https:\/\/.+\.supabase\.co$/.test(supabaseUrl) && supabaseAnonKey.length > 20;
+
+        let supabaseClient = null;
+        if (credencialesValidas) {
+            try {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            } catch (err) {
+                console.error('No se pudo inicializar Supabase:', err);
+            }
+        } else {
+            console.warn('Supabase no está configurado: reemplaza supabaseUrl y supabaseAnonKey con tus claves reales.');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const loginView = document.getElementById('login-view');
@@ -184,6 +299,14 @@
             const loginForm = document.querySelector('#login-view form');
             const logoutBtn = document.querySelector('.nav-right .btn-outline');
             const userEmailDisplay = document.querySelector('.user-profile span');
+
+            if (!supabaseClient) {
+                const errorMsg = loginForm ? loginForm.querySelector('.login-error') : null;
+                if (errorMsg) errorMsg.textContent = 'Falta configurar Supabase (URL/clave) en el código.';
+                const submitBtn = loginForm ? loginForm.querySelector('button[type="submit"]') : null;
+                if (submitBtn) submitBtn.disabled = true;
+                return;
+            }
 
             // --- GESTIÓN DE SESIÓN ACTIVA ---
             supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -207,9 +330,11 @@
                     const emailInput = loginForm.querySelector('input[type="email"]').value;
                     const passwordInput = loginForm.querySelector('input[type="password"]').value;
                     const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    const errorMsg = loginForm.querySelector('.login-error');
 
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Autenticando...';
+                    if (errorMsg) errorMsg.textContent = '';
 
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email: emailInput,
@@ -217,9 +342,9 @@
                     });
 
                     if (error) {
-                        alert('Error al autenticar: ' + error.message);
+                        if (errorMsg) errorMsg.textContent = 'No se pudo iniciar sesión. Verifica tus datos.';
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'INICIAR SESIÓN';
+                        submitBtn.textContent = 'Iniciar sesión';
                     }
                 });
             }
@@ -245,16 +370,19 @@
                 if(loginForm) {
                     loginForm.reset();
                     const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    const errorMsg = loginForm.querySelector('.login-error');
                     if(submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'INICIAR SESIÓN';
+                        submitBtn.textContent = 'Iniciar sesión';
                     }
+                    if(errorMsg) errorMsg.textContent = '';
                 }
             }
 
             // --- NAVEGACIÓN INTERNA ---
             const navLinks = document.querySelectorAll('.nav-link');
             const subviews = document.querySelectorAll('.subview');
+            let activosCargados = false;
 
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -268,8 +396,50 @@
                     subviews.forEach(view => view.classList.add('hidden'));
                     const targetView = document.getElementById(targetId);
                     if(targetView) targetView.classList.remove('hidden');
+
+                    if (targetId === 'vista-datos' && !activosCargados) {
+                        activosCargados = true;
+                        cargarActivos();
+                    }
                 });
             });
+
+            // --- CARGA DE ACTIVOS (tabla "activos", filtrada por RLS/razón social) ---
+            async function cargarActivos() {
+                const estado = document.getElementById('activos-estado');
+                const tabla = document.getElementById('activos-tabla');
+                const tbody = tabla ? tabla.querySelector('tbody') : null;
+
+                const { data, error } = await supabaseClient
+                    .from('activos')
+                    .select('tienda, nombre, tipo, numero_serie, estado')
+                    .order('tienda', { ascending: true });
+
+                if (error) {
+                    if (estado) estado.textContent = 'No se pudo cargar el listado de activos.';
+                    console.error('Error al cargar activos:', error);
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    if (estado) estado.textContent = 'Todavía no hay activos registrados.';
+                    return;
+                }
+
+                if (tbody) {
+                    tbody.innerHTML = data.map(a => `
+                        <tr>
+                            <td>${a.tienda ?? ''}</td>
+                            <td>${a.nombre ?? ''}</td>
+                            <td>${a.tipo ?? '-'}</td>
+                            <td>${a.numero_serie ?? '-'}</td>
+                            <td><span class="estado-badge estado-${a.estado}">${a.estado}</span></td>
+                        </tr>
+                    `).join('');
+                }
+                if (estado) estado.classList.add('hidden');
+                if (tabla) tabla.classList.remove('hidden');
+            }
         });
     </script>
 </body>
