@@ -1,459 +1,874 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuroda Activos - Gestor Avanzado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
-    <style>
-        .tab-content, .view-content { display: none; }
-        .tab-content.active, .view-content.active { display: block; }
-        
-        :root { --kuroda-blue: #0A327E; }
-        body { background-color: #F1F5F9; font-family: system-ui, -apple-system, sans-serif; }
-
-        .kuroda-header { background-color: white; border-radius: 12px 12px 0 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .kuroda-nav-btn { background-color: #F1F5F9; color: #475569; transition: all 0.2s; }
-        .kuroda-nav-btn:hover:not(:disabled) { background-color: #E2E8F0; }
-        .kuroda-nav-btn.active { background-color: var(--kuroda-blue); color: white; }
-        .kuroda-action-btn { background-color: var(--kuroda-blue); color: white; }
-        .kuroda-panel { background-color: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-
-        .status-badge-progress { background-color: #FEF3C7; color: #92400E; }
-        .status-badge-paused { background-color: #E2E8F0; color: #475569; }
-
-        #reader-container.hidden { display: none; }
-        #reader { width: 100%; border-radius: 8px; overflow: hidden; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuroda Activos — Gestor de Inventarios</title>
+<style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.fixed{position:fixed}.inset-0{inset:0}.bottom-6{bottom:1.5rem}.left-1\/2{left:50%}.z-50{z-index:50}.mx-2{margin-left:.5rem;margin-right:.5rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.ml-2{margin-left:.5rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-2{height:.5rem}.h-9{height:2.25rem}.max-h-72{max-height:18rem}.min-h-\[600px\]{min-height:600px}.min-h-\[700px\]{min-height:700px}.min-h-screen{min-height:100vh}.w-24{width:6rem}.w-9{width:2.25rem}.w-full{width:100%}.max-w-6xl{max-width:72rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-8{gap:2rem}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.rounded-b-lg{border-bottom-right-radius:.5rem;border-bottom-left-radius:.5rem}.rounded-t-lg{border-top-left-radius:.5rem;border-top-right-radius:.5rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-t-0{border-top-width:0}.border-t-4{border-top-width:4px}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254/var(--tw-border-opacity,1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.border-blue-800{--tw-border-opacity:1;border-color:rgb(30 64 175/var(--tw-border-opacity,1))}.border-gray-100{--tw-border-opacity:1;border-color:rgb(243 244 246/var(--tw-border-opacity,1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235/var(--tw-border-opacity,1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219/var(--tw-border-opacity,1))}.border-green-200{--tw-border-opacity:1;border-color:rgb(187 247 208/var(--tw-border-opacity,1))}.border-red-200{--tw-border-opacity:1;border-color:rgb(254 202 202/var(--tw-border-opacity,1))}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165/var(--tw-border-opacity,1))}.border-yellow-500{--tw-border-opacity:1;border-color:rgb(234 179 8/var(--tw-border-opacity,1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.bg-blue-200{--tw-bg-opacity:1;background-color:rgb(191 219 254/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-blue-800{--tw-bg-opacity:1;background-color:rgb(30 64 175/var(--tw-bg-opacity,1))}.bg-blue-900{--tw-bg-opacity:1;background-color:rgb(30 58 138/var(--tw-bg-opacity,1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246/var(--tw-bg-opacity,1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235/var(--tw-bg-opacity,1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.bg-gray-900{--tw-bg-opacity:1;background-color:rgb(17 24 39/var(--tw-bg-opacity,1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244/var(--tw-bg-opacity,1))}.bg-green-600{--tw-bg-opacity:1;background-color:rgb(22 163 74/var(--tw-bg-opacity,1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-yellow-500{--tw-bg-opacity:1;background-color:rgb(234 179 8/var(--tw-bg-opacity,1))}.bg-opacity-50{--tw-bg-opacity:0.5}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-14{padding-top:3.5rem;padding-bottom:3.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.pb-2{padding-bottom:.5rem}.pb-4{padding-bottom:1rem}.pl-4{padding-left:1rem}.pl-5{padding-left:1.25rem}.pr-1{padding-right:.25rem}.pr-3{padding-right:.75rem}.pt-2{padding-top:.5rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175/var(--tw-text-opacity,1))}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138/var(--tw-text-opacity,1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175/var(--tw-text-opacity,1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128/var(--tw-text-opacity,1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99/var(--tw-text-opacity,1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81/var(--tw-text-opacity,1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55/var(--tw-text-opacity,1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39/var(--tw-text-opacity,1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74/var(--tw-text-opacity,1))}.text-green-700{--tw-text-opacity:1;color:rgb(21 128 61/var(--tw-text-opacity,1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68/var(--tw-text-opacity,1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38/var(--tw-text-opacity,1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.opacity-80{opacity:.8}.shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color)}.shadow-lg,.shadow-xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.last\:border-0:last-child{border-width:0}.hover\:bg-blue-200:hover{--tw-bg-opacity:1;background-color:rgb(191 219 254/var(--tw-bg-opacity,1))}.hover\:bg-blue-900:hover{--tw-bg-opacity:1;background-color:rgb(30 58 138/var(--tw-bg-opacity,1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246/var(--tw-bg-opacity,1))}.hover\:bg-gray-200:hover{--tw-bg-opacity:1;background-color:rgb(229 231 235/var(--tw-bg-opacity,1))}.hover\:bg-gray-300:hover{--tw-bg-opacity:1;background-color:rgb(209 213 219/var(--tw-bg-opacity,1))}.hover\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251/var(--tw-bg-opacity,1))}.hover\:bg-green-700:hover{--tw-bg-opacity:1;background-color:rgb(21 128 61/var(--tw-bg-opacity,1))}.hover\:bg-red-50:hover{--tw-bg-opacity:1;background-color:rgb(254 242 242/var(--tw-bg-opacity,1))}.hover\:bg-yellow-600:hover{--tw-bg-opacity:1;background-color:rgb(202 138 4/var(--tw-bg-opacity,1))}.hover\:text-blue-800:hover{--tw-text-opacity:1;color:rgb(30 64 175/var(--tw-text-opacity,1))}.hover\:underline:hover{text-decoration-line:underline}@media (min-width:640px){.sm\:mx-3{margin-left:.75rem;margin-right:.75rem}.sm\:mt-3{margin-top:.75rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}}@media (min-width:768px){.md\:col-span-2{grid-column:span 2/span 2}.md\:mx-6{margin-left:1.5rem;margin-right:1.5rem}.md\:mb-0{margin-bottom:0}.md\:mt-6{margin-top:1.5rem}.md\:block{display:block}.md\:flex{display:flex}.md\:hidden{display:none}.md\:h-\[560px\]{height:560px}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.md\:p-4{padding:1rem}.md\:p-6{padding:1.5rem}.md\:p-8{padding:2rem}}@media (min-width:1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--blue:#0A327E;--blue-light:#EAF0FB}
+body{background:#F1F5F9;font-family:system-ui,-apple-system,sans-serif}
+.tab-content,.view-content{display:none}
+.tab-content.active,.view-content.active{display:block}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.nav-btn{background:#F1F5F9;color:#475569;transition:.15s}
+.nav-btn:hover{background:#E2E8F0}
+.nav-btn.active{background:var(--blue);color:#fff}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{opacity:.92}
+.badge-progreso{background:#FEF3C7;color:#92400E}
+.badge-pausado{background:#E2E8F0;color:#475569}
+.badge-finalizado{background:#DCFCE7;color:#166534}
+#reader-container.hidden{display:none}
+#reader{width:100%;border-radius:8px;overflow:hidden}
+#reader video{border-radius:8px}
+button:disabled{opacity:.5;cursor:not-allowed}
+input[type=text],input[type=number],input[type=date],select{outline:none}
+input:focus,select:focus{box-shadow:0 0 0 3px var(--blue-light);border-color:var(--blue)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+html{-webkit-text-size-adjust:100%}
+.modal-scroll{max-height:90vh;overflow-y:auto}
+@media (max-width:767px){
+  input[type=text],input[type=number],input[type=date],select,button,textarea{font-size:16px}
+  .asset-list-mobile{height:min(60vh,460px)}
+}
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800">
+<body class="min-h-screen text-gray-800">
 
-    <!-- Navegación -->
-    <nav class="kuroda-header p-4 mx-4 mt-4 flex items-center justify-between flex-wrap shadow-md">
-        <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 bg-blue-800 rounded-md flex items-center justify-center text-white font-bold">K</div>
-            <span class="font-bold text-lg text-gray-900">Kuroda Activos</span>
-        </div>
-        
-        <div class="flex space-x-2 flex-wrap mt-4 md:mt-0">
-            <button onclick="changeTab('consultar')" class="kuroda-nav-btn nav-tab px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-1.5">
-                <span>Consultar</span>
-            </button>
-            <button onclick="changeTab('levantamiento')" class="kuroda-nav-btn nav-tab active px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-1.5">
-                <span>Levantamiento</span>
-            </button>
-            <button onclick="changeTab('informes')" class="kuroda-nav-btn nav-tab px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-1.5">
-                <span>Informes</span>
-            </button>
-        </div>
-        
-        <div class="flex items-center space-x-2 text-sm mt-4 lg:mt-0">
-            <span class="text-gray-600">fcerezo@kuroda.com</span>
-        </div>
-    </nav>
+<nav class="card mx-2 mt-2 sm:mx-3 sm:mt-3 md:mx-6 md:mt-6 p-3 md:p-4">
+  <div class="flex items-center justify-between gap-3 mb-3 md:mb-0">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 shrink-0 bg-blue-900 rounded-lg flex items-center justify-center text-white font-bold">K</div>
+      <span class="font-bold text-base sm:text-lg text-gray-900">Kuroda Activos</span>
+    </div>
+    <div class="hidden md:flex items-center gap-3 text-sm text-gray-500">
+      <span id="db-count"></span>
+      <span>fcerezo@kuroda.com</span>
+    </div>
+  </div>
+  <div class="grid grid-cols-3 gap-2 md:hidden">
+    <button onclick="changeTab('consultar')" data-tab="consultar" class="nav-btn nav-tab px-2 py-2.5 rounded-lg text-xs font-semibold">Consultar</button>
+    <button onclick="changeTab('levantamiento')" data-tab="levantamiento" class="nav-btn nav-tab active px-2 py-2.5 rounded-lg text-xs font-semibold">Levantamiento</button>
+    <button onclick="changeTab('informes')" data-tab="informes" class="nav-btn nav-tab px-2 py-2.5 rounded-lg text-xs font-semibold">Informes</button>
+  </div>
+  <div class="hidden md:flex gap-2">
+    <button onclick="changeTab('consultar')" data-tab="consultar" class="nav-btn nav-tab px-4 py-2 rounded-lg text-sm font-semibold">Consultar</button>
+    <button onclick="changeTab('levantamiento')" data-tab="levantamiento" class="nav-btn nav-tab active px-4 py-2 rounded-lg text-sm font-semibold">Levantamiento</button>
+    <button onclick="changeTab('informes')" data-tab="informes" class="nav-btn nav-tab px-4 py-2 rounded-lg text-sm font-semibold">Informes</button>
+  </div>
+</nav>
 
-    <!-- Contenedor Principal -->
-    <main class="p-4 mx-4 mb-10 relative">
-        
-        <!-- =================== PESTAÑA: LEVANTAMIENTO =================== -->
-        <section id="levantamiento" class="tab-content active kuroda-panel p-8 min-h-[700px]">
-            
-            <!-- VISTA A: GESTOR DE SESIONES (Lista de Levantamientos) -->
-            <div id="view-session-list" class="view-content active">
-                <div class="flex justify-between items-center mb-6 border-b pb-4">
-                    <h2 class="text-xl font-bold text-gray-900">Gestor de Levantamientos</h2>
-                    <button onclick="iniciarNuevoLevantamiento()" class="kuroda-action-btn font-bold px-5 py-2 rounded-lg text-sm flex items-center space-x-1.5">
-                        <span>+ NUEVO LEVANTAMIENTO</span>
-                    </button>
-                </div>
-                
-                <div class="space-y-4" id="sessions-container">
-                    <!-- Las sesiones se cargan con JS -->
-                </div>
+<main class="p-3 md:p-6 max-w-6xl mx-auto">
+
+<!-- ============ CONSULTAR ============ -->
+<section id="consultar" class="tab-content card p-5 md:p-8 min-h-[600px]">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6 border-b pb-4">
+    <h2 class="text-xl font-bold text-gray-900">Consulta de Activos</h2>
+    <div class="flex flex-wrap gap-2">
+      <input type="file" id="import-file" accept=".xlsx,.xls" class="hidden" onchange="importarExcel(event)">
+      <button onclick="document.getElementById('import-file').click()" class="border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Importar Excel</button>
+      <button onclick="exportarMasterExcel()" class="border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Exportar Excel</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+    <input type="text" id="search-input" oninput="renderConsulta()" placeholder="Buscar por ID o descripción..." class="md:col-span-2 border border-gray-300 rounded-lg p-3 text-sm">
+    <select id="search-sucursal" onchange="renderConsulta()" class="border border-gray-300 rounded-lg p-3 text-sm bg-white"></select>
+  </div>
+
+  <div class="hidden md:block overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="py-2 pr-3">ID</th>
+          <th class="py-2 pr-3">Descripción</th>
+          <th class="py-2 pr-3">Sucursal</th>
+          <th class="py-2 pr-3">Valor neto</th>
+          <th class="py-2 pr-3"></th>
+        </tr>
+      </thead>
+      <tbody id="consulta-tbody"></tbody>
+    </table>
+  </div>
+  <div id="consulta-cards" class="md:hidden space-y-3"></div>
+  <p id="consulta-empty" class="hidden text-center text-gray-400 py-10">Sin resultados</p>
+</section>
+
+<!-- ============ LEVANTAMIENTO ============ -->
+<section id="levantamiento" class="tab-content active card p-5 md:p-8 min-h-[700px]">
+
+  <div id="view-session-list" class="view-content active">
+    <div class="flex justify-between items-center mb-6 border-b pb-4 flex-wrap gap-3">
+      <h2 class="text-xl font-bold text-gray-900">Gestor de Levantamientos</h2>
+      <button onclick="abrirModalNuevaSesion()" class="btn-primary font-bold px-5 py-2 rounded-lg text-sm">+ Nuevo levantamiento</button>
+    </div>
+    <div class="space-y-3" id="sessions-container"></div>
+    <p id="sessions-empty" class="hidden text-center text-gray-400 py-14">Aún no hay levantamientos. Crea el primero.</p>
+  </div>
+
+  <div id="view-active-session" class="view-content">
+    <div class="flex items-center justify-between mb-6 border-b pb-4 flex-wrap gap-3">
+      <div class="flex items-center gap-4">
+        <button onclick="volverAGestor()" class="text-gray-500 hover:text-blue-800 font-semibold text-sm">← Volver</button>
+        <h2 class="text-xl font-bold text-gray-900 border-l pl-4 border-gray-300">Inventario activo</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div>
+        <div class="space-y-3 mb-6">
+          <div class="flex items-baseline gap-2">
+            <span class="text-gray-500 text-sm">Tienda:</span>
+            <span id="current-store-name" class="font-bold text-xl text-blue-900"></span>
+          </div>
+          <div id="status-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"></div>
+          <p class="text-gray-700 text-sm">Evaluados: <span id="metric-evaluated" class="font-semibold text-gray-900">0</span> / <span id="metric-total" class="text-gray-500">0</span></p>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div id="metric-bar" class="bg-blue-800 h-2 rounded-full" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="flex gap-2 mb-6">
+          <button id="btn-pausar" onclick="pausarLevantamiento()" class="nav-btn flex-1 py-2 rounded-lg text-sm font-bold border border-gray-300">Pausar</button>
+          <button id="btn-finalizar" onclick="finalizarLevantamiento()" class="bg-green-600 hover:bg-green-700 text-white flex-1 py-2 rounded-lg text-sm font-bold">Finalizar</button>
+        </div>
+
+        <div id="reader-container" class="hidden mb-6 border-2 border-blue-800 rounded-lg p-2 bg-gray-50">
+          <div id="reader"></div>
+          <button onclick="stopScanner()" class="mt-2 w-full bg-red-50 text-red-600 font-bold py-2 rounded-lg text-sm">Cancelar</button>
+        </div>
+
+        <div class="space-y-3 mb-6">
+          <input type="text" id="asset-code-input" placeholder="Código de activo (manual o escaneado)" class="w-full border border-gray-300 rounded-lg p-3 text-sm" onkeydown="if(event.key==='Enter')searchManual()">
+          <div class="flex gap-2">
+            <button onclick="searchManual()" class="flex-1 bg-blue-800 text-white font-semibold py-3 rounded-lg text-sm">Buscar</button>
+            <button onclick="startScanner()" class="flex-1 bg-white border-2 border-blue-800 text-blue-800 font-semibold py-3 rounded-lg text-sm">QR Escanear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="asset-list-mobile bg-gray-50 rounded-xl p-4 border border-gray-200 md:h-[560px] flex flex-col">
+        <div class="flex items-center justify-between mb-3 border-b pb-2">
+          <h3 class="text-lg font-bold text-gray-900">Estado del inventario</h3>
+          <div class="flex gap-1 text-xs">
+            <button onclick="setFiltroLista('todos')" data-f="todos" class="filtro-lista px-2 py-1 rounded font-semibold">Todos</button>
+            <button onclick="setFiltroLista('missing')" data-f="missing" class="filtro-lista px-2 py-1 rounded font-semibold">Faltantes</button>
+          </div>
+        </div>
+        <div id="asset-status-list" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INFORMES ============ -->
+<section id="informes" class="tab-content card p-5 md:p-8 min-h-[600px]">
+  <div id="view-informes-list" class="view-content active">
+    <div class="flex justify-between items-center mb-6 border-b pb-4 flex-wrap gap-3">
+      <h2 class="text-xl font-bold text-gray-900">Informes de Levantamientos</h2>
+      <button onclick="exportarTodoCSV()" class="border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Exportar resumen CSV</button>
+    </div>
+    <div id="informes-summary" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
+    <div class="space-y-3" id="informes-container"></div>
+    <p id="informes-empty" class="hidden text-center text-gray-400 py-14">Aún no hay levantamientos para reportar.</p>
+  </div>
+
+  <div id="view-informe-detalle" class="view-content">
+    <div class="flex items-center gap-4 mb-6 border-b pb-4">
+      <button onclick="volverAInformes()" class="text-gray-500 hover:text-blue-800 font-semibold text-sm">← Volver</button>
+      <h2 id="informe-titulo" class="text-xl font-bold text-gray-900 border-l pl-4 border-gray-300"></h2>
+    </div>
+    <div id="informe-metrics" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
+    <div class="flex gap-2 mb-6">
+      <button onclick="exportarInformeCSV('missing')" class="border border-red-300 text-red-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-red-50">Exportar no encontrados</button>
+      <button onclick="exportarInformeCSV('todos')" class="border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Exportar informe completo</button>
+      <button onclick="window.print()" class="border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Imprimir / PDF</button>
+    </div>
+    <div id="informe-body" class="space-y-6"></div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ MODALES ============ -->
+<div id="modal-nueva-sesion" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full modal-scroll border-t-4 border-blue-800">
+    <h3 class="text-lg font-bold text-gray-900 mb-4">Nuevo levantamiento</h3>
+    <label class="text-xs font-semibold text-gray-500">Sucursal</label>
+    <select id="new-session-sucursal" class="w-full border border-gray-300 rounded-lg p-3 text-sm mb-3 bg-white" onchange="toggleNuevaSucursalInput()"></select>
+    <input type="text" id="new-session-sucursal-custom" placeholder="Nombre de la nueva sucursal" class="hidden w-full border border-gray-300 rounded-lg p-3 text-sm mb-3">
+    <p class="text-xs text-gray-500 mb-4">Se cargarán los activos maestros registrados en esa sucursal como pendientes por evaluar.</p>
+    <div class="flex justify-end gap-2">
+      <button onclick="cerrarModal('modal-nueva-sesion')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+      <button onclick="confirmarNuevaSesion()" class="px-4 py-2 text-sm btn-primary font-bold rounded-lg">Iniciar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-transfer" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full modal-scroll border-t-4 border-yellow-500">
+    <h3 class="text-lg font-bold text-gray-900 mb-2">Activo de otra sucursal</h3>
+    <p class="text-sm text-gray-600 mb-4">El activo <strong id="transfer-id" class="text-blue-900"></strong> pertenece originalmente a <strong id="transfer-store" class="text-red-600"></strong>.</p>
+    <div class="bg-gray-50 p-3 rounded text-xs text-gray-500 mb-4" id="transfer-desc"></div>
+    <div class="flex justify-end gap-2">
+      <button onclick="cerrarModal('modal-transfer')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+      <button onclick="confirmarTransferencia()" class="px-4 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg">Transferir a esta tienda</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-new" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full modal-scroll border-t-4 border-blue-500">
+    <h3 class="text-lg font-bold text-gray-900 mb-2">Activo no registrado</h3>
+    <p class="text-sm text-gray-600 mb-4">El código <strong id="new-id" class="text-blue-900"></strong> no existe en la base maestra. ¿Deseas darlo de alta?</p>
+    <input type="text" id="new-desc" placeholder="Descripción del nuevo activo..." class="w-full border border-gray-300 rounded-lg p-3 text-sm mb-4">
+    <div class="flex justify-end gap-2">
+      <button onclick="cerrarModal('modal-new')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+      <button onclick="confirmarAlta()" class="px-4 py-2 text-sm bg-blue-800 hover:bg-blue-900 text-white font-bold rounded-lg">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-transfer-consulta" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full modal-scroll border-t-4 border-blue-800">
+    <h3 class="text-lg font-bold text-gray-900 mb-2">Cambiar de sucursal</h3>
+    <p class="text-sm text-gray-600 mb-4">Activo <strong id="ct-id" class="text-blue-900"></strong> — <span id="ct-desc" class="text-gray-500"></span></p>
+    <label class="text-xs font-semibold text-gray-500">Nueva sucursal</label>
+    <select id="ct-sucursal" class="w-full border border-gray-300 rounded-lg p-3 text-sm mb-4 bg-white"></select>
+    <div class="flex justify-end gap-2">
+      <button onclick="cerrarModal('modal-transfer-consulta')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+      <button onclick="confirmarTransferConsulta()" class="px-4 py-2 text-sm btn-primary font-bold rounded-lg">Confirmar cambio</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-lg z-50"></div>
+
+<script id="master-data-seed" type="application/json">[{"id": "25000002", "desc": "RAM 4000 CHASIS CABINA \"PL\"TRANS.MAN 5 VEL TR4050", "fecha": "2015-05-13", "valorAdq": 366184.13, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "25000009", "desc": "NISSAN NP300 NP300 ESTACAS TM DH AC 6 VEL BCO/GRIS", "fecha": "2016-08-03", "valorAdq": 180030.17, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "25000015", "desc": "MONTACARGAS EQUIPO HYSTER FORKLIFT MOD. UT 25P", "fecha": "2017-04-07", "valorAdq": 428641.35, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "25000087", "desc": "CHEVROLET TORNADO PICK UP LS PAQ B MOD 2020", "fecha": "2020-03-13", "valorAdq": 228552.78, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000079", "desc": "LOCKER BOX TN ,LOCKER", "fecha": "2013-04-18", "valorAdq": 8937.33, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000082", "desc": "RELOJ CHECADOR LATHEM", "fecha": "2013-06-30", "valorAdq": 3985.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000083", "desc": "MOLDURA RACK FISHER MOD.DJ987", "fecha": "2013-06-30", "valorAdq": 11950.91, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000084", "desc": "FISHER MODULAR EXPRESS", "fecha": "2013-06-30", "valorAdq": 10640.91, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000085", "desc": "EQUIPO DE SONIDO COMPLETO", "fecha": "2013-06-30", "valorAdq": 22078.3, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000086", "desc": "CHECADOR TIENDA", "fecha": "2013-06-30", "valorAdq": 2875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "30000152", "desc": "AC PORTATIL RHEEM 1TON 115V", "fecha": "2019-02-23", "valorAdq": 4251.67, "valorNeto": 921.17, "sucursal": "Tijuana Centro"}, {"id": "30000158", "desc": "MINISPLIT R-410A FRIO/CALOR 2T 220V RHEEM", "fecha": "2019-07-16", "valorAdq": 7316.09, "valorNeto": 1889.98, "sucursal": "Tijuana Centro"}, {"id": "30000171", "desc": "MINISPLIT INVERTER 17 SEER FRIO/CAL 1T 110", "fecha": "2021-08-27", "valorAdq": 6520.56, "valorNeto": 3042.91, "sucursal": "Tijuana Centro"}, {"id": "30000172", "desc": "MINISPLIT INVERTER 17 SEER FRIO/CAL 1T 110", "fecha": "2021-08-27", "valorAdq": 6520.55, "valorNeto": 3042.9, "sucursal": "Tijuana Centro"}, {"id": "30000198", "desc": "REFRIGERADOR 21´ MT2170S MAYTAG TOP MOUNT", "fecha": "2023-08-07", "valorAdq": 15276.85, "valorNeto": 10184.55, "sucursal": "Tijuana Centro"}, {"id": "45000026", "desc": "SOFTWARE FUNCIONAL ESPECIFICO", "fecha": "2018-08-06", "valorAdq": 6364.84, "valorNeto": 3712.84, "sucursal": "Tijuana Centro"}, {"id": "45000056", "desc": "LICENCIA OFFICE STANDARD 2021", "fecha": "2021-12-01", "valorAdq": 9655.7, "valorNeto": 7241.75, "sucursal": "Tijuana Centro"}, {"id": "45000163", "desc": "FABRICACION Y MANTENIMIENTO A ESTRUCTURAS", "fecha": "2026-02-12", "valorAdq": 140647.0, "valorNeto": 134786.71, "sucursal": "Tijuana Centro"}, {"id": "45000164", "desc": "TORRES METALICAS 6MTS x 60CMS, 6MTS X 90CMS,", "fecha": "2026-02-19", "valorAdq": 365000.0, "valorNeto": 349791.67, "sucursal": "Tijuana Centro"}, {"id": "45000165", "desc": "15 MAMPARAS PARA SANITARIOS LAMINADO COMPACTO", "fecha": "2026-02-17", "valorAdq": 112610.0, "valorNeto": 107917.92, "sucursal": "Tijuana Centro"}, {"id": "45000167", "desc": "FAB.Y HAB.ESTRUCTURA METALICA MEZZANINE,", "fecha": "2026-03-10", "valorAdq": 2023581.0, "valorNeto": 1947696.71, "sucursal": "Tijuana Centro"}, {"id": "45000168", "desc": "SUM.Y FAB.DE SITE AREA MEZZANINE,PINTURA AREA EXH.", "fecha": "2026-04-08", "valorAdq": 110370.0, "valorNeto": 106691.0, "sucursal": "Tijuana Centro"}, {"id": "45000169", "desc": "HAB.Y FAB.EXTENSION DE MEZZANINE, PINTURA", "fecha": "2026-04-22", "valorAdq": 52525.92, "valorNeto": 50775.06, "sucursal": "Tijuana Centro"}, {"id": "45000170", "desc": "INSTALACIONES ELECTRICAS, DESCONECTADORES", "fecha": "2026-04-22", "valorAdq": 33694.55, "valorNeto": 32571.4, "sucursal": "Tijuana Centro"}, {"id": "45000171", "desc": "SUM.Y HABILITADO LOSETA EN PISO TIENDA", "fecha": "2026-04-30", "valorAdq": 20000.0, "valorNeto": 19333.33, "sucursal": "Tijuana Centro"}, {"id": "45000172", "desc": "SUM.Y FAB.DE MUROS INT,EXT A 2 CARAS,CON POSTE MET", "fecha": "2026-05-19", "valorAdq": 319120.0, "valorNeto": 309812.33, "sucursal": "Tijuana Centro"}, {"id": "45000173", "desc": "CAMBIO Y SELLADO DE 18 LAMINAS ACANALADAS ZINCALUM", "fecha": "2026-05-12", "valorAdq": 42255.34, "valorNeto": 41022.89, "sucursal": "Tijuana Centro"}, {"id": "45000174", "desc": "PTR 3/16\" X 3\" X 3\" X 20',1/8\" X 2\" X 3\" X 6 MTS 1", "fecha": "2026-05-29", "valorAdq": 77257.7, "valorNeto": 75004.35, "sucursal": "Tijuana Centro"}, {"id": "45000175", "desc": "INSTALACIONES ELECTRICAS AREA DE CAJA,ALUMBRADO", "fecha": "2026-05-04", "valorAdq": 44951.78, "valorNeto": 43640.69, "sucursal": "Tijuana Centro"}, {"id": "45000176", "desc": "INSTALACIONES ELECTRICAS JAULA Y EXHIBICION", "fecha": "2026-05-21", "valorAdq": 52730.75, "valorNeto": 51192.77, "sucursal": "Tijuana Centro"}, {"id": "45000177", "desc": "COLOCACION DE LOSETA,SOBRE PISO PARA NIVELACION", "fecha": "2026-05-27", "valorAdq": 30000.0, "valorNeto": 29125.0, "sucursal": "Tijuana Centro"}, {"id": "35000015", "desc": "DELL INSPIRON 15 INTEL CORE I3 3217U", "fecha": "2014-01-29", "valorAdq": 7453.83, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000017", "desc": "LED 40\" 1080P 60HZ 40PFL4708/F8 PHILIPS", "fecha": "2014-05-13", "valorAdq": 4912.93, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000029", "desc": "LECTOR VOYAGER 1250G NEGRO USB CABLE/BASE", "fecha": "2016-05-17", "valorAdq": 1799.78, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000045", "desc": "NETBOOK 11.6 SLIMBOOKKII SPA 32GB SPA KB WTH WIN10", "fecha": "2017-07-13", "valorAdq": 3820.73, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000058", "desc": "DISCO DURO WD PURPLE 3TB SERIAL ATA III 7200 RPM 3", "fecha": "2018-06-04", "valorAdq": 3655.38, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000084", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000085", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000086", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000087", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000088", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000089", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000090", "desc": "ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10", "fecha": "2019-07-24", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000097", "desc": "HP 200 G3 AIO CORE 15 8250U 1.6HGZ 8TH 6MB 8GB", "fecha": "2019-08-27", "valorAdq": 15850.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000098", "desc": "COMPUTADORA PORTATIL HP250 G7 13 8 GB 240GB SSD", "fecha": "2019-08-27", "valorAdq": 13120.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000110", "desc": "MERAKI MX84 ROUTER SECURITY, AC POWER CORD", "fecha": "2019-12-13", "valorAdq": 88709.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000112", "desc": "MINIPRINTER EPSON TM-U220D-806 NS:P3QF355888", "fecha": "2019-12-11", "valorAdq": 4639.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000123", "desc": "INST.CONMUTADOR IP-PBX DE 4 PUERTOS FXO", "fecha": "2020-12-07", "valorAdq": 30099.93, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000124", "desc": "EQ. DE VIDEOGRABACION ,CABLEADO,13 CAMARAS,", "fecha": "2020-12-07", "valorAdq": 78348.69, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000131", "desc": "CAJERO AUTOMÁTICO PIN PAD RECICLADOR BILLETES", "fecha": "2021-01-22", "valorAdq": 422002.46, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000141", "desc": "OPTIPLEX 3280 ALL-IN-ONE XCTO, CORE I5-10500T,DDR4", "fecha": "2021-06-17", "valorAdq": 17327.89, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000153", "desc": "OPTIPLEX 3280 ALL-IN-ONE XCTO, CORE I5-10500T,DDR4", "fecha": "2021-06-17", "valorAdq": 17327.89, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000181", "desc": "IMPRESORA HP LASERJET ENTERPRISE M507DN 1200", "fecha": "2021-08-25", "valorAdq": 9890.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000222", "desc": "ESCÁNER DUPLEX A4 DE SUPERFICIE PLANA BROTHER", "fecha": "2021-10-28", "valorAdq": 3575.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000239", "desc": "TABLET SAMSUNG GALAXY TAB A7 SM-T500 10.4 OCTACORE", "fecha": "2022-01-12", "valorAdq": 5085.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000242", "desc": "ESCÁNER EPSON PORTATIL WORKFORCE", "fecha": "2022-01-19", "valorAdq": 4155.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000256", "desc": "TABLETA SAMSUNG GALAXY TAB A8(2022 3 GB, 10.5", "fecha": "2022-05-30", "valorAdq": 4798.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000333", "desc": "ALL IN ONE HP 200 G3 I3 8130U 8GB 240GB SSD 21.5", "fecha": "2023-10-16", "valorAdq": 13875.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000334", "desc": "DELL LATITUDE 3510,CORE I5-10210U 10 GEN 8GB DDR4", "fecha": "2023-10-16", "valorAdq": 17092.65, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000335", "desc": "IMPRESORA HP LASERJET PRO M404N 4800 X 600 DPI LAS", "fecha": "2023-10-16", "valorAdq": 6595.0, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000342", "desc": "DELL LATITUDE 3510,CORE I5-10210U 10 GEN 8GB DDR4", "fecha": "2023-11-27", "valorAdq": 17092.65, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000347", "desc": "LAPTOP DELL LATITUDE 3520 15 PULGADAS I5 8GB", "fecha": "2024-08-30", "valorAdq": 1.0, "valorNeto": 0.3, "sucursal": "Tijuana Centro"}, {"id": "35000388", "desc": "CISCOMERAKI MR36 WI-FI 6 INDOOR AP", "fecha": "2024-04-03", "valorAdq": 8120.93, "valorNeto": 1624.18, "sucursal": "Tijuana Centro"}, {"id": "35000389", "desc": "CISCOMERAKI MR36 WI-FI 6 INDOOR AP", "fecha": "2024-04-03", "valorAdq": 8120.93, "valorNeto": 1624.18, "sucursal": "Tijuana Centro"}, {"id": "35000398", "desc": "CISCOMERAKI MR ADVANCED LICENSE AND SUPPORT, 5YR", "fecha": "2024-04-03", "valorAdq": 23042.47, "valorNeto": 4608.5, "sucursal": "Tijuana Centro"}, {"id": "35000399", "desc": "CISCOMERAKI MR ADVANCED LICENSE AND SUPPORT, 5YR", "fecha": "2024-04-03", "valorAdq": 23042.47, "valorNeto": 4608.5, "sucursal": "Tijuana Centro"}, {"id": "35000459", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000460", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000461", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 23014.94, "valorNeto": 8630.61, "sucursal": "Tijuana Centro"}, {"id": "35000462", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000463", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000464", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000465", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000466", "desc": "COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420", "fecha": "2024-11-01", "valorAdq": 24782.61, "valorNeto": 9293.48, "sucursal": "Tijuana Centro"}, {"id": "35000480", "desc": "OPTIPLEX 5480 ALL IN ONE XCTO, CORE I5-10500T,8GB", "fecha": "2024-12-06", "valorAdq": 18713.54, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000512", "desc": "MONITOR ELO TOUCHSYSTEMS INC 2202L 22\"", "fecha": "2025-05-21", "valorAdq": 13524.0, "valorNeto": 7100.1, "sucursal": "Tijuana Centro"}, {"id": "35000522", "desc": "DELL ATTITUDE 3520,XCTO CORE I5-1135G7 8GB 1X8GB", "fecha": "2025-11-05", "valorAdq": 21042.09, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000561", "desc": "EPSON T20IV-L IMPRESORA DE TICKETS TÉRMICA DIRECTA", "fecha": "2025-11-05", "valorAdq": 4295.0, "valorNeto": 2899.12, "sucursal": "Tijuana Centro"}, {"id": "35000562", "desc": "EPSON T20IV-L IMPRESORA DE TICKETS TÉRMICA DIRECTA", "fecha": "2025-11-05", "valorAdq": 4295.0, "valorNeto": 2899.12, "sucursal": "Tijuana Centro"}, {"id": "35000563", "desc": "EPSON T20IV-L IMPRESORA DE TICKETS TÉRMICA DIRECTA", "fecha": "2025-11-05", "valorAdq": 4295.0, "valorNeto": 2899.12, "sucursal": "Tijuana Centro"}, {"id": "35000564", "desc": "TABLET SAMSUNG GALAXY TAB A9 PROCESADOR OCTA CORE", "fecha": "2025-11-05", "valorAdq": 3095.0, "valorNeto": 2089.12, "sucursal": "Tijuana Centro"}, {"id": "35000565", "desc": "TABLET SAMSUNG GALAXY TAB A9 PROCESADOR OCTA CORE", "fecha": "2025-11-05", "valorAdq": 3095.0, "valorNeto": 2089.12, "sucursal": "Tijuana Centro"}, {"id": "35000566", "desc": "TABLET SAMSUNG GALAXY TAB A9 PROCESADOR OCTA CORE", "fecha": "2025-11-05", "valorAdq": 3095.0, "valorNeto": 2089.12, "sucursal": "Tijuana Centro"}, {"id": "35000621", "desc": "INSTALACION DE VOZ Y DATOS,51 NODOS,SIST.DE CAMARA", "fecha": "2026-04-08", "valorAdq": 320650.47, "valorNeto": 256520.38, "sucursal": "Tijuana Centro"}, {"id": "35000622", "desc": "CENTRO DE CARGA 30 CIRCUITOS 200 AMPERES", "fecha": "2026-04-22", "valorAdq": 5323.75, "valorNeto": 4259.0, "sucursal": "Tijuana Centro"}, {"id": "35000628", "desc": "PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5", "fecha": "2026-02-18", "valorAdq": 16799.0, "valorNeto": 12599.25, "sucursal": "Tijuana Centro"}, {"id": "35000629", "desc": "PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5", "fecha": "2026-02-18", "valorAdq": 16799.0, "valorNeto": 12599.25, "sucursal": "Tijuana Centro"}, {"id": "35000630", "desc": "PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5", "fecha": "2026-02-18", "valorAdq": 16799.0, "valorNeto": 12599.25, "sucursal": "Tijuana Centro"}, {"id": "35000631", "desc": "PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5", "fecha": "2026-02-18", "valorAdq": 16799.0, "valorNeto": 12599.25, "sucursal": "Tijuana Centro"}, {"id": "35000632", "desc": "PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5", "fecha": "2026-02-18", "valorAdq": 16799.0, "valorNeto": 12599.25, "sucursal": "Tijuana Centro"}, {"id": "55000012", "desc": "LICENCIA SAP ALL IN ONE USUARIO PROFESIONAL", "fecha": "2011-08-31", "valorAdq": 116344.72, "valorNeto": 0, "sucursal": "Tijuana Centro"}, {"id": "35000615", "desc": "TABLET SAMSUNG GALAXY TAB A11 PROCESADOR OCTA-CORE", "fecha": "2026-02-02", "valorAdq": 4690.0, "valorNeto": 3517.5, "sucursal": "Tijuana Centro"}]</script>
+<script>
+// ================= ESTADO Y PERSISTENCIA =================
+const LS_MASTER = 'kuroda_masterDB_v1';
+const LS_SESSIONS = 'kuroda_sessions_v1';
+
+let masterDB = [];
+let sessions = [];
+let currentSessionId = null;
+let html5QrcodeScanner = null;
+let pendingTransferAsset = null;
+let pendingNewId = null;
+let filtroLista = 'todos';
+
+function loadState(){
+  const seed = JSON.parse(document.getElementById('master-data-seed').textContent);
+  const savedMaster = localStorage.getItem(LS_MASTER);
+  masterDB = savedMaster ? JSON.parse(savedMaster) : seed;
+  const savedSessions = localStorage.getItem(LS_SESSIONS);
+  sessions = savedSessions ? JSON.parse(savedSessions) : [];
+}
+function saveMaster(){ localStorage.setItem(LS_MASTER, JSON.stringify(masterDB)); }
+function saveSessions(){ localStorage.setItem(LS_SESSIONS, JSON.stringify(sessions)); }
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.add('hidden'), 2600);
+}
+
+function sucursalesUnicas(){
+  return [...new Set(masterDB.map(a=>a.sucursal).filter(Boolean))].sort();
+}
+
+// ================= NAVEGACIÓN =================
+function changeTab(tabId){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.toggle('active', el.dataset.tab===tabId));
+  if(tabId !== 'levantamiento') stopScanner();
+  if(tabId === 'consultar') renderConsulta();
+  if(tabId === 'informes') renderInformes();
+}
+function switchView(containerId, viewId){
+  document.querySelectorAll('#'+containerId+' .view-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+}
+
+// ================= CONSULTAR =================
+function renderSucursalSelect(el, {withAll=false, withOther=false}={}){
+  const sucursales = sucursalesUnicas();
+  let html = '';
+  if(withAll) html += '<option value="">Todas las sucursales</option>';
+  sucursales.forEach(s=> html += `<option value="${s}">${s}</option>`);
+  if(withOther) html += '<option value="__otra__">+ Otra sucursal...</option>';
+  el.innerHTML = html;
+}
+
+function renderConsulta(){
+  const term = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  const sucursalSel = document.getElementById('search-sucursal');
+  if(!sucursalSel.dataset.init){ renderSucursalSelect(sucursalSel, {withAll:true}); sucursalSel.dataset.init='1'; }
+  const sucursal = sucursalSel.value;
+
+  let results = masterDB.filter(a=>{
+    const matchTerm = !term || a.id.toLowerCase().includes(term) || a.desc.toLowerCase().includes(term);
+    const matchSuc = !sucursal || a.sucursal === sucursal;
+    return matchTerm && matchSuc;
+  }).slice(0, 200);
+
+  const tbody = document.getElementById('consulta-tbody');
+  const cards = document.getElementById('consulta-cards');
+  tbody.innerHTML = '';
+  cards.innerHTML = '';
+  document.getElementById('consulta-empty').classList.toggle('hidden', results.length>0);
+
+  results.forEach(a=>{
+    const valor = (a.valorNeto||0).toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="border-b last:border-0 hover:bg-gray-50">
+        <td class="py-2 pr-3 font-mono text-xs text-gray-700">${a.id}</td>
+        <td class="py-2 pr-3">${a.desc}</td>
+        <td class="py-2 pr-3 text-gray-600">${a.sucursal || '—'}</td>
+        <td class="py-2 pr-3 text-gray-600">${valor}</td>
+        <td class="py-2 pr-3 text-right">
+          <button onclick="abrirModalTransferConsulta('${a.id}')" class="text-blue-800 hover:underline text-xs font-semibold">Cambiar sucursal</button>
+        </td>
+      </tr>`);
+    cards.insertAdjacentHTML('beforeend', `
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex justify-between items-start gap-2">
+          <span class="font-mono text-xs text-gray-500">${a.id}</span>
+          <span class="text-xs text-gray-500">${valor}</span>
+        </div>
+        <p class="text-sm text-gray-800 font-medium mt-1">${a.desc}</p>
+        <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+          <span class="text-xs text-gray-500">${a.sucursal || 'Sin sucursal'}</span>
+          <button onclick="abrirModalTransferConsulta('${a.id}')" class="text-blue-800 text-xs font-semibold">Cambiar sucursal</button>
+        </div>
+      </div>`);
+  });
+
+  document.getElementById('db-count').textContent = masterDB.length + ' activos en base maestra';
+}
+
+function abrirModalTransferConsulta(id){
+  const asset = masterDB.find(a=>a.id===id);
+  if(!asset) return;
+  document.getElementById('ct-id').textContent = asset.id;
+  document.getElementById('ct-desc').textContent = asset.desc;
+  const sel = document.getElementById('ct-sucursal');
+  renderSucursalSelect(sel, {withOther:true});
+  sel.dataset.assetId = id;
+  document.getElementById('modal-transfer-consulta').classList.remove('hidden');
+}
+function confirmarTransferConsulta(){
+  const sel = document.getElementById('ct-sucursal');
+  const id = sel.dataset.assetId;
+  let destino = sel.value;
+  if(destino === '__otra__'){
+    destino = prompt('Nombre de la nueva sucursal:');
+    if(!destino || !destino.trim()) return;
+    destino = destino.trim();
+  }
+  const asset = masterDB.find(a=>a.id===id);
+  if(asset){
+    asset.sucursal = destino;
+    saveMaster();
+    toast(`Activo ${id} movido a ${destino}`);
+  }
+  cerrarModal('modal-transfer-consulta');
+  renderConsulta();
+}
+
+// ================= IMPORTAR / EXPORTAR EXCEL =================
+function importarExcel(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, {defval:''});
+      let added = 0, updated = 0;
+      rows.forEach(r=>{
+        const id = String(r.ID_Activo || r.Id_Activo || r.id || '').trim();
+        if(!id) return;
+        const entry = {
+          id,
+          desc: String(r.Descripcion || r.descripcion || '').trim(),
+          fecha: r.Fecha_Alta ? String(r.Fecha_Alta).slice(0,10) : '',
+          valorAdq: Number(r.Valor_Adquisicion) || 0,
+          valorNeto: Number(r.Valor_Neto) || 0,
+          sucursal: String(r.Sucursal || '').trim()
+        };
+        const existing = masterDB.find(a=>a.id===id);
+        if(existing){ Object.assign(existing, entry); updated++; }
+        else { masterDB.push(entry); added++; }
+      });
+      saveMaster();
+      toast(`Importación completa: ${added} nuevos, ${updated} actualizados`);
+      renderConsulta();
+    }catch(err){
+      alert('No se pudo leer el archivo. Verifica que use las columnas de la plantilla.');
+    }
+    evt.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function exportarMasterExcel(){
+  const data = masterDB.map(a=>({
+    ID_Activo: a.id, Subnumero: 0, Fecha_Alta: a.fecha, Descripcion: a.desc,
+    Valor_Adquisicion: a.valorAdq, Depreciacion_Acumulada: -(a.valorAdq-a.valorNeto), Valor_Neto: a.valorNeto,
+    Moneda: 'MXN', Sucursal: a.sucursal
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Carga_Activos');
+  XLSX.writeFile(wb, 'Master_Activos_Kuroda.xlsx');
+}
+
+// ================= GESTOR DE LEVANTAMIENTOS =================
+function abrirModalNuevaSesion(){
+  const sel = document.getElementById('new-session-sucursal');
+  renderSucursalSelect(sel, {withOther:true});
+  document.getElementById('new-session-sucursal-custom').classList.add('hidden');
+  document.getElementById('new-session-sucursal-custom').value = '';
+  document.getElementById('modal-nueva-sesion').classList.remove('hidden');
+}
+function toggleNuevaSucursalInput(){
+  const sel = document.getElementById('new-session-sucursal');
+  document.getElementById('new-session-sucursal-custom').classList.toggle('hidden', sel.value !== '__otra__');
+}
+function confirmarNuevaSesion(){
+  const sel = document.getElementById('new-session-sucursal');
+  let sucursal = sel.value;
+  if(sucursal === '__otra__'){
+    sucursal = document.getElementById('new-session-sucursal-custom').value.trim();
+  }
+  if(!sucursal){ alert('Indica la sucursal.'); return; }
+
+  const inventarioInicial = masterDB
+    .filter(a=>a.sucursal === sucursal)
+    .map(a=>({ id:a.id, desc:a.desc, status:'missing', isExtra:false }));
+
+  const session = {
+    id: Date.now() + Math.floor(Math.random()*1000),
+    sucursal,
+    estado: 'progreso',
+    fecha: new Date().toLocaleDateString('es-MX'),
+    fechaFin: null,
+    inventory: inventarioInicial
+  };
+  sessions.push(session);
+  saveSessions();
+  cerrarModal('modal-nueva-sesion');
+  abrirSesion(session.id);
+}
+
+function renderizarSesiones(){
+  const container = document.getElementById('sessions-container');
+  container.innerHTML = '';
+  const activas = sessions.filter(s=>s.estado !== 'finalizado').sort((a,b)=>b.id-a.id);
+  document.getElementById('sessions-empty').classList.toggle('hidden', sessions.length>0);
+
+  activas.forEach(session=>{
+    const total = session.inventory.length;
+    const encontrados = session.inventory.filter(i=>i.status==='found').length;
+    const isPaused = session.estado === 'pausado';
+    const btnClass = isPaused ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+    const btnText = isPaused ? 'Reanudar' : 'Continuar';
+    const badge = isPaused
+      ? '<span class="badge-pausado px-2 py-1 rounded text-xs font-bold">PAUSADO</span>'
+      : '<span class="badge-progreso px-2 py-1 rounded text-xs font-bold">EN PROGRESO</span>';
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 class="font-bold text-lg text-gray-900">${session.sucursal}</h3>
+            ${badge}
+          </div>
+          <p class="text-sm text-gray-500">Iniciado: ${session.fecha} · Progreso: ${encontrados} de ${total} activos</p>
+        </div>
+        <button onclick="abrirSesion(${session.id})" class="px-4 py-2 rounded-lg font-bold text-sm ${btnClass}">${btnText}</button>
+      </div>`);
+  });
+
+  const finalizadas = sessions.filter(s=>s.estado==='finalizado').sort((a,b)=>b.id-a.id);
+  if(finalizadas.length){
+    container.insertAdjacentHTML('beforeend', `<p class="text-xs font-semibold text-gray-400 uppercase pt-2">Finalizados</p>`);
+    finalizadas.forEach(session=>{
+      const total = session.inventory.length;
+      const encontrados = session.inventory.filter(i=>i.status==='found').length;
+      container.insertAdjacentHTML('beforeend', `
+        <div class="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between flex-wrap gap-3 opacity-80">
+          <div>
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <h3 class="font-bold text-lg text-gray-900">${session.sucursal}</h3>
+              <span class="badge-finalizado px-2 py-1 rounded text-xs font-bold">FINALIZADO</span>
             </div>
+            <p class="text-sm text-gray-500">Cerrado: ${session.fechaFin || session.fecha} · ${encontrados} de ${total} activos</p>
+          </div>
+          <button onclick="verInformeDesdeGestor(${session.id})" class="px-4 py-2 rounded-lg font-bold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200">Ver informe</button>
+        </div>`);
+    });
+  }
+}
+function verInformeDesdeGestor(id){
+  changeTab('informes');
+  document.querySelector('[data-tab="informes"]').classList.add('active');
+  document.querySelector('[data-tab="levantamiento"]').classList.remove('active');
+  abrirInforme(id);
+}
 
-            <!-- VISTA B: ESCÁNER Y LISTA ACTIVA -->
-            <div id="view-active-session" class="view-content">
-                <div class="flex items-center justify-between mb-6 border-b pb-4">
-                    <div class="flex items-center space-x-4">
-                        <button onclick="volverAGestor()" class="text-gray-500 hover:text-blue-600 font-bold text-sm flex items-center space-x-1">
-                            <span>← Volver al Gestor</span>
-                        </button>
-                        <h2 class="text-xl font-bold text-gray-900 border-l pl-4 border-gray-300">Inventario Activo</h2>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <!-- Controles -->
-                    <div class="lg:col-span-1">
-                        <div class="space-y-4 mb-8">
-                            <div class="flex items-baseline space-x-1">
-                                <span class="text-gray-600">Tienda:</span>
-                                <span id="current-store-name" class="font-bold text-xl text-blue-900">...</span>
-                            </div>
-                            <div id="status-badge" class="inline-flex items-center status-badge-progress px-3 py-1 rounded-full text-xs font-semibold">
-                                EN PROGRESO
-                            </div>
-                            <p class="text-gray-700">Evaluados: <span id="metric-evaluated" class="font-semibold text-gray-900">0</span> / <span id="metric-total" class="text-gray-500">0</span></p>
-                        </div>
+function abrirSesion(id){
+  currentSessionId = id;
+  const session = sessions.find(s=>s.id===id);
+  if(session.estado !== 'finalizado') session.estado = 'progreso';
+  saveSessions();
+  filtroLista = 'todos';
 
-                        <!-- Botones de Acción -->
-                        <div class="flex space-x-2 mb-8">
-                            <button id="btn-pausar" onclick="pausarLevantamiento()" class="kuroda-nav-btn flex-1 py-2 rounded-lg text-sm font-bold border border-gray-300">
-                                PAUSAR
-                            </button>
-                            <button id="btn-finalizar" onclick="finalizarLevantamiento()" class="bg-green-600 hover:bg-green-700 text-white flex-1 py-2 rounded-lg text-sm font-bold">
-                                FINALIZAR
-                            </button>
-                        </div>
+  document.getElementById('current-store-name').textContent = session.sucursal;
+  actualizarBadgeEstado(session);
+  const finalizada = session.estado === 'finalizado';
+  document.getElementById('btn-pausar').disabled = finalizada;
+  document.getElementById('btn-finalizar').disabled = finalizada;
+  document.getElementById('asset-code-input').disabled = finalizada;
 
-                        <!-- Lector QR -->
-                        <div id="reader-container" class="hidden mb-6 border-2 border-blue-500 rounded-lg p-2 bg-gray-50">
-                            <div id="reader"></div>
-                            <button onclick="stopScanner()" class="mt-2 w-full bg-red-100 text-red-600 font-bold py-2 rounded-lg text-sm">Cancelar</button>
-                        </div>
+  renderListaActiva();
+  switchView('levantamiento', 'view-active-session');
+}
+function actualizarBadgeEstado(session){
+  const badge = document.getElementById('status-badge');
+  const map = {progreso:['badge-progreso','EN PROGRESO'], pausado:['badge-pausado','PAUSADO'], finalizado:['badge-finalizado','FINALIZADO']};
+  const [cls, txt] = map[session.estado];
+  badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ' + cls;
+  badge.textContent = txt;
+}
 
-                        <!-- Campos de Entrada -->
-                        <div class="space-y-4 mb-8">
-                            <input type="text" id="asset-code-input" placeholder="Código de activo (manual o escaneado)" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-200 outline-none">
-                            <div class="flex space-x-2">
-                                <button onclick="searchManual()" class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-lg text-sm">BUSCAR</button>
-                                <button onclick="startScanner()" class="flex-1 bg-white border-2 border-blue-600 text-blue-600 font-semibold py-3 rounded-lg text-sm">QR ESCANEAR</button>
-                            </div>
-                        </div>
-                    </div>
+function volverAGestor(){
+  stopScanner();
+  currentSessionId = null;
+  renderizarSesiones();
+  switchView('levantamiento', 'view-session-list');
+}
+function pausarLevantamiento(){
+  const session = sessions.find(s=>s.id===currentSessionId);
+  session.estado = 'pausado';
+  saveSessions();
+  volverAGestor();
+}
+function finalizarLevantamiento(){
+  if(!confirm('¿Finalizar este levantamiento? Ya no podrás agregar más escaneos.')) return;
+  const session = sessions.find(s=>s.id===currentSessionId);
+  session.estado = 'finalizado';
+  session.fechaFin = new Date().toLocaleDateString('es-MX');
+  saveSessions();
+  toast(`Inventario de ${session.sucursal} finalizado`);
+  volverAGestor();
+}
 
-                    <!-- Lista de Activos -->
-                    <div class="lg:col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-200 h-[600px] flex flex-col">
-                        <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Estado del Inventario</h2>
-                        <div id="asset-status-list" class="space-y-3 flex-1 overflow-y-auto pr-2">
-                            <!-- Renderizado por JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+function setFiltroLista(f){
+  filtroLista = f;
+  document.querySelectorAll('.filtro-lista').forEach(b=>{
+    b.classList.toggle('bg-blue-800', b.dataset.f===f);
+    b.classList.toggle('text-white', b.dataset.f===f);
+    b.classList.toggle('bg-gray-100', b.dataset.f!==f);
+    b.classList.toggle('text-gray-600', b.dataset.f!==f);
+  });
+  renderListaActiva();
+}
 
-        <!-- Pestañas Simuladas -->
-        <section id="consultar" class="tab-content kuroda-panel p-8 text-center text-gray-500">Módulo de Consulta (En desarrollo)</section>
-        <section id="informes" class="tab-content kuroda-panel p-8 text-center text-gray-500">Módulo de Informes Corporativos (En desarrollo)</section>
+function renderListaActiva(){
+  const session = sessions.find(s=>s.id===currentSessionId);
+  const listContainer = document.getElementById('asset-status-list');
+  listContainer.innerHTML = '';
+  let evaluatedCount = 0;
 
-        <!-- =================== MODALES =================== -->
-        
-        <!-- Modal: Activo de otra tienda -->
-        <div id="modal-transfer" class="hidden absolute top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex items-center justify-center rounded-xl z-50">
-            <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full m-4 border-t-4 border-yellow-500">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">¡Activo de otra Sucursal!</h3>
-                <p class="text-sm text-gray-600 mb-4">El activo <strong id="transfer-id" class="text-blue-900"></strong> pertenece originalmente a <strong id="transfer-store" class="text-red-600"></strong>.</p>
-                <div class="bg-gray-50 p-3 rounded text-xs text-gray-500 mb-4" id="transfer-desc"></div>
-                <div class="flex justify-end space-x-2">
-                    <button onclick="cerrarModal('modal-transfer')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-                    <button onclick="confirmarTransferencia()" class="px-4 py-2 text-sm bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600">Transferir a esta tienda</button>
-                </div>
-            </div>
+  let inventory = [...session.inventory];
+  inventory.forEach(i=>{ if(i.status==='found') evaluatedCount++; });
+  if(filtroLista === 'missing') inventory = inventory.filter(i=>i.status==='missing');
+  inventory.sort((a,b)=> (a.status==='found'?-1:1) - (b.status==='found'?-1:1));
+
+  inventory.forEach(item=>{
+    const isFound = item.status === 'found';
+    let bgClass = isFound ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+    let icon = isFound ? '<span class="text-green-600 font-bold">✓</span>' : '<span class="text-red-500 font-bold">✗</span>';
+    let tag = '';
+    if(item.isExtra){
+      bgClass = 'bg-blue-50 border-blue-200';
+      tag = '<span class="ml-2 px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-[10px] font-bold">AGREGADO / EXTRA</span>';
+    }
+    const textClass = isFound || item.isExtra ? 'text-gray-700' : 'text-red-700';
+    listContainer.insertAdjacentHTML('beforeend', `
+      <div class="${bgClass} border rounded-lg p-3 flex flex-col text-sm">
+        <div class="flex items-center gap-2">
+          ${icon}<p class="font-bold text-gray-900">${item.id}</p>${tag}
         </div>
+        <p class="${textClass} mt-1 pl-5">${item.desc}</p>
+      </div>`);
+  });
 
-        <!-- Modal: Activo Nuevo -->
-        <div id="modal-new" class="hidden absolute top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex items-center justify-center rounded-xl z-50">
-            <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full m-4 border-t-4 border-blue-500">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Activo No Registrado</h3>
-                <p class="text-sm text-gray-600 mb-4">El código <strong id="new-id" class="text-blue-900"></strong> no existe en la base de datos maestra. ¿Deseas darlo de alta?</p>
-                <input type="text" id="new-desc" placeholder="Descripción del nuevo activo..." class="w-full border border-gray-300 rounded p-2 text-sm mb-4">
-                <div class="flex justify-end space-x-2">
-                    <button onclick="cerrarModal('modal-new')" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-                    <button onclick="confirmarAlta()" class="px-4 py-2 text-sm bg-blue-600 text-white font-bold rounded hover:bg-blue-700">Registrar y Encontrar</button>
-                </div>
-            </div>
+  document.getElementById('metric-evaluated').textContent = evaluatedCount;
+  document.getElementById('metric-total').textContent = session.inventory.length;
+  const pct = session.inventory.length ? Math.round(evaluatedCount/session.inventory.length*100) : 0;
+  document.getElementById('metric-bar').style.width = pct + '%';
+}
+
+// ================= ESCANEO / BÚSQUEDA =================
+function searchManual(){
+  const input = document.getElementById('asset-code-input');
+  const code = input.value.trim();
+  if(code) processScan(code);
+}
+function processScan(code){
+  const session = sessions.find(s=>s.id===currentSessionId);
+  if(session.estado === 'finalizado') return;
+
+  const foundInSession = session.inventory.find(i=>i.id===code);
+  if(foundInSession){
+    foundInSession.status = 'found';
+    saveSessions();
+    renderListaActiva();
+    document.getElementById('asset-code-input').value = '';
+    if(html5QrcodeScanner) stopScanner();
+    toast(`Activo ${code} registrado ✓`);
+    return;
+  }
+
+  const foundInMaster = masterDB.find(i=>i.id===code);
+  if(foundInMaster && foundInMaster.sucursal !== session.sucursal){
+    pendingTransferAsset = foundInMaster;
+    document.getElementById('transfer-id').textContent = foundInMaster.id;
+    document.getElementById('transfer-store').textContent = foundInMaster.sucursal || 'Sin sucursal';
+    document.getElementById('transfer-desc').textContent = foundInMaster.desc;
+    document.getElementById('modal-transfer').classList.remove('hidden');
+    if(html5QrcodeScanner) stopScanner();
+    return;
+  }
+  if(foundInMaster && foundInMaster.sucursal === session.sucursal){
+    // Ya pertenece a la sucursal pero no estaba en el inventario de la sesión (se agregó a master después)
+    session.inventory.push({ id: foundInMaster.id, desc: foundInMaster.desc, status:'found', isExtra:false });
+    saveSessions();
+    renderListaActiva();
+    document.getElementById('asset-code-input').value = '';
+    if(html5QrcodeScanner) stopScanner();
+    return;
+  }
+
+  pendingNewId = code;
+  document.getElementById('new-id').textContent = code;
+  document.getElementById('new-desc').value = '';
+  document.getElementById('modal-new').classList.remove('hidden');
+  if(html5QrcodeScanner) stopScanner();
+}
+
+function cerrarModal(modalId){
+  document.getElementById(modalId).classList.add('hidden');
+  pendingTransferAsset = null;
+  pendingNewId = null;
+}
+function confirmarTransferencia(){
+  const session = sessions.find(s=>s.id===currentSessionId);
+  const origen = pendingTransferAsset.sucursal;
+  pendingTransferAsset.sucursal = session.sucursal; // actualiza master
+  saveMaster();
+  session.inventory.push({ id: pendingTransferAsset.id, desc: pendingTransferAsset.desc, status:'found', isExtra:true });
+  saveSessions();
+  cerrarModal('modal-transfer');
+  renderListaActiva();
+  document.getElementById('asset-code-input').value = '';
+  toast(`Activo transferido de ${origen} a ${session.sucursal}`);
+}
+function confirmarAlta(){
+  const desc = document.getElementById('new-desc').value.trim();
+  if(!desc){ alert('Debes ingresar una descripción.'); return; }
+  const session = sessions.find(s=>s.id===currentSessionId);
+
+  session.inventory.push({ id: pendingNewId, desc, status:'found', isExtra:true });
+  saveSessions();
+
+  masterDB.push({ id: pendingNewId, desc, fecha:new Date().toISOString().slice(0,10), valorAdq:0, valorNeto:0, sucursal: session.sucursal });
+  saveMaster();
+
+  cerrarModal('modal-new');
+  renderListaActiva();
+  document.getElementById('asset-code-input').value = '';
+  toast(`Activo ${pendingNewId} dado de alta`);
+}
+
+// ================= CÁMARA =================
+function startScanner(){
+  if(typeof Html5Qrcode === 'undefined'){
+    toast('El lector QR no cargó (sin conexión). Usa el código manual.');
+    return;
+  }
+  const container = document.getElementById('reader-container');
+  container.classList.remove('hidden');
+  if(html5QrcodeScanner) return;
+  try{
+    html5QrcodeScanner = new Html5Qrcode('reader');
+    html5QrcodeScanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText)=>{ processScan(decodedText); },
+      ()=>{}
+    ).catch(()=>{
+      toast('Error de cámara. Verifica los permisos del navegador.');
+      container.classList.add('hidden');
+      html5QrcodeScanner = null;
+    });
+  }catch(err){
+    toast('No se pudo iniciar el lector QR en este dispositivo.');
+    container.classList.add('hidden');
+    html5QrcodeScanner = null;
+  }
+}
+function stopScanner(){
+  const container = document.getElementById('reader-container');
+  if(html5QrcodeScanner){
+    html5QrcodeScanner.stop().then(()=>{
+      html5QrcodeScanner.clear();
+      html5QrcodeScanner = null;
+      container.classList.add('hidden');
+    }).catch(()=>{ html5QrcodeScanner=null; container.classList.add('hidden'); });
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+// ================= INFORMES =================
+function renderInformes(){
+  switchView('informes', 'view-informes-list');
+  const container = document.getElementById('informes-container');
+  container.innerHTML = '';
+  const empty = document.getElementById('informes-empty');
+  empty.classList.toggle('hidden', sessions.length>0);
+
+  const totalSesiones = sessions.length;
+  const finalizados = sessions.filter(s=>s.estado==='finalizado').length;
+  const totalFaltantes = sessions.reduce((acc,s)=>acc + s.inventory.filter(i=>i.status==='missing').length, 0);
+  const totalEncontrados = sessions.reduce((acc,s)=>acc + s.inventory.filter(i=>i.status==='found').length, 0);
+
+  document.getElementById('informes-summary').innerHTML = `
+    ${metricCard('Levantamientos', totalSesiones, 'text-gray-900')}
+    ${metricCard('Finalizados', finalizados, 'text-green-700')}
+    ${metricCard('Activos encontrados', totalEncontrados, 'text-blue-800')}
+    ${metricCard('Activos no encontrados', totalFaltantes, 'text-red-600')}
+  `;
+
+  [...sessions].sort((a,b)=>b.id-a.id).forEach(session=>{
+    const total = session.inventory.length;
+    const encontrados = session.inventory.filter(i=>i.status==='found').length;
+    const faltantes = session.inventory.filter(i=>i.status==='missing').length;
+    const estadoBadge = {progreso:'badge-progreso',pausado:'badge-pausado',finalizado:'badge-finalizado'}[session.estado];
+    const estadoTxt = {progreso:'EN PROGRESO',pausado:'PAUSADO',finalizado:'FINALIZADO'}[session.estado];
+    container.insertAdjacentHTML('beforeend', `
+      <div class="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 class="font-bold text-lg text-gray-900">${session.sucursal}</h3>
+            <span class="${estadoBadge} px-2 py-1 rounded text-xs font-bold">${estadoTxt}</span>
+          </div>
+          <p class="text-sm text-gray-500">${session.fecha} · ${encontrados}/${total} encontrados · <span class="text-red-600 font-semibold">${faltantes} faltantes</span></p>
         </div>
+        <button onclick="abrirInforme(${session.id})" class="px-4 py-2 rounded-lg font-bold text-sm bg-blue-100 text-blue-800 hover:bg-blue-200">Ver informe</button>
+      </div>`);
+  });
+}
+function metricCard(label, value, colorClass){
+  return `<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+    <p class="text-2xl font-bold ${colorClass}">${value}</p>
+    <p class="text-xs text-gray-500 mt-1">${label}</p>
+  </div>`;
+}
 
-    </main>
+let currentInformeId = null;
+function abrirInforme(id){
+  currentInformeId = id;
+  const session = sessions.find(s=>s.id===id);
+  document.getElementById('informe-titulo').textContent = `Informe — ${session.sucursal}`;
 
-    <script>
-        // 1. BASE DE DATOS MAESTRA (Simula el catálogo global)
-        const masterDB = [
-            { id: "25000002", desc: 'RAM 4000 CHASIS CABINA', sucursal: 'Tijuana Centro' },
-            { id: "25000087", desc: 'CHEVROLET TORNADO PICK UP', sucursal: 'Tijuana Centro' },
-            { id: "30000010", desc: 'ESCRITORIO EJECUTIVO MADERA', sucursal: 'Tijuana Sur' },
-            { id: "30000015", desc: 'MONTACARGAS YALE', sucursal: 'Tijuana Norte' }
-        ];
+  const total = session.inventory.length;
+  const encontrados = session.inventory.filter(i=>i.status==='found' && !i.isExtra);
+  const faltantes = session.inventory.filter(i=>i.status==='missing');
+  const extras = session.inventory.filter(i=>i.isExtra);
 
-        // 2. GESTOR DE SESIONES
-        let sessions = []; // Guarda múltiples levantamientos
-        let currentSessionId = null; 
-        let html5QrcodeScanner = null;
-        let pendingTransferAsset = null; // Variable temporal para el modal
-        let pendingNewId = null;
+  document.getElementById('informe-metrics').innerHTML = `
+    ${metricCard('Total esperado', total, 'text-gray-900')}
+    ${metricCard('Encontrados', encontrados.length, 'text-green-700')}
+    ${metricCard('No encontrados', faltantes.length, 'text-red-600')}
+    ${metricCard('Extras / transferidos', extras.length, 'text-blue-800')}
+  `;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Crear una sesión de prueba por defecto
-            crearSesionFalsa('Tijuana Centro');
-            crearSesionFalsa('Tijuana Sur', 'pausado');
-            renderizarSesiones();
-        });
+  document.getElementById('informe-body').innerHTML =
+    informeLista('Activos no encontrados', faltantes, 'red') +
+    informeLista('Activos encontrados', encontrados, 'green') +
+    informeLista('Activos agregados o transferidos', extras, 'blue');
 
-        // ================= LÓGICA DE NAVEGACIÓN =================
-        function changeTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            if(tabId !== 'levantamiento') stopScanner();
-        }
+  switchView('informes', 'view-informe-detalle');
+}
+function informeLista(titulo, items, color){
+  const colorMap = {red:'border-red-200 bg-red-50 text-red-700', green:'border-green-200 bg-green-50 text-green-700', blue:'border-blue-200 bg-blue-50 text-blue-700'};
+  const rows = items.length
+    ? items.map(i=>`<div class="flex gap-3 text-sm py-1.5 border-b border-gray-100 last:border-0"><span class="font-mono text-xs text-gray-500 w-24 shrink-0">${i.id}</span><span class="text-gray-700">${i.desc}</span></div>`).join('')
+    : '<p class="text-sm text-gray-400 py-2">Sin registros</p>';
+  return `<div>
+    <h4 class="font-bold text-sm px-3 py-2 rounded-t-lg border ${colorMap[color]}">${titulo} (${items.length})</h4>
+    <div class="border border-t-0 border-gray-200 rounded-b-lg p-3 max-h-72 overflow-y-auto">${rows}</div>
+  </div>`;
+}
+function volverAInformes(){ currentInformeId = null; renderInformes(); }
 
-        function switchView(viewId) {
-            document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-        }
+// ================= EXPORTAR CSV =================
+function toCSV(rows, headers){
+  const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+  const lines = [headers.map(esc).join(',')];
+  rows.forEach(r=> lines.push(headers.map(h=>esc(r[h])).join(',')));
+  return lines.join('\n');
+}
+function downloadCSV(content, filename){
+  const blob = new Blob(['\uFEFF'+content], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function exportarInformeCSV(tipo){
+  const session = sessions.find(s=>s.id===currentInformeId);
+  if(!session) return;
+  let items = session.inventory;
+  let suffix = 'completo';
+  if(tipo === 'missing'){ items = items.filter(i=>i.status==='missing'); suffix = 'no_encontrados'; }
+  const rows = items.map(i=>({ ID:i.id, Descripcion:i.desc, Estado: i.status==='found' ? (i.isExtra?'Extra/Transferido':'Encontrado') : 'No encontrado', Sucursal: session.sucursal }));
+  const csv = toCSV(rows, ['ID','Descripcion','Estado','Sucursal']);
+  downloadCSV(csv, `Informe_${session.sucursal.replace(/\s+/g,'_')}_${suffix}.csv`);
+}
+function exportarTodoCSV(){
+  const rows = [];
+  sessions.forEach(s=>{
+    s.inventory.forEach(i=>{
+      rows.push({ Sucursal:s.sucursal, Fecha:s.fecha, EstadoSesion:s.estado, ID:i.id, Descripcion:i.desc, Estado: i.status==='found' ? (i.isExtra?'Extra/Transferido':'Encontrado') : 'No encontrado' });
+    });
+  });
+  const csv = toCSV(rows, ['Sucursal','Fecha','EstadoSesion','ID','Descripcion','Estado']);
+  downloadCSV(csv, 'Resumen_Todos_Levantamientos.csv');
+}
 
-        // ================= GESTOR DE LEVANTAMIENTOS =================
-        function crearSesionFalsa(sucursal, estado = 'progreso') {
-            // Filtra los activos que le tocan a esta sucursal de la MasterDB
-            let inventarioInicial = masterDB
-                .filter(a => a.sucursal === sucursal)
-                .map(a => ({ id: a.id, desc: a.desc, status: 'missing', isExtra: false }));
-            
-            sessions.push({
-                id: Date.now() + Math.floor(Math.random()*100),
-                sucursal: sucursal,
-                estado: estado,
-                fecha: new Date().toLocaleDateString(),
-                inventory: inventarioInicial
-            });
-        }
+// ================= INIT =================
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadState();
+  renderizarSesiones();
+  renderConsulta();
+  document.getElementById('db-count').textContent = masterDB.length + ' activos en base maestra';
+});
 
-        function iniciarNuevoLevantamiento() {
-            let sucursal = prompt("Ingresa el nombre de la sucursal para este nuevo levantamiento:\n(Ej: Tijuana Centro, Tijuana Norte, Ensenada)");
-            if(sucursal && sucursal.trim() !== "") {
-                crearSesionFalsa(sucursal.trim());
-                renderizarSesiones();
-            }
-        }
-
-        function renderizarSesiones() {
-            const container = document.getElementById('sessions-container');
-            container.innerHTML = '';
-            
-            sessions.forEach(session => {
-                const total = session.inventory.length;
-                const encontrados = session.inventory.filter(i => i.status === 'found').length;
-                const isPaused = session.estado === 'pausado';
-                
-                const btnClass = isPaused ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-                const btnText = isPaused ? 'REANUDAR' : 'CONTINUAR';
-                const badge = isPaused ? '<span class="px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-bold">PAUSADO</span>' : '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-bold">EN PROGRESO</span>';
-
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-1">
-                                <h3 class="font-bold text-lg text-gray-900">${session.sucursal}</h3>
-                                ${badge}
-                            </div>
-                            <p class="text-sm text-gray-500">Iniciado: ${session.fecha} | Progreso: ${encontrados} de ${total} activos</p>
-                        </div>
-                        <button onclick="abrirSesion(${session.id})" class="px-4 py-2 rounded-lg font-bold text-sm ${btnClass} transition-colors">
-                            ${btnText}
-                        </button>
-                    </div>
-                `);
-            });
-        }
-
-        // ================= OPERACIONES DENTRO DE UNA SESIÓN =================
-        function abrirSesion(id) {
-            currentSessionId = id;
-            const session = sessions.find(s => s.id === id);
-            session.estado = 'progreso'; // Al abrirla, pasa a progreso
-            
-            document.getElementById('current-store-name').innerText = session.sucursal;
-            document.getElementById('status-badge').className = "inline-flex items-center status-badge-progress px-3 py-1 rounded-full text-xs font-semibold";
-            document.getElementById('status-badge').innerText = "EN PROGRESO";
-
-            renderListaActiva();
-            switchView('view-active-session');
-        }
-
-        function volverAGestor() {
-            stopScanner();
-            currentSessionId = null;
-            renderizarSesiones();
-            switchView('view-session-list');
-        }
-
-        function pausarLevantamiento() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            session.estado = 'pausado';
-            volverAGestor();
-        }
-
-        function finalizarLevantamiento() {
-            if(confirm("¿Estás seguro de finalizar? Ya no podrás agregar más escaneos a esta sesión.")) {
-                const session = sessions.find(s => s.id === currentSessionId);
-                session.estado = 'finalizado'; // En un caso real, aquí se enviarían los datos a la DB final
-                alert(`Inventario de ${session.sucursal} finalizado y guardado exitosamente.`);
-                volverAGestor();
-            }
-        }
-
-        function renderListaActiva() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            const listContainer = document.getElementById('asset-status-list');
-            listContainer.innerHTML = '';
-            
-            let evaluatedCount = 0;
-
-            // Ordenamos para que los encontrados (o extras) salgan arriba
-            let sortedInventory = [...session.inventory].sort((a,b) => (a.status === 'found' ? -1 : 1));
-
-            sortedInventory.forEach(item => {
-                const isFound = item.status === 'found';
-                if(isFound) evaluatedCount++;
-
-                let bgClass = isFound ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
-                let tag = '';
-                
-                // Si es un activo transferido o nuevo
-                if(item.isExtra) {
-                    bgClass = 'bg-blue-50 border-blue-200';
-                    tag = '<span class="ml-2 px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-[10px] font-bold">AGREGADO / EXTRA</span>';
-                }
-
-                const textClass = isFound || item.isExtra ? 'text-gray-800' : 'text-red-800';
-
-                listContainer.insertAdjacentHTML('beforeend', `
-                    <div class="${bgClass} border rounded-lg p-3 flex flex-col text-sm transition-all mb-2 shadow-sm">
-                        <div class="flex items-center">
-                            <p class="font-bold text-gray-900">${item.id} ${tag}</p>
-                        </div>
-                        <p class="${textClass} mt-1">${item.desc}</p>
-                    </div>
-                `);
-            });
-
-            document.getElementById('metric-evaluated').innerText = evaluatedCount;
-            document.getElementById('metric-total').innerText = session.inventory.length;
-        }
-
-        // ================= LÓGICA DE ESCANEO INTELIGENTE =================
-        function searchManual() {
-            const code = document.getElementById('asset-code-input').value.trim();
-            if(code) processScan(code);
-        }
-
-        function processScan(code) {
-            const session = sessions.find(s => s.id === currentSessionId);
-            
-            // 1. Buscar en el inventario esperado de esta sesión
-            let foundInSession = session.inventory.find(i => i.id === code);
-            if(foundInSession) {
-                foundInSession.status = 'found';
-                renderListaActiva();
-                document.getElementById('asset-code-input').value = '';
-                if(html5QrcodeScanner) stopScanner();
-                return;
-            }
-
-            // 2. Si no está en la sesión, buscar en la Master DB (¿Es de otra tienda?)
-            let foundInMaster = masterDB.find(i => i.id === code);
-            if(foundInMaster) {
-                pendingTransferAsset = foundInMaster;
-                document.getElementById('transfer-id').innerText = foundInMaster.id;
-                document.getElementById('transfer-store').innerText = foundInMaster.sucursal;
-                document.getElementById('transfer-desc').innerText = foundInMaster.desc;
-                document.getElementById('modal-transfer').classList.remove('hidden');
-                if(html5QrcodeScanner) stopScanner();
-                return;
-            }
-
-            // 3. Si no está ni en la sesión ni en Master, es un Activo Nuevo
-            pendingNewId = code;
-            document.getElementById('new-id').innerText = code;
-            document.getElementById('new-desc').value = '';
-            document.getElementById('modal-new').classList.remove('hidden');
-            if(html5QrcodeScanner) stopScanner();
-        }
-
-        // ================= ACCIONES DE MODALES =================
-        function cerrarModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            pendingTransferAsset = null;
-            pendingNewId = null;
-        }
-
-        function confirmarTransferencia() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            // Agregamos a la sesión actual como 'extra'
-            session.inventory.push({
-                id: pendingTransferAsset.id,
-                desc: pendingTransferAsset.desc,
-                status: 'found',
-                isExtra: true
-            });
-            cerrarModal('modal-transfer');
-            renderListaActiva();
-            document.getElementById('asset-code-input').value = '';
-        }
-
-        function confirmarAlta() {
-            const desc = document.getElementById('new-desc').value.trim();
-            if(!desc) { alert("Debes ingresar una descripción."); return; }
-            
-            const session = sessions.find(s => s.id === currentSessionId);
-            
-            // 1. Agregar a la sesión actual
-            session.inventory.push({
-                id: pendingNewId,
-                desc: desc,
-                status: 'found',
-                isExtra: true
-            });
-
-            // 2. Agregar a la Master DB para futuros inventarios
-            masterDB.push({
-                id: pendingNewId,
-                desc: desc,
-                sucursal: session.sucursal
-            });
-
-            cerrarModal('modal-new');
-            renderListaActiva();
-            document.getElementById('asset-code-input').value = '';
-        }
-
-        // ================= CÁMARA =================
-        function startScanner() {
-            const container = document.getElementById('reader-container');
-            container.classList.remove('hidden');
-            if(html5QrcodeScanner) return; 
-            
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => { processScan(decodedText); },
-                () => {} 
-            ).catch(err => {
-                alert("Error de cámara. Verifica los permisos.");
-                container.classList.add('hidden');
-                html5QrcodeScanner = null;
-            });
-        }
-
-        function stopScanner() {
-            const container = document.getElementById('reader-container');
-            if(html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner.clear();
-                    html5QrcodeScanner = null;
-                    container.classList.add('hidden');
-                });
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-    </script>
+</script>
 </body>
 </html>
