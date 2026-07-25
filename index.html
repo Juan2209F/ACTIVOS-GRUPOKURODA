@@ -1,97 +1,72 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Kuroda Activos - Sistema Integral</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>AssetFlow - Sistema Integral de Activos</title>
     
-    <!-- Librerías Tailwind y QR -->
+    <!-- Librerías Tailwind y Lector QR -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
-    <!-- Fuentes e Iconos -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Fuentes e Iconos de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
     
-    <!-- Configuración Tailwind inyectada del nuevo diseño -->
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    "colors": {
-                        "on-secondary": "#ffffff",
-                        "surface-container-high": "#e4e9ed",
+                    colors: {
                         "primary": "#001e57",
-                        "surface-variant": "#dfe3e7",
-                        "secondary": "#4059aa",
-                        "on-tertiary-fixed": "#002109",
-                        "surface-dim": "#d6dade",
-                        "on-error-container": "#93000a",
-                        "tertiary-fixed-dim": "#62df7d",
-                        "on-tertiary-container": "#35b75b",
-                        "on-secondary-fixed-variant": "#264191",
-                        "surface-container-low": "#f0f4f8",
-                        "on-primary-container": "#819ef0",
-                        "inverse-on-surface": "#edf1f5",
-                        "outline-variant": "#c4c6d3",
-                        "on-tertiary": "#ffffff",
-                        "on-secondary-fixed": "#00164e",
-                        "on-surface": "#171c1f",
-                        "background": "#f6fafe",
-                        "surface-container": "#eaeef2",
-                        "tertiary-fixed": "#7ffc97",
-                        "on-secondary-container": "#1d3989",
-                        "on-error": "#ffffff",
-                        "secondary-fixed-dim": "#b6c4ff",
-                        "secondary-fixed": "#dce1ff",
-                        "inverse-primary": "#b3c5ff",
                         "primary-container": "#0a327e",
-                        "on-background": "#171c1f",
-                        "error-container": "#ffdad6",
-                        "on-surface-variant": "#444651",
-                        "tertiary": "#00290c",
-                        "primary-fixed": "#dae1ff",
-                        "surface": "#f6fafe",
-                        "on-primary-fixed-variant": "#22428e",
-                        "surface-tint": "#3d5ba8",
-                        "surface-bright": "#f6fafe",
-                        "surface-container-lowest": "#ffffff",
-                        "on-tertiary-fixed-variant": "#005320",
                         "on-primary": "#ffffff",
+                        "on-primary-container": "#819ef0",
+                        "secondary": "#4059aa",
                         "secondary-container": "#8fa7fe",
-                        "inverse-surface": "#2c3134",
-                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#1d3989",
+                        "tertiary": "#00290c",
                         "tertiary-container": "#004118",
-                        "primary-fixed-dim": "#b3c5ff",
-                        "on-primary-fixed": "#001849",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#35b75b",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#f6fafe",
+                        "on-background": "#171c1f",
+                        "surface": "#f6fafe",
+                        "on-surface": "#171c1f",
+                        "surface-variant": "#dfe3e7",
+                        "on-surface-variant": "#444651",
                         "outline": "#747682",
-                        "surface-container-highest": "#dfe3e7"
+                        "outline-variant": "#c4c6d3",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f0f4f8",
+                        "surface-container": "#eaeef2",
+                        "surface-container-high": "#e4e9ed",
+                        "surface-container-highest": "#dfe3e7",
+                        "tertiary-fixed": "#7ffc97",
+                        "tertiary-fixed-dim": "#62df7d",
                     },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    spacing: { "xs": "4px", "sm": "8px", "md": "12px", "lg": "16px", "xl": "24px", "2xl": "32px", "margin": "24px", "gutter": "16px", "max-width": "1152px", "safe": "env(safe-area-inset-bottom)" },
+                    fontFamily: {
+                        "headline-lg": ["Inter"], "headline-md": ["Inter"], "headline-lg-mobile": ["Inter"],
+                        "body-base": ["Inter"], "body-bold": ["Inter"], "label-sm": ["Inter"],
+                        "micro-tag": ["Inter"], "code-id": ["JetBrains Mono"]
                     },
-                    "spacing": {
-                        "margin": "24px",
-                        "gutter": "16px",
-                        "xl": "24px",
-                        "max-width": "1152px",
-                        "lg": "16px",
-                        "sm": "8px",
-                        "md": "12px",
-                    },
-                    "fontFamily": {
-                        "headline-lg-mobile": ["Inter"],
-                        "body-bold": ["Inter"],
-                        "headline-md": ["Inter"],
-                        "code-id": ["JetBrains Mono"],
-                        "body-base": ["Inter"],
-                        "micro-tag": ["Inter"],
-                        "label-sm": ["Inter"],
-                        "headline-lg": ["Inter"]
+                    fontSize: {
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "body-base": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-bold": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "micro-tag": ["10px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "code-id": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
                     }
                 }
             }
@@ -101,43 +76,56 @@
         body { min-height: max(884px, 100dvh); }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
         .pt-xs { padding-top: 4px; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Sistema de vistas */
+        /* Sistema de Vistas SPA */
         .view-content, .sub-view { display: none; }
         .view-content.active, .sub-view.active { display: block; }
 
-        @media (min-width: 768px) {
-            main { margin-left: 16rem; }
-            header { margin-left: 16rem; width: calc(100% - 16rem); }
-        }
+        /* Animación del Escáner */
+        .scanner-line { animation: scan 2s linear infinite; }
+        @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        #reader-container.hidden { display: none; }
-        #reader { width: 100%; border-radius: 8px; overflow: hidden; }
+        /* Ocultar elementos según dispositivo */
+        @media (min-width: 768px) { 
+            .mobile-only { display: none !important; }
+            main.with-sidebar { margin-left: 16rem; }
+            header.with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); }
+        }
+        @media (max-width: 767px) { 
+            .desktop-only { display: none !important; } 
+        }
+
+        /* Lector QR */
+        #qr-reader-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #000; display: none; }
+        #qr-reader-container.active { display: block; }
+        #reader { width: 100%; height: 100%; border-radius: 1rem; overflow: hidden; }
+        #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
     </style>
 </head>
-<body class="bg-background text-on-background antialiased pb-24 min-h-screen">
+<body class="bg-background text-on-background font-body-base h-full flex flex-col antialiased">
 
     <!-- TopAppBar -->
-    <header class="docked full-width top-0 bg-surface shadow-sm border-b border-outline-variant flex justify-between items-center w-full px-margin py-md z-40 sticky">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white font-bold md:hidden">K</div>
-            <h1 class="font-headline-md text-headline-md font-bold text-primary">Kuroda Activos</h1>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-on-surface-variant hidden md:block mr-2">fcerezo@kuroda.com</span>
-            <button class="text-on-surface-variant hover:bg-surface-container-low active:opacity-80 transition-colors p-2 rounded-full">
-                <span class="material-symbols-outlined text-[24px]">notifications</span>
+    <header class="bg-surface border-b border-outline-variant shadow-sm w-full sticky top-0 z-40 transition-colors with-sidebar">
+        <div class="flex justify-between items-center w-full px-margin py-md mx-auto max-w-[1152px]">
+            <div class="flex items-center gap-md">
+                <button class="text-primary hover:bg-surface-container-low active:opacity-80 transition-colors rounded-full p-2 flex items-center justify-center -ml-2 md:hidden">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+                </button>
+                <h1 class="font-headline-md font-bold text-primary tracking-tight">AssetFlow</h1>
+            </div>
+            <button class="text-on-surface-variant hover:bg-surface-container-low active:opacity-80 transition-colors rounded-full p-2 flex items-center justify-center -mr-2">
+                <span class="material-symbols-outlined">notifications</span>
             </button>
         </div>
     </header>
 
     <!-- Desktop SideNav -->
-    <div class="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant z-30 pt-4 px-4">
-        <div class="flex items-center gap-3 px-4 py-3 mb-4">
-            <div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white font-bold">K</div>
-            <span class="font-bold text-lg text-primary">Kuroda</span>
+    <div class="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant z-50 pt-4 px-4 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+        <div class="flex items-center gap-3 px-4 py-3 mb-6">
+            <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+            <span class="font-headline-md text-primary tracking-tight">AssetFlow</span>
         </div>
         <nav class="flex flex-col gap-2" id="desktop-nav">
             <button onclick="cambiarVista('vista-inicio')" class="nav-btn w-full flex items-center gap-3 bg-secondary-container text-on-secondary-container px-4 py-3 rounded-lg font-body-bold transition-colors">
@@ -152,33 +140,17 @@
         </nav>
     </div>
 
-    <!-- BottomNavBar (Mobile) -->
-    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant shadow-lg pb-safe pt-xs md:hidden" id="mobile-nav">
-        <button onclick="cambiarVista('vista-inicio')" class="nav-btn-mob flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 active:scale-95 transition-transform duration-150">
-            <span class="material-symbols-outlined">home</span>
-            <span class="font-label-sm text-label-sm">Inicio</span>
-        </button>
-        <button onclick="cambiarVista('vista-activos')" class="nav-btn-mob flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/20 active:scale-95 transition-transform duration-150 rounded-xl">
-            <span class="material-symbols-outlined">account_tree</span>
-            <span class="font-label-sm text-label-sm">Activos</span>
-        </button>
-        <button onclick="cambiarVista('vista-escaneo')" class="nav-btn-mob flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/20 active:scale-95 transition-transform duration-150 rounded-xl">
-            <span class="material-symbols-outlined">qr_code_scanner</span>
-            <span class="font-label-sm text-label-sm">Escaneo</span>
-        </button>
-    </nav>
-
-    <!-- Contenedor Principal (Donde se inyectan las pantallas) -->
-    <main class="max-w-max-width mx-auto px-lg md:px-margin py-lg flex flex-col gap-xl">
+    <!-- Main Content Canvas -->
+    <main class="flex-1 w-full max-w-[1152px] mx-auto px-lg md:px-margin py-margin pb-32 flex flex-col gap-margin with-sidebar relative">
         
-        <!-- VISTA 1: INICIO (Diseño original del nuevo template) -->
-        <section id="vista-inicio" class="view-content active space-y-6">
+        <!-- =================== VISTA 1: INICIO =================== -->
+        <section id="vista-inicio" class="view-content active flex flex-col gap-xl">
             <!-- Metrics -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex items-center justify-between border-t-4 border-t-primary">
                     <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Total Activos</p>
-                        <p class="font-headline-lg text-headline-lg text-primary" id="metric-total-db">0</p>
+                        <p class="font-label-sm text-on-surface-variant mb-1">Total Activos</p>
+                        <p class="font-headline-lg text-primary" id="dash-total">0</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
                         <span class="material-symbols-outlined">dataset</span>
@@ -186,17 +158,17 @@
                 </div>
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex items-center justify-between border-t-4 border-t-on-tertiary-container">
                     <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Sucursales Activas</p>
-                        <p class="font-headline-lg text-headline-lg text-primary">4</p>
+                        <p class="font-label-sm text-on-surface-variant mb-1">En Uso / Operativos</p>
+                        <p class="font-headline-lg text-primary" id="dash-operativos">0</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-on-tertiary-container">
-                        <span class="material-symbols-outlined">store</span>
+                        <span class="material-symbols-outlined">check_circle</span>
                     </div>
                 </div>
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] flex items-center justify-between border-t-4 border-t-error">
                     <div>
-                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Mantenimiento</p>
-                        <p class="font-headline-lg text-headline-lg text-primary">0</p>
+                        <p class="font-label-sm text-on-surface-variant mb-1">En Mantenimiento</p>
+                        <p class="font-headline-lg text-primary" id="dash-mantenimiento">0</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center text-error">
                         <span class="material-symbols-outlined">build</span>
@@ -206,214 +178,293 @@
 
             <!-- Categories Carousel -->
             <div>
-                <h2 class="font-body-bold text-body-bold text-primary mb-md">Categorías</h2>
-                <div class="flex overflow-x-auto gap-gutter pb-4 snap-x hide-scrollbar">
+                <h2 class="font-body-bold text-primary mb-md">Categorías</h2>
+                <div class="flex overflow-x-auto gap-gutter pb-4 scrollbar-hide snap-x">
                     <button class="snap-start min-w-[120px] bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-surface-container-low transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined">directions_car</span></div>
-                        <span class="font-label-sm text-label-sm text-on-surface">Vehículos</span>
+                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">directions_car</span></div>
+                        <span class="font-label-sm text-on-surface">Vehículos</span>
                     </button>
                     <button class="snap-start min-w-[120px] bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-surface-container-low transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined">computer</span></div>
-                        <span class="font-label-sm text-label-sm text-on-surface">IT</span>
+                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">computer</span></div>
+                        <span class="font-label-sm text-on-surface">IT Equipos</span>
                     </button>
                     <button class="snap-start min-w-[120px] bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-surface-container-low transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined">precision_manufacturing</span></div>
-                        <span class="font-label-sm text-label-sm text-on-surface">Maquinaria</span>
+                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span></div>
+                        <span class="font-label-sm text-on-surface">Maquinaria</span>
                     </button>
                     <button class="snap-start min-w-[120px] bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-surface-container-low transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined">desk</span></div>
-                        <span class="font-label-sm text-label-sm text-on-surface">Mobiliario</span>
+                        <div class="text-primary bg-primary-fixed-dim rounded-full p-3"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">desk</span></div>
+                        <span class="font-label-sm text-on-surface">Mobiliario</span>
                     </button>
+                </div>
+            </div>
+            
+            <!-- Resumen Activos Recientes -->
+            <div>
+                <div class="flex justify-between items-center mb-md">
+                    <h2 class="font-body-bold text-primary">Vistazo Rápido</h2>
+                    <button onclick="cambiarVista('vista-activos')" class="font-label-sm text-secondary hover:underline">Ver Padrón Completo</button>
+                </div>
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                    <p class="font-body-base text-on-surface-variant">Dirígete a la pestaña de "Padrón Activos" para visualizar o buscar toda la flotilla, o a "Levantamiento" para iniciar una auditoría mediante escaneo QR.</p>
                 </div>
             </div>
         </section>
 
-        <!-- VISTA 2: ACTIVOS / CONSULTAR DB MAESTRA -->
-        <section id="vista-activos" class="view-content bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
-            <h2 class="font-headline-md font-bold text-primary mb-6">Padrón Total de Activos</h2>
-            <div class="mb-4">
-                <input type="text" id="search-db" onkeyup="filtrarTabla()" placeholder="Buscar por ID, Descripción o Sucursal..." class="w-full md:w-1/2 border border-outline-variant bg-surface rounded-lg p-3 text-sm outline-none focus:border-primary">
+        <!-- =================== VISTA 2: LISTA DE ACTIVOS =================== -->
+        <section id="vista-activos" class="view-content flex flex-col gap-lg">
+            <!-- Search Bar -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">search</span>
+                </div>
+                <input id="search-input" onkeyup="renderListaActivos()" class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-md py-3 font-body-base text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container/20 focus:border-primary shadow-sm transition-all" placeholder="Buscar por nombre, ID o sucursal..." type="text">
             </div>
-            <div class="overflow-x-auto rounded-lg border border-outline-variant">
-                <table class="min-w-full bg-white">
-                    <thead class="bg-surface-container-low">
-                        <tr>
-                            <th class="px-6 py-3 border-b text-left text-xs font-bold text-on-surface-variant uppercase">ID Activo</th>
-                            <th class="px-6 py-3 border-b text-left text-xs font-bold text-on-surface-variant uppercase">Descripción</th>
-                            <th class="px-6 py-3 border-b text-left text-xs font-bold text-on-surface-variant uppercase">Sucursal Base</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-consultas" class="divide-y divide-surface-variant">
-                        <!-- Generado por JS (masterDB) -->
-                    </tbody>
-                </table>
+
+            <!-- Asset List Container (Grid of Cards) -->
+            <div id="lista-activos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+                <!-- JS Inyectará las tarjetas (articles) aquí -->
             </div>
         </section>
 
-        <!-- VISTA 3: ESCANEO / GESTOR DE LEVANTAMIENTOS -->
-        <section id="vista-escaneo" class="view-content">
+        <!-- =================== VISTA 3: DETALLE DEL ACTIVO =================== -->
+        <section id="vista-detalle" class="view-content flex flex-col gap-xl">
+            <button onclick="cambiarVista('vista-activos')" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-body-bold w-fit">
+                <span class="material-symbols-outlined">arrow_back</span> Volver a la lista
+            </button>
+
+            <!-- Hero Section -->
+            <div class="relative w-full rounded-xl overflow-hidden shadow-sm border border-outline-variant bg-surface h-64">
+                <img id="det-img" class="w-full h-full object-cover" src="">
+                <div id="det-status-badge" class="absolute top-sm right-sm font-micro-tag px-2 py-1 rounded">ESTADO</div>
+            </div>
+
+            <!-- Información Principal -->
+            <div class="flex flex-col gap-sm">
+                <h2 id="det-name" class="font-headline-lg-mobile text-primary">Nombre del Activo</h2>
+                <div class="flex items-center gap-md">
+                    <span id="det-id" class="font-code-id text-on-surface-variant bg-surface-container px-2 py-1 rounded">ID</span>
+                    <span id="det-category" class="font-label-sm text-on-surface-variant">Categoría</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                <!-- Detalles Técnicos -->
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm">
+                    <h3 class="font-body-bold text-primary mb-md border-b-4 border-primary pb-2 w-fit">Especificaciones</h3>
+                    <div class="grid grid-cols-2 gap-y-md gap-x-sm">
+                        <div>
+                            <span class="block font-micro-tag text-on-surface-variant uppercase">Sucursal Base</span>
+                            <span id="det-sucursal" class="block font-body-base text-on-surface">--</span>
+                        </div>
+                        <div>
+                            <span class="block font-micro-tag text-on-surface-variant uppercase">Adquisición</span>
+                            <span id="det-date" class="block font-body-base text-on-surface">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicación -->
+                <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm">
+                    <h3 class="font-body-bold text-primary mb-md">Ubicación Física Actual</h3>
+                    <div class="flex items-center gap-md">
+                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">location_on</span>
+                        <div>
+                            <span id="det-location-main" class="block font-body-base text-on-surface">--</span>
+                            <span id="det-location-sub" class="block font-label-sm text-on-surface-variant">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================== VISTA 4: LEVANTAMIENTO / ESCÁNER =================== -->
+        <section id="vista-escaneo" class="view-content h-full">
             
-            <!-- SUB-VISTA A: GESTOR -->
-            <div id="sub-gestor" class="sub-view active bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-outline-variant pb-4">
-                    <h2 class="font-headline-md font-bold text-primary">Gestor de Levantamientos</h2>
-                    <button onclick="iniciarNuevoLevantamiento()" class="bg-primary text-white font-bold px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 hover:bg-primary-container transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">add_circle</span> NUEVO LEVANTAMIENTO
+            <!-- SUB-VISTA: GESTOR DE SESIONES -->
+            <div id="sub-gestor" class="sub-view active flex flex-col gap-6">
+                <div class="flex justify-between items-center bg-surface-container-lowest rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-outline-variant">
+                    <div>
+                        <h2 class="font-headline-md text-primary">Gestor de Levantamientos</h2>
+                        <p class="font-body-base text-on-surface-variant mt-1">Inicia o retoma una auditoría física.</p>
+                    </div>
+                    <button onclick="iniciarNuevoLevantamiento()" class="bg-primary text-white font-body-bold px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary-container transition-colors">
+                        <span class="material-symbols-outlined">add</span> NUEVO
                     </button>
                 </div>
                 <div class="space-y-4" id="sessions-container">
-                    <!-- Sesiones generadas dinámicamente -->
+                    <!-- JS Inyectará las sesiones aquí -->
                 </div>
             </div>
 
-            <!-- SUB-VISTA B: ESCÁNER ACTIVO -->
-            <div id="sub-escaneo-activo" class="sub-view">
-                <div class="flex items-center gap-4 mb-6 bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant">
-                    <button onclick="volverAGestor()" class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full bg-surface-container-low">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                    <div>
-                        <h2 class="font-headline-md font-bold text-primary" id="current-store-name">...</h2>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="px-2 py-0.5 bg-tertiary-fixed-dim text-on-tertiary-fixed rounded font-micro-tag">EN PROGRESO</span>
-                            <span class="text-sm font-medium text-on-surface-variant" id="metric-progreso">0 / 0</span>
-                        </div>
-                    </div>
-                    <div class="ml-auto flex gap-2">
-                        <button onclick="pausarLevantamiento()" class="px-4 py-2 border border-outline-variant text-on-surface-variant rounded-lg text-sm font-bold hover:bg-surface-container-low transition-colors hidden md:block">PAUSAR</button>
-                        <button onclick="finalizarLevantamiento()" class="px-4 py-2 bg-on-tertiary-container text-white rounded-lg text-sm font-bold shadow hover:opacity-90 transition-colors">FINALIZAR</button>
-                    </div>
-                </div>
+            <!-- SUB-VISTA: ESCÁNER ACTIVO -->
+            <div id="sub-escaneo-activo" class="sub-view flex flex-col md:flex-row gap-8 items-start justify-center">
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Controles de Escaneo -->
-                    <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant space-y-6">
+                <!-- Columna Izquierda: UI del Escáner (Source 4) -->
+                <div class="w-full md:w-1/2 flex flex-col items-center flex-grow max-w-md mx-auto relative">
+                    <div class="w-full flex justify-between items-center mb-4">
+                        <button onclick="volverAGestor()" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 font-body-bold">
+                            <span class="material-symbols-outlined">arrow_back</span> Salir
+                        </button>
+                        <span class="font-label-sm bg-tertiary-fixed-dim text-on-tertiary-fixed px-3 py-1 rounded-full uppercase" id="metric-progreso">0/0</span>
+                    </div>
+
+                    <!-- Camera Viewport Container -->
+                    <div class="relative w-full aspect-[3/4] bg-inverse-surface rounded-2xl overflow-hidden shadow-lg border-2 border-primary-container/20">
                         
-                        <div id="reader-container" class="hidden border-2 border-primary rounded-xl p-2 bg-surface">
-                            <p class="text-center text-sm font-bold text-primary mb-2 mt-1">Apunta la cámara al código QR</p>
-                            <div id="reader" class="rounded-lg overflow-hidden"></div>
-                            <button onclick="stopScanner()" class="mt-3 w-full bg-error-container text-on-error-container font-bold py-3 rounded-lg text-sm transition-colors hover:bg-red-200">CANCELAR CÁMARA</button>
+                        <!-- Lector de Código Real (oculto por defecto) -->
+                        <div id="qr-reader-container">
+                            <div id="reader"></div>
                         </div>
 
-                        <div class="space-y-3">
-                            <label class="font-label-sm text-on-surface-variant">Registro Manual / Búsqueda</label>
-                            <input type="text" id="asset-code-input" placeholder="Ingresa el ID del activo..." class="w-full border border-outline-variant bg-surface rounded-lg p-3 text-sm outline-none focus:border-primary">
-                            <div class="flex gap-3">
-                                <button onclick="searchManual()" class="flex-1 bg-primary text-white font-bold py-3 rounded-lg text-sm flex justify-center items-center gap-2 hover:bg-primary-container transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">search</span>BUSCAR
-                                </button>
-                                <button onclick="startScanner()" class="flex-1 bg-secondary-container text-on-secondary-container font-bold py-3 rounded-lg text-sm flex justify-center items-center gap-2 hover:opacity-90 transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">qr_code_scanner</span>ESCANEAR
-                                </button>
+                        <!-- Fondo Simulado -->
+                        <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBzyOXmM4HKseM0FM3gLxUVoBRh_skf_Pc4OdkmhMe_di7JtAEW4_0hHvO46wS-YJJgOJ5kouH-aSsSDqfUFe047L2tYY4aTT87rmpXp4ryF7Rt-VDNf-lo7-GZjE5vn9lqfZpmSggJCj2K9X8lBxMpPThVHMieIORP4iiFN-2rs7R6bnDHjb9FKM05irQzVIAyMgikz8Hto42iIkFT--mImKlYhW5A97SwUghhstON64PMMmHVCZkdbJHW0qeHR95q_Kwp5uVX4Yk')"></div>
+                        
+                        <!-- Overlay del Escáner -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                            <div class="relative w-64 h-64">
+                                <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary-container rounded-tl-lg"></div>
+                                <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary-container rounded-tr-lg"></div>
+                                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary-container rounded-bl-lg"></div>
+                                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary-container rounded-br-lg"></div>
+                                <div class="absolute left-0 right-0 h-0.5 bg-tertiary-fixed shadow-[0_0_8px_rgba(127,252,151,0.8)] scanner-line"></div>
+                                <div class="absolute inset-0 bg-white/5 rounded-lg backdrop-blur-[1px]"></div>
                             </div>
                         </div>
+
+                        <!-- Botones de Control de Cámara -->
+                        <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-20">
+                            <button onclick="startScanner()" id="btn-start-scan" class="bg-primary text-white font-body-bold px-6 py-3 rounded-full shadow-lg hover:bg-primary-container active:scale-95 transition-all flex items-center gap-2">
+                                <span class="material-symbols-outlined">play_arrow</span> Iniciar Cámara
+                            </button>
+                            <button onclick="stopScanner()" id="btn-stop-scan" class="hidden bg-error text-white font-body-bold px-6 py-3 rounded-full shadow-lg hover:bg-red-700 active:scale-95 transition-all flex items-center gap-2">
+                                <span class="material-symbols-outlined">stop</span> Detener
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Lista del Inventario -->
-                    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant flex flex-col h-[600px]">
-                        <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-xl">
-                            <h3 class="font-body-bold text-primary flex items-center gap-2">
-                                <span class="material-symbols-outlined">checklist</span> Estado del Levantamiento
-                            </h3>
+                    <!-- Búsqueda Manual -->
+                    <div class="w-full mt-6 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col gap-3">
+                        <label class="font-label-sm text-on-surface-variant">Ingreso Manual</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="asset-code-input" placeholder="ID del activo..." class="flex-1 border border-outline-variant bg-surface rounded-lg px-3 text-sm focus:border-primary outline-none font-code-id">
+                            <button onclick="searchManual()" class="bg-secondary-container text-on-secondary-container font-body-bold px-4 rounded-lg flex items-center gap-1 active:scale-95">
+                                <span class="material-symbols-outlined text-[18px]">search</span> Buscar
+                            </button>
                         </div>
-                        <div id="asset-status-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-surface">
-                            <!-- Renderizado por JS -->
-                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Lista de Activos Escaneados -->
+                <div class="w-full md:w-1/2 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant flex flex-col h-[600px]">
+                    <div class="p-4 border-b border-outline-variant bg-surface-container-low rounded-t-xl flex justify-between items-center">
+                        <h3 class="font-body-bold text-primary flex items-center gap-2">
+                            <span class="material-symbols-outlined">checklist</span> Progreso de <span id="current-store-name">Tienda</span>
+                        </h3>
+                        <button onclick="finalizarLevantamiento()" class="text-sm font-bold text-error hover:underline">Finalizar</button>
+                    </div>
+                    <div id="asset-status-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-surface">
+                        <!-- JS Inject -->
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- =================== MODALES =================== -->
-        
-        <!-- Modal: Activo Transferencia -->
-        <div id="modal-transfer" class="hidden fixed top-0 left-0 w-full h-full bg-on-surface/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-xl max-w-md w-full border-t-4 border-yellow-500">
-                <h3 class="text-xl font-bold text-on-surface mb-2 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-yellow-600">warning</span> ¡Activo de otra Sucursal!
+        <!-- =================== MODALES DE ALERTA =================== -->
+        <div id="modal-transfer" class="hidden fixed top-0 left-0 w-full h-full bg-on-background/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-xl max-w-md w-full border-t-4 border-[#eab308]">
+                <h3 class="font-headline-md text-on-surface mb-2 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#eab308]">warning</span> Activo de otra Sucursal
                 </h3>
-                <p class="text-sm text-on-surface-variant mb-4">El activo <strong id="transfer-id" class="text-primary"></strong> pertenece originalmente a <strong id="transfer-store" class="text-error"></strong>.</p>
-                <div class="bg-surface p-3 rounded border border-outline-variant text-xs text-on-surface-variant mb-6 font-medium" id="transfer-desc"></div>
+                <p class="font-body-base text-on-surface-variant mb-4">El activo <strong id="transfer-id" class="text-primary font-code-id"></strong> pertenece a <strong id="transfer-store" class="text-error"></strong>.</p>
+                <div class="bg-surface-container p-3 rounded border border-outline-variant text-xs text-on-surface-variant mb-6 font-medium" id="transfer-desc"></div>
                 <div class="flex justify-end gap-3">
-                    <button onclick="cerrarModal('modal-transfer')" class="px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors">Cancelar</button>
-                    <button onclick="confirmarTransferencia()" class="px-4 py-2 text-sm bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-colors">Transferir y Marcar</button>
+                    <button onclick="cerrarModal('modal-transfer')" class="px-4 py-2 font-body-bold text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors">Cancelar</button>
+                    <button onclick="confirmarTransferencia()" class="px-4 py-2 bg-[#eab308] text-on-background font-body-bold rounded-lg hover:opacity-90 transition-opacity">Transferir y Marcar</button>
                 </div>
             </div>
         </div>
 
-        <!-- Modal: Activo Nuevo -->
-        <div id="modal-new" class="hidden fixed top-0 left-0 w-full h-full bg-on-surface/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+        <div id="modal-new" class="hidden fixed top-0 left-0 w-full h-full bg-on-background/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
             <div class="bg-surface-container-lowest p-6 rounded-xl shadow-xl max-w-md w-full border-t-4 border-primary">
-                <h3 class="text-xl font-bold text-on-surface mb-2 flex items-center gap-2">
+                <h3 class="font-headline-md text-on-surface mb-2 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">add_box</span> Activo No Registrado
                 </h3>
-                <p class="text-sm text-on-surface-variant mb-4">El código <strong id="new-id" class="text-primary"></strong> no existe en la BD maestra. ¿Deseas darlo de alta?</p>
-                <input type="text" id="new-desc" placeholder="Descripción breve del activo..." class="w-full border border-outline-variant rounded-lg p-3 text-sm mb-6 bg-surface outline-none focus:border-primary">
+                <p class="font-body-base text-on-surface-variant mb-4">El código <strong id="new-id" class="text-primary font-code-id"></strong> no existe en la BD. ¿Deseas darlo de alta?</p>
+                <input type="text" id="new-desc" placeholder="Descripción breve del activo..." class="w-full border border-outline-variant rounded-lg p-3 font-body-base mb-6 bg-surface outline-none focus:border-primary">
                 <div class="flex justify-end gap-3">
-                    <button onclick="cerrarModal('modal-new')" class="px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors">Cancelar</button>
-                    <button onclick="confirmarAlta()" class="px-4 py-2 text-sm bg-primary text-white font-bold rounded-lg hover:bg-primary-container transition-colors">Registrar Alta</button>
+                    <button onclick="cerrarModal('modal-new')" class="px-4 py-2 font-body-bold text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors">Cancelar</button>
+                    <button onclick="confirmarAlta()" class="px-4 py-2 bg-primary text-white font-body-bold rounded-lg hover:bg-primary-container transition-colors">Registrar Alta</button>
                 </div>
             </div>
         </div>
 
     </main>
 
+    <!-- BottomNavBar (Mobile) -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant shadow-lg pb-safe pt-xs px-2 h-[72px]" id="mobile-nav">
+        <button onclick="cambiarVista('vista-inicio')" class="nav-btn-mob flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container px-4 py-1 rounded-xl active:scale-95 transition-transform duration-150 min-w-[64px]">
+            <span class="material-symbols-outlined mb-1">home</span><span class="font-label-sm">Inicio</span>
+        </button>
+        <button onclick="cambiarVista('vista-activos')" class="nav-btn-mob flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/20 px-4 py-1 rounded-xl transition-colors min-w-[64px]">
+            <span class="material-symbols-outlined mb-1">account_tree</span><span class="font-label-sm">Activos</span>
+        </button>
+        <button onclick="cambiarVista('vista-escaneo')" class="nav-btn-mob flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/20 px-4 py-1 rounded-xl transition-colors min-w-[64px]">
+            <span class="material-symbols-outlined mb-1">qr_code_scanner</span><span class="font-label-sm">Escaneo</span>
+        </button>
+    </nav>
+
+    <!-- LOGICA JAVASCRIPT -->
     <script>
-        // --- 1. BASE DE DATOS MAESTRA ---
+        // --- 1. BASE DE DATOS MAESTRA (Con imágenes y más detalles) ---
         const masterDB = [
-            { id: "25000002", desc: 'RAM 4000 CHASIS CABINA', sucursal: 'Tijuana Centro' },
-            { id: "25000087", desc: 'CHEVROLET TORNADO PICK UP LS', sucursal: 'Tijuana Centro' },
-            { id: "30000010", desc: 'ESCRITORIO EJECUTIVO MADERA', sucursal: 'Tijuana Sur' },
-            { id: "30000015", desc: 'MONTACARGAS YALE MOD UT', sucursal: 'Tijuana Norte' },
-            { id: "10000050", desc: 'LAPTOP DELL XPS 15', sucursal: 'Tijuana Centro' }
+            { id: "AST-2023-0891", name: 'Laptop Dell XPS 15', category: 'IT Equipos', status: 'OPERATIVO', sucursal: 'Sede Central', location: 'Piso 4 - Desarrollo', date: '15 Oct 2023', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDC1E6GrMNPGqWgY6TSo2DPRzKao6kFiEzWF3VAklG92NiXMxPpbx7EEJmqAM2O7u4dqeWNt-zkWIqZMiPZjkOJa-vo0IzQ5exSNVKaRpXlhhOBOsH_hGqYyH936tnLqbDlIrgHOD6i3CHWUTVfUEX5Xf32zc3gQF9BKY4K3X8cikjxDw9XrKJLHp1nRgMlWIBabeq_VKdOrbTpbky90ofxC70z0OTobn6zeGAV0XWhi7Nkbk4X649lF0ZWarsdkpOIrDqjvAmZPqQ', icon: 'laptop_mac' },
+            { id: "IND-9942-A", name: 'Compresor Industrial XL', category: 'Maquinaria', status: 'MANTENIMIENTO', sucursal: 'Sede Central', location: 'Planta Sur, Nave B', date: '10 Ene 2021', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI7gOCzRmW6qwKuKrAcZq7M9Lm_NkEf-sfxMQXlbhrrAG4UrMVb9Kj5ljybqnttV9rLmIb01wlXFHwzh9QWu4UbrObATed4W0pVldRibN6AolfP3NCyjiwLsa5Fyr43r2qAZeoIbvGFwjazOiSQuBe9J-z0iM9o6TwDLm-TZaL0uPjzW5RD3y1DalfcO7e5tJlOmlF3-bNcb12ZWasnjPlEjV_QUqMCl9KNN5uIRdcpBP4i47m0ZDOKmuFOFWcgHIRyXHG6m8k-NM', icon: 'precision_manufacturing' },
+            { id: "OFI-1123-PRT", name: 'Impresora Multifunción HP', category: 'IT Equipos', status: 'OPERATIVO', sucursal: 'Tijuana Norte', location: 'Recepción Principal', date: '05 May 2022', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB077EKPMVINiqE62LQND7ZPms7jjA6wTputtMdJ1tUT-rjwRP2ySnj17-qjyt1_4VqXeU856uyjkYFNhsyWSXyxyck1HsqOQuhsZplVHAs-qPy1tm5CXqLBds6Aakbmn2Rk35oCej6IB4J6hHQv98ZQpQyBm7k-Im2ZYYUyRm3opsaEPSogHGlZpK_PDvtXii8Ar_Rs29zzz0QvTLhPqIUo3Tr-swF6Ni_A5h-y4fi_H9oNqkKod59zh0VtzN-DOjLUTK_TwNdVWE', icon: 'print' },
+            { id: "25000002", name: 'RAM 4000 CHASIS CABINA', category: 'Vehículos', status: 'OPERATIVO', sucursal: 'Sede Central', location: 'Estacionamiento', date: '12 Ago 2018', img: '', icon: 'directions_car' }
         ];
 
-        // --- 2. VARIABLES DE GESTIÓN ---
+        // --- 2. VARIABLES DE GESTIÓN DE AUDITORÍA ---
         let sessions = [];
         let currentSessionId = null; 
         let html5QrcodeScanner = null;
         let pendingTransferAsset = null;
         let pendingNewId = null;
 
+        // --- 3. INICIALIZACIÓN ---
         document.addEventListener('DOMContentLoaded', () => {
-            crearSesionFalsa('Tijuana Centro');
-            crearSesionFalsa('Tijuana Sur', 'pausado');
-            renderizarSesiones();
-            renderTablaConsulta();
+            actualizarMetricasInicio();
+            renderListaActivos();
             
-            // Actualizar métrica en Inicio
-            document.getElementById('metric-total-db').innerText = masterDB.length;
+            // Crear sesión de prueba
+            crearSesionFalsa('Sede Central');
+            renderizarSesiones();
         });
 
-        // --- 3. NAVEGACIÓN Y VISTAS ---
+        // --- 4. CONTROL DE NAVEGACIÓN SPA ---
         function cambiarVista(vistaId) {
-            // Ocultar todas las vistas
+            if(vistaId !== 'vista-escaneo') stopScanner(); // Apaga cámara si sales
+
             document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
             document.getElementById(vistaId).classList.add('active');
 
-            // Resetear estilos Menú Desktop
-            document.querySelectorAll('#desktop-nav button').forEach(btn => {
+            // Reset desktop nav
+            document.querySelectorAll('#desktop-nav .nav-btn').forEach(btn => {
                 btn.className = "nav-btn w-full flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-low px-4 py-3 rounded-lg font-body-bold transition-colors";
             });
-            
-            // Resetear estilos Menú Móvil
-            document.querySelectorAll('#mobile-nav button').forEach(btn => {
-                btn.className = "nav-btn-mob flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/20 active:scale-95 transition-transform duration-150 rounded-xl";
+            // Reset mobile nav
+            document.querySelectorAll('#mobile-nav .nav-btn-mob').forEach(btn => {
+                btn.className = "nav-btn-mob flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/20 px-4 py-1 rounded-xl transition-colors min-w-[64px]";
             });
 
-            // Aplicar estilo activo dependiendo de la vista
-            const indexMapeo = { 'vista-inicio': 0, 'vista-activos': 1, 'vista-escaneo': 2 };
-            const i = indexMapeo[vistaId];
-            
+            const i = { 'vista-inicio': 0, 'vista-activos': 1, 'vista-escaneo': 2 }[vistaId];
             if(i !== undefined) {
-                const deskBtn = document.querySelectorAll('#desktop-nav button')[i];
-                deskBtn.className = "nav-btn w-full flex items-center gap-3 bg-secondary-container text-on-secondary-container px-4 py-3 rounded-lg font-body-bold transition-colors";
+                const deskBtn = document.querySelectorAll('#desktop-nav .nav-btn')[i];
+                if(deskBtn) deskBtn.className = "nav-btn w-full flex items-center gap-3 bg-secondary-container text-on-secondary-container px-4 py-3 rounded-lg font-body-bold transition-colors";
                 
-                const mobBtn = document.querySelectorAll('#mobile-nav button')[i];
-                mobBtn.className = "nav-btn-mob flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 active:scale-95 transition-transform duration-150";
+                const mobBtn = document.querySelectorAll('#mobile-nav .nav-btn-mob')[i];
+                if(mobBtn) mobBtn.className = "nav-btn-mob flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container px-4 py-1 rounded-xl active:scale-95 transition-transform duration-150 min-w-[64px]";
             }
-
-            if(vistaId !== 'vista-escaneo' && html5QrcodeScanner) stopScanner();
         }
 
         function cambiarSubVista(subId) {
@@ -421,121 +472,162 @@
             document.getElementById(subId).classList.add('active');
         }
 
-        // --- 4. GESTOR DE SESIONES ---
-        function crearSesionFalsa(sucursal, estado = 'progreso') {
-            let inventarioInicial = masterDB
-                .filter(a => a.sucursal === sucursal)
-                .map(a => ({ id: a.id, desc: a.desc, status: 'missing', isExtra: false }));
-            
-            sessions.push({
-                id: Date.now() + Math.floor(Math.random()*100),
-                sucursal: sucursal,
-                estado: estado,
-                fecha: new Date().toLocaleDateString(),
-                inventory: inventarioInicial
+        // --- 5. LOGICA VISTA 1: INICIO ---
+        function actualizarMetricasInicio() {
+            document.getElementById('dash-total').innerText = masterDB.length;
+            document.getElementById('dash-operativos').innerText = masterDB.filter(a => a.status === 'OPERATIVO').length;
+            document.getElementById('dash-mantenimiento').innerText = masterDB.filter(a => a.status === 'MANTENIMIENTO').length;
+        }
+
+        // --- 6. LOGICA VISTA 2: LISTA DE ACTIVOS (Diseño Source 6) ---
+        function renderListaActivos() {
+            const container = document.getElementById('lista-activos-container');
+            const term = document.getElementById('search-input').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtrados = masterDB.filter(a => 
+                a.name.toLowerCase().includes(term) || 
+                a.id.toLowerCase().includes(term) || 
+                a.sucursal.toLowerCase().includes(term)
+            );
+
+            filtrados.forEach(asset => {
+                const badgeColor = asset.status === 'OPERATIVO' ? 'bg-tertiary-container/10 text-on-tertiary-container' : 'bg-error-container text-on-error-container';
+                const accentColor = asset.status === 'OPERATIVO' ? 'bg-tertiary-container' : 'bg-error-container';
+                
+                container.insertAdjacentHTML('beforeend', `
+                    <article onclick="abrirDetalle('${asset.id}')" class="cursor-pointer bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col gap-4 relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-full h-1 ${accentColor}"></div>
+                        <div class="flex gap-4 items-start">
+                            <div class="w-16 h-16 rounded-lg bg-surface-container-low border border-outline-variant flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                ${asset.img ? `<img src="${asset.img}" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-outline text-3xl">${asset.icon}</span>`}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-body-bold text-on-surface truncate">${asset.name}</h3>
+                                <p class="font-code-id text-on-surface-variant mt-1">ID: ${asset.id}</p>
+                                <div class="mt-2 flex items-center">
+                                    <span class="inline-flex px-2 py-0.5 rounded ${badgeColor} font-micro-tag uppercase">${asset.status}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-on-surface-variant mt-auto pt-4 border-t border-surface-variant">
+                            <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">location_on</span><span class="font-label-sm truncate max-w-[120px]">${asset.sucursal}</span></div>
+                            <div class="flex items-center gap-1.5"><span class="font-label-sm">${asset.category}</span></div>
+                        </div>
+                    </article>
+                `);
             });
         }
 
+        // --- 7. LOGICA VISTA 3: DETALLE DE ACTIVO (Diseño Source 5) ---
+        function abrirDetalle(id) {
+            const asset = masterDB.find(a => a.id === id);
+            if(!asset) return;
+
+            document.getElementById('det-img').src = asset.img || 'https://via.placeholder.com/600x400?text=Sin+Imagen';
+            document.getElementById('det-name').innerText = asset.name;
+            document.getElementById('det-id').innerText = asset.id;
+            document.getElementById('det-category').innerText = asset.category;
+            document.getElementById('det-sucursal').innerText = asset.sucursal;
+            document.getElementById('det-date').innerText = asset.date || 'Desconocida';
+            document.getElementById('det-location-main').innerText = asset.sucursal;
+            document.getElementById('det-location-sub').innerText = asset.location || 'Área General';
+            
+            const badge = document.getElementById('det-status-badge');
+            badge.innerText = asset.status;
+            badge.className = `absolute top-sm right-sm font-micro-tag px-2 py-1 rounded ${asset.status === 'OPERATIVO' ? 'bg-tertiary-container text-on-tertiary-container' : 'bg-error-container text-on-error-container'}`;
+
+            cambiarVista('vista-detalle');
+        }
+
+        // --- 8. LOGICA VISTA 4: ESCÁNER Y GESTOR (Diseño Source 4 + Gestor) ---
+        function crearSesionFalsa(sucursal) {
+            let inv = masterDB.filter(a => a.sucursal === sucursal).map(a => ({ id: a.id, name: a.name, status: 'missing', isExtra: false }));
+            sessions.push({ id: Date.now(), sucursal: sucursal, estado: 'progreso', fecha: new Date().toLocaleDateString(), inventory: inv });
+        }
+
         function iniciarNuevoLevantamiento() {
-            let sucursal = prompt("Ingresa la Sucursal para este nuevo inventario:\n(Ej: Tijuana Centro, Tijuana Norte)");
-            if(sucursal && sucursal.trim() !== "") {
-                crearSesionFalsa(sucursal.trim());
-                renderizarSesiones();
-            }
+            let suc = prompt("Ingresa la Sucursal para este inventario:");
+            if(suc && suc.trim() !== "") { crearSesionFalsa(suc.trim()); renderizarSesiones(); }
         }
 
         function renderizarSesiones() {
             const container = document.getElementById('sessions-container');
             container.innerHTML = '';
-            
             sessions.forEach(session => {
                 const total = session.inventory.length;
-                const encontrados = session.inventory.filter(i => i.status === 'found').length;
+                const enc = session.inventory.filter(i => i.status === 'found').length;
                 const isPaused = session.estado === 'pausado';
                 
-                const btnClass = isPaused ? 'bg-surface-container-high text-on-surface hover:bg-outline-variant' : 'bg-primary text-white hover:bg-primary-container';
-                const btnText = isPaused ? 'REANUDAR' : 'CONTINUAR';
-                const icon = isPaused ? 'pause_circle' : 'play_circle';
-
                 container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-surface border border-outline-variant rounded-xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="bg-surface border border-outline-variant rounded-xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
                         <div>
                             <div class="flex items-center gap-3 mb-1">
-                                <h3 class="font-bold text-lg text-primary">${session.sucursal}</h3>
-                                ${isPaused ? '<span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant rounded text-xs font-bold">PAUSADO</span>' : '<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded text-xs font-bold">ACTIVO</span>'}
+                                <h3 class="font-headline-md text-primary">${session.sucursal}</h3>
+                                ${isPaused ? '<span class="px-2 py-0.5 bg-surface-variant text-on-surface-variant rounded font-micro-tag">PAUSADO</span>' : '<span class="px-2 py-0.5 bg-[#eab308]/20 text-[#ca8a04] rounded font-micro-tag">ACTIVO</span>'}
                             </div>
-                            <p class="text-sm text-on-surface-variant">Iniciado: ${session.fecha} | Progreso: ${encontrados}/${total} activos</p>
+                            <p class="font-body-base text-on-surface-variant">Iniciado: ${session.fecha} | Progreso: ${enc}/${total}</p>
                         </div>
-                        <button onclick="abrirSesion(${session.id})" class="w-full md:w-auto px-5 py-2.5 rounded-lg font-bold text-sm ${btnClass} transition-colors flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">${icon}</span> ${btnText}
+                        <button onclick="abrirSesion(${session.id})" class="px-5 py-2.5 rounded-lg font-body-bold transition-colors ${isPaused ? 'bg-surface-container-highest text-on-surface' : 'bg-primary text-white'}">
+                            ${isPaused ? 'REANUDAR' : 'CONTINUAR'}
                         </button>
                     </div>
                 `);
             });
         }
 
-        // --- 5. OPERACIÓN EN SESIÓN ACTIVA ---
         function abrirSesion(id) {
             currentSessionId = id;
             const session = sessions.find(s => s.id === id);
             session.estado = 'progreso';
-            
             document.getElementById('current-store-name').innerText = session.sucursal;
-            renderListaActiva();
+            renderListaAuditoria();
             cambiarSubVista('sub-escaneo-activo');
         }
 
         function volverAGestor() {
             stopScanner();
+            if(currentSessionId) sessions.find(s => s.id === currentSessionId).estado = 'pausado';
             currentSessionId = null;
             renderizarSesiones();
             cambiarSubVista('sub-gestor');
         }
 
-        function pausarLevantamiento() {
-            sessions.find(s => s.id === currentSessionId).estado = 'pausado';
-            volverAGestor();
-        }
-
         function finalizarLevantamiento() {
-            if(confirm("¿Estás seguro de finalizar este levantamiento?")) {
+            if(confirm("¿Finalizar este levantamiento y guardar datos?")) {
                 sessions.find(s => s.id === currentSessionId).estado = 'finalizado';
-                alert("Inventario guardado y sincronizado exitosamente.");
+                alert("Inventario guardado.");
                 volverAGestor();
             }
         }
 
-        function renderListaActiva() {
+        function renderListaAuditoria() {
             const session = sessions.find(s => s.id === currentSessionId);
             const container = document.getElementById('asset-status-list');
             container.innerHTML = '';
-            
             let evals = 0;
-            let sorted = [...session.inventory].sort((a,b) => (a.status === 'found' ? -1 : 1));
 
+            let sorted = [...session.inventory].sort((a,b) => (a.status === 'found' ? -1 : 1));
             sorted.forEach(item => {
                 const found = item.status === 'found';
                 if(found) evals++;
-
-                let bgClass = found ? 'bg-surface-container-low border-tertiary-fixed-dim' : 'bg-error-container/20 border-error-container';
-                let tag = item.isExtra ? '<span class="ml-2 px-2 py-0.5 bg-primary-fixed-dim text-on-primary-fixed rounded text-[10px] font-bold">EXTRA / ALTA</span>' : '';
-                let icon = found ? '<span class="material-symbols-outlined text-tertiary-fixed-dim">check_circle</span>' : '<span class="material-symbols-outlined text-error">cancel</span>';
+                let bgClass = found ? 'bg-surface border-l-[#166534]' : 'bg-error-container border-l-error';
+                let tag = item.isExtra ? '<span class="ml-2 px-2 py-0.5 bg-primary-fixed-dim text-on-primary-fixed rounded font-micro-tag">EXTRA</span>' : '';
+                let icon = found ? '<span class="material-symbols-outlined text-[#166534]">check_circle</span>' : '<span class="material-symbols-outlined text-error">cancel</span>';
 
                 container.insertAdjacentHTML('beforeend', `
-                    <div class="${bgClass} border-l-4 rounded-r-lg p-3 flex gap-3 text-sm shadow-sm transition-all mb-2">
+                    <div class="${bgClass} border-l-4 rounded-r-lg p-3 flex gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.05)] mb-2 border-y border-r border-outline-variant">
                         <div class="mt-0.5">${icon}</div>
                         <div>
-                            <p class="font-bold text-on-surface">${item.id} ${tag}</p>
-                            <p class="text-on-surface-variant text-xs mt-0.5">${item.desc}</p>
+                            <p class="font-body-bold text-on-surface font-code-id">${item.id} ${tag}</p>
+                            <p class="text-on-surface-variant text-xs mt-0.5 font-body-base truncate max-w-[200px]">${item.name}</p>
                         </div>
                     </div>
                 `);
             });
-
-            document.getElementById('metric-progreso').innerText = `${evals} / ${session.inventory.length}`;
+            document.getElementById('metric-progreso').innerText = `${evals}/${session.inventory.length}`;
         }
 
-        // --- 6. LÓGICA DE ESCANEO / BÚSQUEDA ---
         function searchManual() {
             const code = document.getElementById('asset-code-input').value.trim();
             if(code) processScan(code);
@@ -545,92 +637,60 @@
             const session = sessions.find(s => s.id === currentSessionId);
             
             // 1. Está en la sesión
-            let foundInSession = session.inventory.find(i => i.id === code);
-            if(foundInSession) {
-                foundInSession.status = 'found';
-                renderListaActiva();
+            let inSession = session.inventory.find(i => i.id === code);
+            if(inSession) {
+                inSession.status = 'found';
+                renderListaAuditoria();
                 document.getElementById('asset-code-input').value = '';
-                if(html5QrcodeScanner) stopScanner();
+                stopScanner();
                 return;
             }
 
-            // 2. Es de otra tienda (DB Maestra)
-            let foundInMaster = masterDB.find(i => i.id === code);
-            if(foundInMaster) {
-                pendingTransferAsset = foundInMaster;
-                document.getElementById('transfer-id').innerText = foundInMaster.id;
-                document.getElementById('transfer-store').innerText = foundInMaster.sucursal;
-                document.getElementById('transfer-desc').innerText = foundInMaster.desc;
+            // 2. Es de otra tienda
+            let inMaster = masterDB.find(i => i.id === code);
+            if(inMaster) {
+                pendingTransferAsset = inMaster;
+                document.getElementById('transfer-id').innerText = inMaster.id;
+                document.getElementById('transfer-store').innerText = inMaster.sucursal;
+                document.getElementById('transfer-desc').innerText = inMaster.name;
                 document.getElementById('modal-transfer').classList.remove('hidden');
-                if(html5QrcodeScanner) stopScanner();
+                stopScanner();
                 return;
             }
 
-            // 3. Activo Nuevo
+            // 3. Nuevo
             pendingNewId = code;
             document.getElementById('new-id').innerText = code;
             document.getElementById('new-desc').value = '';
             document.getElementById('modal-new').classList.remove('hidden');
-            if(html5QrcodeScanner) stopScanner();
+            stopScanner();
         }
 
-        // --- MODALES (Transferencia y Altas) ---
-        function cerrarModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
+        function cerrarModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
         function confirmarTransferencia() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            session.inventory.push({ id: pendingTransferAsset.id, desc: pendingTransferAsset.desc, status: 'found', isExtra: true });
-            cerrarModal('modal-transfer');
-            renderListaActiva();
-            document.getElementById('asset-code-input').value = '';
+            sessions.find(s => s.id === currentSessionId).inventory.push({ id: pendingTransferAsset.id, name: pendingTransferAsset.name, status: 'found', isExtra: true });
+            cerrarModal('modal-transfer'); renderListaAuditoria(); document.getElementById('asset-code-input').value = '';
         }
 
         function confirmarAlta() {
             const desc = document.getElementById('new-desc').value.trim();
-            if(!desc) { alert("Ingresa una descripción."); return; }
-            
+            if(!desc) return alert("Ingresa una descripción.");
             const session = sessions.find(s => s.id === currentSessionId);
-            session.inventory.push({ id: pendingNewId, desc: desc, status: 'found', isExtra: true });
-            masterDB.push({ id: pendingNewId, desc: desc, sucursal: session.sucursal });
+            session.inventory.push({ id: pendingNewId, name: desc, status: 'found', isExtra: true });
+            masterDB.push({ id: pendingNewId, name: desc, sucursal: session.sucursal, category: 'N/A', status: 'OPERATIVO', icon: 'category' });
             
-            cerrarModal('modal-new');
-            renderListaActiva();
-            renderTablaConsulta();
-            document.getElementById('metric-total-db').innerText = masterDB.length;
-            document.getElementById('asset-code-input').value = '';
+            cerrarModal('modal-new'); renderListaAuditoria(); renderListaActivos(); actualizarMetricasInicio(); document.getElementById('asset-code-input').value = '';
         }
 
-        // --- 7. CONSULTAS DB ---
-        function renderTablaConsulta() {
-            const tbody = document.getElementById('tabla-consultas');
-            tbody.innerHTML = '';
-            masterDB.forEach(item => {
-                tbody.insertAdjacentHTML('beforeend', `
-                    <tr class="search-row hover:bg-surface-container-low transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-primary id-cell">${item.id}</td>
-                        <td class="px-6 py-4 text-sm text-on-surface-variant desc-cell">${item.desc}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-on-surface-variant suc-cell">
-                            <span class="bg-surface-container-high px-2 py-1 rounded font-medium">${item.sucursal}</span>
-                        </td>
-                    </tr>
-                `);
-            });
-        }
-
-        function filtrarTabla() {
-            const term = document.getElementById('search-db').value.toLowerCase();
-            document.querySelectorAll('.search-row').forEach(row => {
-                const data = row.innerText.toLowerCase();
-                row.style.display = data.includes(term) ? '' : 'none';
-            });
-        }
-
-        // --- 8. QR SCANNER ---
+        // --- 9. CONTROL DE CÁMARA (Lector QR) ---
         function startScanner() {
-            const container = document.getElementById('reader-container');
-            container.classList.remove('hidden');
+            const container = document.getElementById('qr-reader-container');
+            container.classList.add('active');
+            document.getElementById('btn-start-scan').classList.add('hidden');
+            document.getElementById('btn-stop-scan').classList.remove('hidden');
+            document.getElementById('btn-stop-scan').classList.add('flex');
+
             if(html5QrcodeScanner) return; 
             
             html5QrcodeScanner = new Html5Qrcode("reader");
@@ -640,22 +700,25 @@
                 (decodedText) => { processScan(decodedText); },
                 () => {} 
             ).catch(err => {
-                alert("Error de cámara. Verifica los permisos.");
-                container.classList.add('hidden');
-                html5QrcodeScanner = null;
+                alert("Error: Asegúrate de otorgar permisos de cámara en tu navegador.");
+                stopScanner();
             });
         }
 
         function stopScanner() {
-            const container = document.getElementById('reader-container');
-            if(html5QrcodeScanner) {
+            const container = document.getElementById('qr-reader-container');
+            if(container) container.classList.remove('active');
+            
+            const btnStart = document.getElementById('btn-start-scan');
+            const btnStop = document.getElementById('btn-stop-scan');
+            if(btnStart) { btnStart.classList.remove('hidden'); btnStart.classList.add('flex'); }
+            if(btnStop) { btnStop.classList.add('hidden'); btnStop.classList.remove('flex'); }
+
+            if(html5QrcodeScanner && html5QrcodeScanner.getState() !== 1) { 
                 html5QrcodeScanner.stop().then(() => {
                     html5QrcodeScanner.clear();
                     html5QrcodeScanner = null;
-                    container.classList.add('hidden');
-                });
-            } else {
-                container.classList.add('hidden');
+                }).catch(() => { html5QrcodeScanner = null; });
             }
         }
     </script>
