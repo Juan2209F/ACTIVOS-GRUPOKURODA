@@ -11,9 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="Kuroda Activos">
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Activos%20Kuroda%22%2C%22short_name%22%3A%22Kuroda%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%23001e57%22%7D">
     
-    <!-- Estilos: hoja compilada localmente (sin CDN de Tailwind) -->
-    
-    <!-- Librerías Funcionales (Escáner QR, Excel, PDF) -->
+    <!-- Librerías Funcionales -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -24,286 +22,342 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
     <style>
-        /* Reset base (reemplaza el preflight de Tailwind) */
+        /* ===== RESET BASE ===== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; }
         button, input, select { font: inherit; color: inherit; border: none; background: none; padding: 0; }
         button { cursor: pointer; }
         img { display: block; max-width: 100%; }
         a { color: inherit; text-decoration: none; }
 
-        body { min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
+        body { 
+            min-height: 100dvh; 
+            -webkit-tap-highlight-color: transparent;
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== UTILIDADES ===== */
         .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 80px); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Sistema SPA (Single Page Application) */
+        /* ===== SPA (Single Page Application) ===== */
         .view-content, .sub-view { display: none; animation: fadeIn 0.3s ease; }
         .view-content.active, .sub-view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Escáner */
+        /* ===== ESCÁNER QR ===== */
         .scanner-line { animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        #qr-reader-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #000; display: none; }
+        #qr-reader-container { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 5; background: #000; display: none; 
+        }
         #qr-reader-container.active { display: block; }
         #reader { width: 100%; height: 100%; }
         #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
 
-        /* Menú Desktop Hover / Active State (Imagen 1) */
+        /* ===== MENÚ DESKTOP ===== */
         .nav-btn.active { background-color: #e0e7ff; color: #001e57; font-weight: 700; }
         .nav-btn.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
 
-        /* Ajustes Responsivos */
-        @media (min-width: 768px) { 
+        /* ===== MENÚ MÓVIL ===== */
+        .nav-btn-mob { color: #475569; transition: all 0.2s ease; }
+        .nav-btn-mob.active { background-color: #e0e7ff; color: #4f46e5; border-radius: 12px; }
+        .nav-btn-mob.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+        /* ===== RESPONSIVE ===== */
+        /* Desktop (> 768px) */
+        @media (min-width: 769px) { 
             main.with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); }
             header.with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); }
             .pb-safe { padding-bottom: 32px; }
+            .desktop-menu { display: flex; }
+            .mobile-menu { display: none; }
+            .mobile-header-brand { display: none; }
         }
 
-        /* Utilidades equivalentes a Tailwind (generadas localmente, sin CDN) */
-.absolute{position:absolute}
-.active\:scale-95:active{transform:scale(0.95)}
-.antialiased{-webkit-font-smoothing:antialiased}
-.aspect-square{aspect-ratio:1 / 1}
-.backdrop-blur-sm{backdrop-filter:blur(4px)}
-.bg-background{background-color:#f8fafc}
-.bg-black{background-color:#000000}
-.bg-black\/60{background-color:rgba(0,0,0,0.6)}
-.bg-blue-100{background-color:#dbeafe}
-.bg-error{background-color:#dc2626}
-.bg-error-container{background-color:#fee2e2}
-.bg-gray-900{background-color:#111827}
-.bg-green-400{background-color:#4ade80}
-.bg-green-600{background-color:#16a34a}
-.bg-primary{background-color:#001e57}
-.bg-primary-container{background-color:#e0e7ff}
-.bg-success-container{background-color:#dcfce7}
-.bg-surface{background-color:#ffffff}
-.bg-surface-variant{background-color:#f1f5f9}
-.bg-surface-variant\/50{background-color:rgba(241,245,249,0.5)}
-.bg-surface\/50{background-color:rgba(255,255,255,0.5)}
-.bg-warning{background-color:#eab308}
-.bg-white\/70{background-color:rgba(255,255,255,0.7)}
-.block{display:block}
-.border{border-width:1px;border-style:solid}
-.border-2{border-width:2px;border-style:solid}
-.border-b{border-bottom-width:1px;border-bottom-style:solid}
-.border-b-4{border-bottom-width:4px;border-bottom-style:solid}
-.border-blue-200\/60{border-color:rgba(191,219,254,0.6)}
-.border-current{border-color:currentColor}
-.border-dashed{border-style:dashed}
-.border-error{border-color:#dc2626}
-.border-error\/20{border-color:rgba(220,38,38,0.2)}
-.border-l-4{border-left-width:4px;border-left-style:solid}
-.border-outline-variant{border-color:#cbd5e1}
-.border-primary{border-color:#001e57}
-.border-primary-container{border-color:#e0e7ff}
-.border-r{border-right-width:1px;border-right-style:solid}
-.border-r-4{border-right-width:4px;border-right-style:solid}
-.border-success\/20{border-color:rgba(22,163,74,0.2)}
-.border-surface-variant{border-color:#f1f5f9}
-.border-t{border-top-width:1px;border-top-style:solid}
-.border-t-4{border-top-width:4px;border-top-style:solid}
-.border-t-error{border-top-color:#dc2626}
-.border-t-primary{border-top-color:#001e57}
-.border-t-success{border-top-color:#16a34a}
-.border-warning{border-color:#eab308}
-.border-white{border-color:#ffffff}
-.border-y{border-top-width:1px;border-bottom-width:1px;border-style:solid}
-.bottom-0{bottom:0}
-.bottom-6{bottom:1.5rem}
-.col-span-full{grid-column:1 / -1}
-.cursor-pointer{cursor:pointer}
-.fixed{position:fixed}
-.flex{display:flex}
-.flex-1{flex:1 1 0%}
-.flex-col{flex-direction:column}
-.flex-shrink-0{flex-shrink:0}
-.flex-wrap{flex-wrap:wrap}
-.focus\:border-primary:focus{border-color:#001e57}
-.focus\:outline-none:focus{outline:none}
-.font-bold{font-weight:700}
-.font-mono{font-family:'JetBrains Mono',monospace}
-.font-sans{font-family:'Inter',sans-serif}
-.font-semibold{font-weight:600}
-.gap-1{gap:0.25rem}
-.gap-2{gap:0.5rem}
-.gap-3{gap:0.75rem}
-.gap-4{gap:1.0rem}
-.gap-6{gap:1.5rem}
-.gap-8{gap:2.0rem}
-.grid{display:grid}
-.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}
-.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}
-.group:hover .group-hover\:scale-110{transform:scale(1.1)}
-.h-0\.5{height:0.125rem}
-.h-10{height:2.5rem}
-.h-12{height:3.0rem}
-.h-14{height:3.5rem}
-.h-16{height:4.0rem}
-.h-2{height:0.5rem}
-.h-20{height:5.0rem}
-.h-32{height:8.0rem}
-.h-48{height:12.0rem}
-.h-8{height:2.0rem}
-.h-\[500px\]{height:500px}
-.h-fit{height:fit-content}
-.h-full{height:100%}
-.hidden{display:none}
-.hover\:bg-error-container:hover{background-color:#fee2e2}
-.hover\:bg-green-700:hover{background-color:#15803d}
-.hover\:bg-primary-container:hover{background-color:#e0e7ff}
-.hover\:bg-red-700:hover{background-color:#b91c1c}
-.hover\:bg-surface-variant:hover{background-color:#f1f5f9}
-.hover\:text-primary:hover{color:#001e57}
-.hover\:underline:hover{text-decoration:underline}
-.inline-flex{display:inline-flex}
-.inset-0{top:0;right:0;bottom:0;left:0}
-.inset-y-0{top:0;bottom:0}
-.items-center{align-items:center}
-.items-start{align-items:flex-start}
-.justify-around{justify-content:space-around}
-.justify-between{justify-content:space-between}
-.justify-center{justify-content:center}
-.justify-end{justify-content:flex-end}
-.left-0{left:0}
-.max-h-\[90vh\]{max-height:90vh}
-.max-w-\[1152px\]{max-width:1152px}
-.max-w-md{max-width:28rem}
-.max-w-sm{max-width:24rem}
-.mb-1{margin-bottom:0.25rem}
-.mb-2{margin-bottom:0.5rem}
-.mb-3{margin-bottom:0.75rem}
-.mb-4{margin-bottom:1.0rem}
-.mb-8{margin-bottom:2.0rem}
-.min-w-0{min-width:0}
-.min-w-\[100px\]{min-width:100px}
-.mt-1{margin-top:0.25rem}
-.mt-2{margin-top:0.5rem}
-.mt-6{margin-top:1.5rem}
-.mx-auto{margin-left:auto;margin-right:auto}
-.object-cover{object-fit:cover}
-.outline-none{outline:none}
-.overflow-hidden{overflow:hidden}
-.overflow-x-auto{overflow-x:auto}
-.overflow-y-auto{overflow-y:auto}
-.p-0\.5{padding:0.125rem}
-.p-1{padding:0.25rem}
-.p-2{padding:0.5rem}
-.p-2\.5{padding:0.625rem}
-.p-3{padding:0.75rem}
-.p-4{padding:1.0rem}
-.p-5{padding:1.25rem}
-.p-6{padding:1.5rem}
-.pb-2{padding-bottom:0.5rem}
-.pb-6{padding-bottom:1.5rem}
-.pl-10{padding-left:2.5rem}
-.pl-3{padding-left:0.75rem}
-.pointer-events-none{pointer-events:none}
-.pr-2{padding-right:0.5rem}
-.pr-4{padding-right:1.0rem}
-.pt-1{padding-top:0.25rem}
-.pt-2{padding-top:0.5rem}
-.pt-5{padding-top:1.25rem}
-.pt-6{padding-top:1.5rem}
-.px-2{padding-left:0.5rem;padding-right:0.5rem}
-.px-3{padding-left:0.75rem;padding-right:0.75rem}
-.px-4{padding-left:1.0rem;padding-right:1.0rem}
-.px-5{padding-left:1.25rem;padding-right:1.25rem}
-.px-6{padding-left:1.5rem;padding-right:1.5rem}
-.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}
-.py-1{padding-top:0.25rem;padding-bottom:0.25rem}
-.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}
-.py-10{padding-top:2.5rem;padding-bottom:2.5rem}
-.py-2{padding-top:0.5rem;padding-bottom:0.5rem}
-.py-3{padding-top:0.75rem;padding-bottom:0.75rem}
-.py-6{padding-top:1.5rem;padding-bottom:1.5rem}
-.relative{position:relative}
-.right-0{right:0}
-.rounded{border-radius:0.25rem}
-.rounded-2xl{border-radius:1rem}
-.rounded-b-xl{border-bottom-left-radius:0.75rem;border-bottom-right-radius:0.75rem}
-.rounded-bl-lg{border-bottom-left-radius:0.5rem}
-.rounded-br-lg{border-bottom-right-radius:0.5rem}
-.rounded-full{border-radius:9999px}
-.rounded-lg{border-radius:0.5rem}
-.rounded-md{border-radius:0.375rem}
-.rounded-r-lg{border-top-right-radius:0.5rem;border-bottom-right-radius:0.5rem}
-.rounded-t-xl{border-top-left-radius:0.75rem;border-top-right-radius:0.75rem}
-.rounded-tl-lg{border-top-left-radius:0.5rem}
-.rounded-tr-lg{border-top-right-radius:0.5rem}
-.rounded-xl{border-radius:0.75rem}
-.shadow-\[0_-4px_6px_-1px_rgba\(0\,0\,0\,0\.05\)\]{box-shadow:0 -4px 6px -1px rgba(0,0,0,0.05)}
-.shadow-\[0_0_8px_rgba\(74\,222\,128\,0\.8\)\]{box-shadow:0 0 8px rgba(74,222,128,0.8)}
-.shadow-lg{box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1)}
-.shadow-md{box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1)}
-.shadow-sm{box-shadow:0 1px 2px 0 rgba(0,0,0,0.05)}
-.shadow-xl{box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1)}
-.snap-start{scroll-snap-align:start}
-.snap-x{scroll-snap-type:x mandatory}
-.space-y-2{--space-y:0.5rem}
-.sticky{position:sticky}
-.text-2xl{font-size:1.5rem}
-.text-3xl{font-size:1.875rem}
-.text-4xl{font-size:2.25rem}
-.text-6xl{font-size:3.75rem}
-.text-\[10px\]{font-size:10px}
-.text-\[11px\]{font-size:11px}
-.text-\[14px\]{font-size:14px}
-.text-\[16px\]{font-size:16px}
-.text-\[18px\]{font-size:18px}
-.text-\[26px\]{font-size:26px}
-.text-\[9px\]{font-size:9px}
-.text-black{color:#000}
-.text-blue-800{color:#1e40af}
-.text-center{text-align:center}
-.text-error{color:#dc2626}
-.text-left{text-align:left}
-.text-lg{font-size:1.125rem}
-.text-on-surface{color:#0f172a}
-.text-on-surface-variant{color:#475569}
-.text-outline{color:#94a3b8}
-.text-primary{color:#001e57}
-.text-secondary{color:#4059aa}
-.text-sm{font-size:0.875rem}
-.text-success{color:#16a34a}
-.text-warning{color:#eab308}
-.text-white{color:#fff}
-.text-xl{font-size:1.25rem}
-.text-xs{font-size:0.75rem}
-.top-0{top:0}
-.tracking-tight{letter-spacing:-0.025em}
-.transition{transition-property:all;transition-duration:0.15s}
-.transition-all{transition-property:all;transition-duration:0.15s}
-.transition-colors{transition-property:color,background-color,border-color;transition-duration:0.15s}
-.transition-transform{transition-property:transform;transition-duration:0.15s}
-.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.uppercase{text-transform:uppercase}
-.w-10{width:2.5rem}
-.w-12{width:3.0rem}
-.w-14{width:3.5rem}
-.w-16{width:4.0rem}
-.w-48{width:12.0rem}
-.w-64{width:16.0rem}
-.w-8{width:2.0rem}
-.w-full{width:100%}
-.whitespace-nowrap{white-space:nowrap}
-.z-10{z-index:10}
-.z-20{z-index:20}
-.z-30{z-index:30}
-.z-40{z-index:40}
-.z-50{z-index:50}
-.z-\[100\]{z-index:100}
-@media (min-width:1024px){.lg\:flex-row{flex-direction:row}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:h-auto{height:auto}.lg\:w-1\/2{width:50.0%}}
-@media (min-width:768px){.md\:aspect-\[4\/3\]{aspect-ratio:4 / 3}.md\:flex{display:flex}.md\:flex-none{flex:none}.md\:flex-row{flex-direction:row}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:h-64{height:16.0rem}.md\:hidden{display:none}.md\:items-center{align-items:center}.md\:px-8{padding-left:2.0rem;padding-right:2.0rem}.md\:w-64{width:16.0rem}.md\:w-auto{width:auto}}
+        /* Mobile (< 768px) */
+        @media (max-width: 768px) { 
+            .desktop-menu { display: none; }
+            .mobile-menu { display: flex; }
+            .mobile-header-brand { display: flex; }
+            main.with-sidebar { margin-left: 0; width: 100%; }
+            header.with-sidebar { margin-left: 0; width: 100%; }
+            .mobile-full-height { height: calc(100vh - 80px); }
+        }
+
+        /* ===== ESTILOS ADICIONALES ===== */
+        .bg-background { background-color: #f8fafc; }
+        .bg-primary { background-color: #001e57; }
+        .bg-primary-container { background-color: #e0e7ff; }
+        .bg-surface { background-color: #ffffff; }
+        .bg-surface-variant { background-color: #f1f5f9; }
+        .bg-error { background-color: #dc2626; }
+        .bg-error-container { background-color: #fee2e2; }
+        .bg-success-container { background-color: #dcfce7; }
+        .bg-warning { background-color: #eab308; }
+        .bg-green-600 { background-color: #16a34a; }
+        .bg-green-700 { background-color: #15803d; }
+        .bg-gray-900 { background-color: #111827; }
+        .bg-black\/60 { background-color: rgba(0,0,0,0.6); }
+        .bg-white\/70 { background-color: rgba(255,255,255,0.7); }
+        .bg-surface\/50 { background-color: rgba(255,255,255,0.5); }
+        
+        .text-primary { color: #001e57; }
+        .text-on-surface { color: #0f172a; }
+        .text-on-surface-variant { color: #475569; }
+        .text-outline { color: #94a3b8; }
+        .text-error { color: #dc2626; }
+        .text-success { color: #16a34a; }
+        .text-warning { color: #eab308; }
+        .text-white { color: #fff; }
+        .text-black { color: #000; }
+        .text-blue-800 { color: #1e40af; }
+        .text-secondary { color: #4059aa; }
+
+        .border { border: 1px solid; }
+        .border-outline-variant { border-color: #cbd5e1; }
+        .border-primary { border-color: #001e57; }
+        .border-primary-container { border-color: #e0e7ff; }
+        .border-error { border-color: #dc2626; }
+        .border-warning { border-color: #eab308; }
+        .border-success\/20 { border-color: rgba(22,163,74,0.2); }
+        .border-error\/20 { border-color: rgba(220,38,38,0.2); }
+        .border-blue-200\/60 { border-color: rgba(191,219,254,0.6); }
+        .border-dashed { border-style: dashed; }
+        .border-t-4 { border-top-width: 4px; border-top-style: solid; }
+        .border-t-primary { border-top-color: #001e57; }
+        .border-t-success { border-top-color: #16a34a; }
+        .border-t-error { border-top-color: #dc2626; }
+        .border-l-4 { border-left-width: 4px; border-left-style: solid; }
+        .border-l-success { border-left-color: #16a34a; }
+        .border-l-error { border-left-color: #dc2626; }
+        
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); }
+        .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
+        .shadow-\[0_-4px_6px_-1px_rgba\(0\,0\,0\,0\.05\)\] { box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05); }
+        .shadow-\[0_0_8px_rgba\(74\,222\,128\,0\.8\)\] { box-shadow: 0 0 8px rgba(74,222,128,0.8); }
+
+        .rounded { border-radius: 0.25rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-t-xl { border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+        .rounded-b-xl { border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+        .rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
+        .rounded-tl-lg { border-top-left-radius: 0.5rem; }
+        .rounded-tr-lg { border-top-right-radius: 0.5rem; }
+        .rounded-bl-lg { border-bottom-left-radius: 0.5rem; }
+        .rounded-br-lg { border-bottom-right-radius: 0.5rem; }
+
+        .backdrop-blur-sm { backdrop-filter: blur(4px); }
+        .transition { transition: all 0.15s ease; }
+        .transition-colors { transition: color 0.15s, background-color 0.15s, border-color 0.15s; }
+        .transition-transform { transition: transform 0.15s; }
+        .active\:scale-95:active { transform: scale(0.95); }
+        .hover\:scale-110:hover { transform: scale(1.1); }
+        .group-hover\:scale-110:hover { transform: scale(1.1); }
+        .hover\:bg-primary-container:hover { background-color: #e0e7ff; }
+        .hover\:bg-surface-variant:hover { background-color: #f1f5f9; }
+        .hover\:bg-error-container:hover { background-color: #fee2e2; }
+        .hover\:bg-green-700:hover { background-color: #15803d; }
+        .hover\:bg-red-700:hover { background-color: #b91c1c; }
+        .hover\:text-primary:hover { color: #001e57; }
+        .hover\:underline:hover { text-decoration: underline; }
+        .focus\:border-primary:focus { border-color: #001e57; }
+        .focus\:outline-none:focus { outline: none; }
+
+        .snap-x { scroll-snap-type: x mandatory; }
+        .snap-start { scroll-snap-align: start; }
+
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .uppercase { text-transform: uppercase; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .antialiased { -webkit-font-smoothing: antialiased; }
+
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .z-30 { z-index: 30; }
+        .z-40 { z-index: 40; }
+        .z-50 { z-index: 50; }
+        .z-\[100\] { z-index: 100; }
+
+        .fixed { position: fixed; }
+        .absolute { position: absolute; }
+        .relative { position: relative; }
+        .sticky { position: sticky; }
+        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+        .inset-y-0 { top: 0; bottom: 0; }
+        .top-0 { top: 0; }
+        .bottom-0 { bottom: 0; }
+        .bottom-6 { bottom: 1.5rem; }
+        .left-0 { left: 0; }
+        .right-0 { right: 0; }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+        .justify-around { justify-content: space-around; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-8 { gap: 2rem; }
+
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .col-span-full { grid-column: 1 / -1; }
+
+        .w-full { width: 100%; }
+        .w-8 { width: 2rem; }
+        .w-10 { width: 2.5rem; }
+        .w-12 { width: 3rem; }
+        .w-14 { width: 3.5rem; }
+        .w-16 { width: 4rem; }
+        .w-48 { width: 12rem; }
+        .w-64 { width: 16rem; }
+        .min-w-0 { min-width: 0; }
+        .min-w-\[100px\] { min-width: 100px; }
+        .max-w-sm { max-width: 24rem; }
+        .max-w-md { max-width: 28rem; }
+        .max-w-\[1152px\] { max-width: 1152px; }
+        .max-h-\[90vh\] { max-height: 90vh; }
+
+        .h-full { height: 100%; }
+        .h-2 { height: 0.5rem; }
+        .h-0\.5 { height: 0.125rem; }
+        .h-8 { height: 2rem; }
+        .h-10 { height: 2.5rem; }
+        .h-12 { height: 3rem; }
+        .h-14 { height: 3.5rem; }
+        .h-16 { height: 4rem; }
+        .h-20 { height: 5rem; }
+        .h-32 { height: 8rem; }
+        .h-48 { height: 12rem; }
+        .h-\[500px\] { height: 500px; }
+        .h-fit { height: fit-content; }
+        .aspect-square { aspect-ratio: 1 / 1; }
+
+        .m-0 { margin: 0; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+
+        .p-1 { padding: 0.25rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-2\.5 { padding: 0.625rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+        .pt-1 { padding-top: 0.25rem; }
+        .pt-2 { padding-top: 0.5rem; }
+        .pt-5 { padding-top: 1.25rem; }
+        .pt-6 { padding-top: 1.5rem; }
+        .pb-2 { padding-bottom: 0.5rem; }
+        .pb-6 { padding-bottom: 1.5rem; }
+        .pl-3 { padding-left: 0.75rem; }
+        .pl-10 { padding-left: 2.5rem; }
+        .pr-2 { padding-right: 0.5rem; }
+        .pr-4 { padding-right: 1rem; }
+
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-6xl { font-size: 3.75rem; }
+        .text-\[9px\] { font-size: 9px; }
+        .text-\[10px\] { font-size: 10px; }
+        .text-\[11px\] { font-size: 11px; }
+        .text-\[14px\] { font-size: 14px; }
+        .text-\[16px\] { font-size: 16px; }
+        .text-\[18px\] { font-size: 18px; }
+        .text-\[26px\] { font-size: 26px; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .whitespace-nowrap { white-space: nowrap; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-x-auto { overflow-x: auto; }
+        .overflow-y-auto { overflow-y: auto; }
+        .object-cover { object-fit: cover; }
+        .pointer-events-none { pointer-events: none; }
+        .cursor-pointer { cursor: pointer; }
+        .block { display: block; }
+        .hidden { display: none; }
+        .inline-flex { display: inline-flex; }
+
+        /* ===== RESPONSIVE GRID ===== */
+        @media (min-width: 640px) {
+            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 768px) {
+            .md\:flex { display: flex; }
+            .md\:flex-row { flex-direction: row; }
+            .md\:items-center { align-items: center; }
+            .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .md\:w-auto { width: auto; }
+            .md\:w-64 { width: 16rem; }
+            .md\:h-64 { height: 16rem; }
+            .md\:aspect-\[4\/3\] { aspect-ratio: 4 / 3; }
+            .md\:flex-none { flex: none; }
+            .md\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+            .md\:hidden { display: none; }
+        }
+        @media (min-width: 1024px) {
+            .lg\:flex-row { flex-direction: row; }
+            .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .lg\:w-1\/2 { width: 50%; }
+            .lg\:h-auto { height: auto; }
+        }
     </style>
 </head>
-<body class="bg-background text-on-surface font-sans h-full flex flex-col antialiased">
+<body>
 
-    <!-- HEADER FLOTANTE -->
+    <!-- ===== HEADER ===== -->
     <header class="bg-surface border-b border-outline-variant shadow-sm w-full sticky top-0 z-40 with-sidebar h-16 flex items-center">
         <div class="flex justify-between items-center w-full px-4 md:px-8 mx-auto max-w-[1152px]">
-            <div class="flex items-center gap-2 md:hidden">
+            <!-- Mobile Brand -->
+            <div class="mobile-header-brand flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-2xl font-bold">inventory_2</span>
             </div>
             <h1 class="text-xl font-bold text-primary tracking-tight">Grupo Kuroda</h1>
@@ -313,8 +367,8 @@
         </div>
     </header>
 
-    <!-- MENU LATERAL (PC) - Diseño Imagen 1 -->
-    <div class="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant z-50 pt-6 px-4 shadow-sm">
+    <!-- ===== MENU LATERAL DESKTOP ===== -->
+    <div class="desktop-menu hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant z-50 pt-6 px-4 shadow-sm">
         <div class="flex items-center gap-3 px-4 mb-8">
             <span class="material-symbols-outlined text-primary text-3xl font-bold">inventory_2</span>
             <span class="text-2xl font-bold text-primary tracking-tight">Activos Kuroda</span>
@@ -335,31 +389,29 @@
         </nav>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL -->
+    <!-- ===== MAIN CONTENT ===== -->
     <main class="flex-1 w-full max-w-[1152px] mx-auto px-4 md:px-8 py-6 pb-safe flex flex-col gap-8 with-sidebar relative">
         
-        <!-- =================== VISTA 1: INICIO (Diseño Imagen 2) =================== -->
+        <!-- ===== VISTA 1: INICIO ===== -->
         <section id="vista-inicio" class="view-content active flex flex-col gap-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Total -->
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex items-center justify-between border-t-4 border-t-primary">
                     <div><p class="text-xs font-bold text-on-surface-variant mb-1">Total Activos</p><p class="text-3xl font-bold text-primary" id="dash-total">0</p></div>
                     <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary"><span class="material-symbols-outlined">dataset</span></div>
                 </div>
-                <!-- Encontrados -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex items-center justify-between border-t-4 border-t-success">
                     <div><p class="text-xs font-bold text-on-surface-variant mb-1">Encontrados</p><p class="text-3xl font-bold text-primary" id="dash-encontrados">0</p></div>
                     <div class="w-10 h-10 rounded-full bg-success-container flex items-center justify-center text-success border border-success/20"><span class="material-symbols-outlined">check_circle</span></div>
                 </div>
-                <!-- No Encontrados -->
                 <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex items-center justify-between border-t-4 border-t-error">
                     <div><p class="text-xs font-bold text-on-surface-variant mb-1">No Encontrados</p><p class="text-3xl font-bold text-primary" id="dash-no-encontrados">0</p></div>
                     <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error border border-error/20"><span class="material-symbols-outlined">cancel</span></div>
                 </div>
             </div>
 
-            <!-- Accesos Rápidos: Base de Datos / Informes -->
+            <!-- Quick Access -->
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="cambiarVista('vista-activos')" class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex items-center gap-3 hover:bg-surface-variant transition text-left">
                     <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined">database</span></div>
@@ -371,7 +423,7 @@
                 </button>
             </div>
 
-            <!-- Categorías -->
+            <!-- Categories -->
             <div>
                 <h2 class="text-sm font-bold text-primary mb-3">Categorías</h2>
                 <div class="flex overflow-x-auto gap-4 pb-2 scrollbar-hide snap-x">
@@ -394,52 +446,47 @@
                 </div>
             </div>
             
-            <!-- Activos Recientes -->
+            <!-- Recent Assets -->
             <div class="flex flex-col gap-4 border border-blue-200/60 rounded-2xl p-4 bg-surface/50 border-dashed">
                 <div class="flex justify-between items-center mb-1">
                     <h2 class="text-sm font-bold text-primary">Activos Recientes</h2>
                     <button onclick="cambiarVista('vista-activos')" class="text-xs font-semibold text-secondary hover:underline">Ver Todos</button>
                 </div>
-                <div id="home-recent-list" class="flex flex-col gap-3">
-                    <!-- Inyectado por JS -->
-                </div>
+                <div id="home-recent-list" class="flex flex-col gap-3"></div>
             </div>
         </section>
 
-        <!-- =================== VISTA 2: PADRÓN DE ACTIVOS (Carga y Edición) =================== -->
+        <!-- ===== VISTA 2: ACTIVOS ===== -->
         <section id="vista-activos" class="view-content flex flex-col gap-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h2 class="text-xl font-bold text-primary">Base de Datos de Activos</h2>
                 <div class="flex gap-2 w-full md:w-auto flex-wrap">
-                    <!-- Botón Nuevo Activo -->
                     <button onclick="abrirNuevoActivo()" class="flex-1 md:flex-none bg-primary text-white font-bold px-4 py-2 rounded-lg hover:bg-primary-container hover:text-primary transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
                         <span class="material-symbols-outlined text-[18px]">add</span> Nuevo
                     </button>
-                    <!-- Botón Plantilla -->
                     <button onclick="descargarPlantilla()" class="flex-1 md:flex-none bg-surface border border-outline-variant text-on-surface-variant font-bold px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
                         <span class="material-symbols-outlined text-[18px]">description</span> Plantilla
                     </button>
-                    <!-- Botón Importar -->
                     <label class="flex-1 md:flex-none cursor-pointer bg-surface border border-outline-variant text-on-surface-variant font-bold px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
                         <span class="material-symbols-outlined text-[18px]">upload_file</span> Importar
                         <input type="file" id="excel-upload" accept=".xlsx, .xls" class="hidden" onchange="importarExcel(event)">
                     </label>
-                    <!-- Botón Exportar -->
                     <button onclick="exportarExcel()" class="flex-1 md:flex-none bg-green-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
                         <span class="material-symbols-outlined text-[18px]">download</span> Exportar
                     </button>
                 </div>
             </div>
 
-            <!-- Aviso: Centro de carga de activos -->
+            <!-- Info Banner -->
             <div class="bg-primary-container/40 border border-primary-container rounded-xl p-4 flex items-start gap-3">
                 <span class="material-symbols-outlined text-primary">info</span>
                 <div class="text-sm text-on-surface">
                     <p class="font-bold text-primary mb-1">Toda la app se alimenta desde aquí</p>
-                    <p class="text-on-surface-variant">Carga tus activos de forma manual con "Nuevo", o sube un Excel. Descarga la <strong>Plantilla</strong> si quieres el formato ideal, o sube tu archivo tal cual lo tengas (por ejemplo un reporte contable): el sistema te dejará indicar qué columna es cada dato antes de importar, y luego podrás corregir cualquier campo manualmente.</p>
+                    <p class="text-on-surface-variant">Carga tus activos de forma manual con "Nuevo", o sube un Excel. Descarga la <strong>Plantilla</strong> si quieres el formato ideal, o sube tu archivo tal cual lo tengas: el sistema te dejará indicar qué columna es cada dato antes de importar.</p>
                 </div>
             </div>
 
+            <!-- Search -->
             <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-outline">search</span>
@@ -447,6 +494,7 @@
                 <input id="search-input" onkeyup="renderDirectorio()" class="w-full bg-surface border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary shadow-sm" placeholder="Buscar por nombre, ID o sucursal..." type="text">
             </div>
 
+            <!-- Filters -->
             <div class="flex flex-col md:flex-row gap-3">
                 <select id="filtro-tienda-select" onchange="renderDirectorio()" class="w-full md:w-auto bg-surface border border-outline-variant rounded-xl px-4 py-2 text-sm shadow-sm">
                     <option value="">Todas las sucursales</option>
@@ -461,15 +509,14 @@
                 </select>
             </div>
 
-            <div id="lista-directorio" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Inyectado por JS -->
-            </div>
+            <!-- Asset Grid -->
+            <div id="lista-directorio" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- =================== VISTA 3: ESCÁNER / GESTOR =================== -->
+        <!-- ===== VISTA 3: ESCÁNER ===== -->
         <section id="vista-escaneo" class="view-content h-full">
             
-            <!-- SUB-VISTA: GESTOR DE SESIONES -->
+            <!-- Sub: Gestor -->
             <div id="sub-gestor" class="sub-view active flex flex-col gap-6">
                 <div class="flex flex-col md:flex-row justify-between md:items-center bg-surface rounded-xl p-6 shadow-sm border border-outline-variant gap-4">
                     <div>
@@ -480,12 +527,10 @@
                         <span class="material-symbols-outlined">add</span> NUEVO LEVANTAMIENTO
                     </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="sessions-container">
-                    <!-- Inyectado por JS -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="sessions-container"></div>
             </div>
 
-            <!-- SUB-VISTA: ESCÁNER ACTIVO (Cambia de pantalla) -->
+            <!-- Sub: Escáner Activo -->
             <div id="sub-escaneo-activo" class="sub-view flex flex-col lg:flex-row gap-6">
                 
                 <!-- Columna Izquierda: Cámara -->
@@ -498,7 +543,7 @@
                         <span class="text-xs font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full" id="metric-progreso">0/0</span>
                     </div>
 
-                    <!-- Lector QR -->
+                    <!-- QR Reader -->
                     <div class="relative w-full aspect-square md:aspect-[4/3] bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-outline-variant">
                         <div id="qr-reader-container" class="absolute inset-0 z-10 hidden bg-black">
                             <div id="reader" class="w-full h-full"></div>
@@ -522,59 +567,52 @@
                         </div>
                     </div>
 
-                    <!-- Ingreso Manual -->
+                    <!-- Manual Input -->
                     <div class="bg-surface p-4 rounded-xl border border-outline-variant shadow-sm flex gap-2">
                         <input type="text" id="asset-code-input" placeholder="ID del activo..." class="flex-1 border border-outline-variant rounded-lg px-3 py-2 text-sm font-mono focus:border-primary outline-none uppercase">
                         <button onclick="searchManual()" class="bg-primary text-white font-bold px-4 rounded-lg flex items-center gap-1 active:scale-95">Buscar</button>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Lista y Generación PDF -->
+                <!-- Columna Derecha: Lista -->
                 <div class="w-full lg:w-1/2 bg-surface rounded-xl shadow-sm border border-outline-variant flex flex-col h-[500px] lg:h-auto">
                     <div class="p-4 border-b border-outline-variant bg-surface-variant rounded-t-xl flex justify-between items-center">
                         <h3 class="text-sm font-bold text-primary flex items-center gap-2">
                             <span class="material-symbols-outlined">checklist</span> Progreso Actual
                         </h3>
-                        <!-- Boton para finalizar y generar PDF -->
                         <button onclick="finalizarInventario()" class="text-xs font-bold text-white bg-error px-3 py-1.5 rounded-lg shadow-sm hover:bg-red-700 transition flex items-center gap-1">
                             <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> Finalizar
                         </button>
                     </div>
-                    <div id="asset-status-list" class="flex-1 overflow-y-auto p-4 space-y-2 bg-surface rounded-b-xl">
-                        <!-- JS Inyecta lista de activos -->
-                    </div>
+                    <div id="asset-status-list" class="flex-1 overflow-y-auto p-4 space-y-2 bg-surface rounded-b-xl"></div>
                 </div>
             </div>
         </section>
 
-        <!-- =================== VISTA 4: INFORMES =================== -->
+        <!-- ===== VISTA 4: INFORMES ===== -->
         <section id="vista-informes" class="view-content flex flex-col gap-6">
             <h2 class="text-xl font-bold text-primary">Informes Generados</h2>
             <div class="bg-surface rounded-xl p-6 border border-outline-variant shadow-sm text-center">
                 <span class="material-symbols-outlined text-6xl text-outline mb-4">description</span>
                 <h3 class="text-lg font-bold text-primary">Historial de Reportes</h3>
                 <p class="text-sm text-on-surface-variant mt-2 max-w-md mx-auto">Al finalizar una auditoría en la pestaña "Escaneo", los reportes PDF se guardarán aquí para su consulta posterior.</p>
-                <div id="lista-reportes-pdf" class="mt-6 flex flex-col gap-3 text-left">
-                    <!-- Se llenará al crear PDFs -->
-                </div>
+                <div id="lista-reportes-pdf" class="mt-6 flex flex-col gap-3 text-left"></div>
             </div>
         </section>
 
-        <!-- =================== MODALES =================== -->
+        <!-- ===== MODALES ===== -->
         
-        <!-- Modal Editar Activo (con Fotografía) -->
+        <!-- Modal Editar Activo -->
         <div id="modal-edit" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
             <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-primary max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold text-on-surface" id="modal-edit-title">Editar Activo</h3>
                     <button onclick="cerrarModal('modal-edit')" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                
                 <input type="hidden" id="edit-id">
 
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">Fotografía del Activo</label>
+                <label class="block text-xs font-bold text-on-surface-variant mb-1">Fotografía</label>
                 <div class="mb-4">
-                    <!-- El capture="environment" abre la cámara directamente en móviles -->
                     <label class="flex items-center justify-center w-full h-32 border-2 border-dashed border-primary-container rounded-xl cursor-pointer hover:bg-surface-variant relative overflow-hidden group bg-surface-variant/50">
                         <img id="edit-photo-preview" src="" class="absolute inset-0 w-full h-full object-cover hidden">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6 text-primary z-10 group-hover:scale-110 transition-transform bg-white/70 rounded-full w-12 h-12 shadow-sm backdrop-blur-sm" id="edit-photo-icon">
@@ -637,7 +675,7 @@
             </div>
         </div>
 
-        <!-- Modal Alertas (Transferencia) -->
+        <!-- Modal Transferencia -->
         <div id="modal-transfer" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
             <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-warning">
                 <h3 class="text-lg font-bold text-on-surface mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-warning">warning</span> Cambio de Sucursal</h3>
@@ -649,7 +687,7 @@
             </div>
         </div>
 
-        <!-- Modal Selección de Tienda (Nuevo Levantamiento / Cambiar Tienda) -->
+        <!-- Modal Tienda -->
         <div id="modal-tienda" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
             <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-primary">
                 <div class="flex justify-between items-center mb-4">
@@ -662,27 +700,23 @@
             </div>
         </div>
 
-        <!-- Modal Mapeo de Columnas (Importación flexible de Excel) -->
+        <!-- Modal Import -->
         <div id="modal-import" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
             <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-2xl w-full border-t-4 border-primary max-h-[90vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-on-surface">Mapeo de Columnas — Importar Excel</h3>
                     <button onclick="cerrarModal('modal-import')" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                <p class="text-sm text-on-surface-variant mb-4">Indica qué dato contiene cada columna de tu archivo. El sistema intenta adivinarlo automáticamente; ajústalo si hace falta. Las columnas en "Ignorar" no se importan.</p>
-
+                <p class="text-sm text-on-surface-variant mb-4">Indica qué dato contiene cada columna de tu archivo. El sistema intenta adivinarlo automáticamente; ajústalo si hace falta.</p>
                 <div id="import-mapping-fields" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
-
                 <label class="flex items-center gap-2 text-sm font-semibold text-on-surface-variant mb-2 bg-surface-variant/60 p-3 rounded-lg">
-                    <input type="checkbox" id="import-filtrar-resumen" checked class="w-4 h-4 accent-current"> Omitir filas sin un ID válido (encabezados, totales o filas de resumen)
+                    <input type="checkbox" id="import-filtrar-resumen" checked class="w-4 h-4 accent-current"> Omitir filas sin un ID válido
                 </label>
-
-                <h4 class="text-xs font-bold text-on-surface-variant mb-2 mt-3">Vista previa (primeras filas)</h4>
+                <h4 class="text-xs font-bold text-on-surface-variant mb-2 mt-3">Vista previa</h4>
                 <div class="overflow-x-auto border border-outline-variant rounded-lg mb-1">
                     <table class="w-full text-xs" id="import-preview-table"></table>
                 </div>
                 <p class="text-xs text-on-surface-variant mb-4" id="import-total-filas"></p>
-
                 <div class="flex gap-2">
                     <button onclick="cerrarModal('modal-import')" class="px-4 py-3 rounded-xl border border-outline-variant text-on-surface-variant font-bold">Cancelar</button>
                     <button onclick="confirmarImportacionMapeada()" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl shadow-md hover:bg-primary-container hover:text-primary transition-colors">Importar Activos</button>
@@ -692,18 +726,18 @@
 
     </main>
 
-    <!-- NAVEGACIÓN INFERIOR (MÓVIL - Diseño exacto Imagen 2) -->
-    <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-20 px-2 pb-2 pt-1" id="mobile-nav">
+    <!-- ===== NAVEGACIÓN INFERIOR (MÓVIL) ===== -->
+    <nav class="mobile-menu md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-20 px-2 pb-2 pt-1" id="mobile-nav">
         <button onclick="cambiarVista('vista-inicio')" class="nav-btn-mob active flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all">
             <span class="material-symbols-outlined text-[26px] mb-1">home</span>
             <span class="text-[11px] font-semibold">Inicio</span>
         </button>
         <button onclick="cambiarVista('vista-activos')" class="nav-btn-mob flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all">
-            <span class="material-symbols-outlined text-[26px] mb-1 border-2 border-dashed border-current rounded-md p-0.5">account_tree</span>
+            <span class="material-symbols-outlined text-[26px] mb-1">account_tree</span>
             <span class="text-[11px] font-semibold">Activos</span>
         </button>
         <button onclick="cambiarVista('vista-escaneo')" class="nav-btn-mob flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all">
-            <span class="material-symbols-outlined text-[26px] mb-1 border-2 border-dashed border-current rounded-md p-0.5">qr_code_scanner</span>
+            <span class="material-symbols-outlined text-[26px] mb-1">qr_code_scanner</span>
             <span class="text-[11px] font-semibold">Escaneo</span>
         </button>
         <button onclick="cambiarVista('vista-informes')" class="nav-btn-mob flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all">
@@ -711,49 +745,59 @@
             <span class="text-[11px] font-semibold">Perfil</span>
         </button>
     </nav>
-    <style>
-        /* Colores activos menú móvil (Imagen 2) */
-        .nav-btn-mob { color: #475569; }
-        .nav-btn-mob.active { background-color: #e0e7ff; color: #4f46e5; border-radius: 12px; }
-        .nav-btn-mob.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
-    </style>
 
-    <!-- LOGICA JAVASCRIPT -->
+    <!-- ===== JAVASCRIPT ===== -->
     <script>
-        // --- 1. BASE DE DATOS MAESTRA (persistida en este dispositivo) ---
+        // =====================================================
+        // 1. CONFIGURACIÓN Y CONSTANTES
+        // =====================================================
         const DB_KEY = 'kuroda_master_db';
         const SESSIONS_KEY = 'kuroda_sessions';
         const REPORTS_KEY = 'kuroda_reportes';
+        const TIENDAS_KEY = 'kuroda_tiendas';
 
+        // =====================================================
+        // 2. DATOS DE EJEMPLO
+        // =====================================================
         const datosEjemplo = [
-            { id: "AST-2023-0891", name: 'Laptop Dell XPS 15', category: 'IT', status: 'OPERATIVO', sucursal: 'Oficina Central', location: 'Piso 3', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDC1E6GrMNPGqWgY6TSo2DPRzKao6kFiEzWF3VAklG92NiXMxPpbx7EEJmqAM2O7u4dqeWNt-zkWIqZMiPZjkOJa-vo0IzQ5exSNVKaRpXlhhOBOsH_hGqYyH936tnLqbDlIrgHOD6i3CHWUTVfUEX5Xf32zc3gQF9BKY4K3X8cikjxDw9XrKJLHp1nRgMlWIBabeq_VKdOrbTpbky90ofxC70z0OTobn6zeGAV0XWhi7Nkbk4X649lF0ZWarsdkpOIrDqjvAmZPqQ' },
-            { id: "VEH-2021-0042", name: 'Toyota Hilux 4x4', category: 'Vehículos', status: 'EN REPARACIÓN', sucursal: 'Planta A', location: 'Taller Mecánico', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDI7gOCzRmW6qwKuKrAcZq7M9Lm_NkEf-sfxMQXlbhrrAG4UrMVb9Kj5ljybqnttV9rLmIb01wlXFHwzh9QWu4UbrObATed4W0pVldRibN6AolfP3NCyjiwLsa5Fyr43r2qAZeoIbvGFwjazOiSQuBe9J-z0iM9o6TwDLm-TZaL0uPjzW5RD3y1DalfcO7e5tJlOmlF3-bNcb12ZWasnjPlEjV_QUqMCl9KNN5uIRdcpBP4i47m0ZDOKmuFOFWcgHIRyXHG6m8k-NM' },
-            { id: "MOB-2022-1105", name: 'Silla Ergonómica Herman', category: 'Mobiliario', status: 'OPERATIVO', sucursal: 'Oficina Central', location: 'Sala Juntas', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB077EKPMVINiqE62LQND7ZPms7jjA6wTputtMdJ1tUT-rjwRP2ySnj17-qjyt1_4VqXeU856uyjkYFNhsyWSXyxyck1HsqOQuhsZplVHAs-qPy1tm5CXqLBds6Aakbmn2Rk35oCej6IB4J6hHQv98ZQpQyBm7k-Im2ZYYUyRm3opsaEPSogHGlZpK_PDvtXii8Ar_Rs29zzz0QvTLhPqIUo3Tr-swF6Ni_A5h-y4fi_H9oNqkKod59zh0VtzN-DOjLUTK_TwNdVWE' }
+            { id: "AST-2023-0891", name: 'Laptop Dell XPS 15', category: 'IT', status: 'OPERATIVO', sucursal: 'Oficina Central', location: 'Piso 3', img: '', responsable: 'Juan Pérez', departamento: 'Sistemas' },
+            { id: "VEH-2021-0042", name: 'Toyota Hilux 4x4', category: 'Vehículos', status: 'EN REPARACIÓN', sucursal: 'Planta A', location: 'Taller Mecánico', img: '', responsable: 'María López', departamento: 'Logística' },
+            { id: "MOB-2022-1105", name: 'Silla Ergonómica Herman', category: 'Mobiliario', status: 'OPERATIVO', sucursal: 'Oficina Central', location: 'Sala Juntas', img: '', responsable: 'Carlos Ruiz', departamento: 'Administración' }
         ];
 
+        // =====================================================
+        // 3. GESTIÓN DE DATOS (localStorage)
+        // =====================================================
         function cargarDB(key, fallback) {
             try {
                 const raw = localStorage.getItem(key);
                 return raw ? JSON.parse(raw) : fallback;
             } catch (e) { return fallback; }
         }
+
         function guardarDB(key, data) {
             try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { console.warn('No se pudo guardar', e); }
         }
 
+        // =====================================================
+        // 4. ESTADO GLOBAL
+        // =====================================================
         let masterDB = cargarDB(DB_KEY, datosEjemplo);
         let sessions = cargarDB(SESSIONS_KEY, []);
         let reportesGuardados = cargarDB(REPORTS_KEY, []);
+        let tiendas = cargarDB(TIENDAS_KEY, ['Oficina Central', 'Planta A']);
+        
         let currentSessionId = null;
         let html5QrcodeScanner = null;
         let pendingTransferAsset = null;
         let isScanning = false;
-
-        const TIENDAS_KEY = 'kuroda_tiendas';
-        let tiendas = cargarDB(TIENDAS_KEY, ['Oficina Central', 'Planta A']);
-        let modoModalTienda = 'nuevo'; // 'nuevo' | 'cambiar'
+        let modoModalTienda = 'nuevo';
         let sesionTiendaObjetivo = null;
+        let importState = { headers: [], rows: [] };
 
+        // =====================================================
+        // 5. FUNCIONES AUXILIARES
+        // =====================================================
         function obtenerTiendas() {
             const set = new Set(tiendas);
             masterDB.forEach(a => { if (a.sucursal) set.add(a.sucursal); });
@@ -762,45 +806,42 @@
         }
 
         function agregarTienda(nombre) {
-            if (!tiendas.includes(nombre)) { tiendas.push(nombre); guardarDB(TIENDAS_KEY, tiendas); }
+            if (!tiendas.includes(nombre)) { 
+                tiendas.push(nombre); 
+                guardarDB(TIENDAS_KEY, tiendas); 
+            }
         }
 
         function iconoPorCategoria(cat) {
-            return { 'IT': 'computer', 'Vehículos': 'directions_car', 'Maquinaria': 'precision_manufacturing', 'Mobiliario': 'chair' }[cat] || 'inventory_2';
+            const map = { 'IT': 'computer', 'Vehículos': 'directions_car', 'Maquinaria': 'precision_manufacturing', 'Mobiliario': 'chair' };
+            return map[cat] || 'inventory_2';
         }
 
-        // --- 2. INICIALIZACIÓN ---
-        document.addEventListener('DOMContentLoaded', () => {
-            poblarFiltrosActivos();
-            actualizarMetricasInicio();
-            renderActivosRecientes();
-            renderDirectorio();
-            // Si no hay sesiones, crear una por defecto
-            if (sessions.length === 0) {
-                crearSesion('Oficina Central');
-            }
-            renderizarSesiones();
-            renderizarReportes();
-        });
+        function cerrarModal(id) { 
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('hidden');
+        }
 
-        // --- 3. NAVEGACIÓN ---
+        // =====================================================
+        // 6. NAVEGACIÓN
+        // =====================================================
         function cambiarVista(vistaId) {
-            if (vistaId !== 'vista-escaneo') stopScanner(); 
+            if (vistaId !== 'vista-escaneo') stopScanner();
+            
             document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(vistaId);
             if (target) target.classList.add('active');
             window.scrollTo({ top: 0, behavior: 'instant' });
 
-            // Reset Desktop
+            // Desktop nav
             document.querySelectorAll('#desktop-nav .nav-btn').forEach(btn => {
                 btn.className = "nav-btn w-full flex items-center gap-4 text-on-surface-variant px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-surface-variant";
             });
-            // Reset Mobile
+            // Mobile nav
             document.querySelectorAll('#mobile-nav .nav-btn-mob').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Set Active
             const i = { 'vista-inicio': 0, 'vista-activos': 1, 'vista-escaneo': 2, 'vista-informes': 3 }[vistaId];
             if (i !== undefined) {
                 const deskBtn = document.querySelectorAll('#desktop-nav .nav-btn')[i];
@@ -816,13 +857,18 @@
             if (target) target.classList.add('active');
         }
 
-        // --- 4. VISTA 1: INICIO ---
+        // =====================================================
+        // 7. VISTA INICIO
+        // =====================================================
         function actualizarMetricasInicio() {
             document.getElementById('dash-total').innerText = masterDB.length;
             let encontrados = 0, noEncontrados = 0;
             sessions.forEach(s => {
                 if (s.inventory) {
-                    s.inventory.forEach(i => { if (i.status === 'found') encontrados++; else noEncontrados++; });
+                    s.inventory.forEach(i => { 
+                        if (i.status === 'found') encontrados++; 
+                        else noEncontrados++; 
+                    });
                 }
             });
             document.getElementById('dash-encontrados').innerText = encontrados;
@@ -869,7 +915,9 @@
             });
         }
 
-        // --- 5. VISTA 2: ACTIVOS (Excel y Edición con Foto) ---
+        // =====================================================
+        // 8. VISTA ACTIVOS
+        // =====================================================
         function poblarFiltrosActivos() {
             const sel = document.getElementById('filtro-tienda-select');
             if (!sel) return;
@@ -927,16 +975,14 @@
             });
         }
 
-        // Funcionalidad EXCEL (Importar y Exportar)
+        // =====================================================
+        // 9. EXCEL: EXPORTAR, PLANTILLA, IMPORTAR
+        // =====================================================
         function exportarExcel() {
             const ws = XLSX.utils.json_to_sheet(masterDB.map(a => ({ 
-                ID: a.id, 
-                Nombre: a.name, 
-                Categoria: a.category, 
-                Sucursal: a.sucursal || '', 
-                Ubicacion: a.location || '', 
-                Estado: a.status, 
-                Responsable: a.responsable || '', 
+                ID: a.id, Nombre: a.name, Categoria: a.category, 
+                Sucursal: a.sucursal || '', Ubicacion: a.location || '', 
+                Estado: a.status, Responsable: a.responsable || '', 
                 Departamento: a.departamento || '' 
             })));
             const wb = XLSX.utils.book_new();
@@ -957,12 +1003,11 @@
                 ['INSTRUCCIONES — PLANTILLA DE ACTIVOS KURODA'],
                 [''],
                 ['1. Llena la hoja "Activos": un renglón por cada activo.'],
-                ['2. ID: código único del activo. Si lo dejas vacío, el sistema genera uno automático al importar.'],
-                ['3. Categoria sugerida: IT, Vehículos, Maquinaria, Mobiliario, General (puedes escribir otra y se agregará).'],
+                ['2. ID: código único del activo. Si lo dejas vacío, el sistema genera uno automático.'],
+                ['3. Categoria sugerida: IT, Vehículos, Maquinaria, Mobiliario, General.'],
                 ['4. Estado sugerido: OPERATIVO, EN REPARACIÓN, BAJA.'],
-                ['5. Sucursal: nombre de la tienda/sucursal. Si es nueva, se agrega automáticamente al sistema.'],
-                ['6. Responsable y Departamento son opcionales.'],
-                ['7. También puedes subir un Excel con otra estructura (por ejemplo un reporte contable): al importar podrás indicar manualmente qué columna corresponde a cada dato.']
+                ['5. Sucursal: nombre de la tienda. Si es nueva, se agrega automáticamente.'],
+                ['6. Responsable y Departamento son opcionales.']
             ];
             const wsInfo = XLSX.utils.aoa_to_sheet(instrucciones);
             wsInfo['!cols'] = [{wch:95}];
@@ -973,7 +1018,7 @@
             XLSX.writeFile(wb, 'Plantilla_Activos_Kuroda.xlsx');
         }
 
-        // Campos de destino disponibles al mapear columnas
+        // Mapeo de columnas
         const CAMPOS_DESTINO = [
             { key: '', label: 'Ignorar' },
             { key: 'id', label: 'ID de Activo' },
@@ -987,7 +1032,7 @@
         ];
 
         const SINONIMOS_CAMPOS = {
-            id: ['id', 'id activo', 'id de activo', 'codigo', 'clave', 'no activo', 'numero de activo', 'cuenta'],
+            id: ['id', 'id activo', 'codigo', 'clave', 'no activo', 'numero de activo'],
             name: ['nombre', 'descripcion', 'concepto', 'activo'],
             category: ['categoria', 'clase', 'tipo'],
             sucursal: ['sucursal', 'tienda', 'planta'],
@@ -1022,21 +1067,24 @@
             return { idx: mejorIdx, score: mejorScore };
         }
 
-        let importState = { headers: [], rows: [] };
-
         function importarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '', raw: false });
-                rows = rows.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
-                if (rows.length === 0) { alert('El archivo está vacío o no se pudo leer.'); event.target.value = ''; return; }
-                iniciarWizardImportacion(rows);
-                event.target.value = '';
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '', raw: false });
+                    rows = rows.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+                    if (rows.length === 0) { alert('El archivo está vacío.'); event.target.value = ''; return; }
+                    iniciarWizardImportacion(rows);
+                    event.target.value = '';
+                } catch (err) {
+                    alert('Error al leer el archivo: ' + err.message);
+                    event.target.value = '';
+                }
             };
             reader.readAsArrayBuffer(file);
         }
@@ -1081,7 +1129,7 @@
             const thead = '<thead><tr>' + importState.headers.map(h => `<th class="p-2 text-left border-b border-outline-variant bg-surface-variant whitespace-nowrap">${h || ''}</th>`).join('') + '</tr></thead>';
             const tbody = '<tbody>' + previewRows.map(r => '<tr>' + importState.headers.map((_, i) => `<td class="p-2 border-b border-outline-variant whitespace-nowrap">${(r[i] !== undefined && r[i] !== null) ? r[i] : ''}</td>`).join('') + '</tr>').join('') + '</tbody>';
             previewTable.innerHTML = thead + tbody;
-            document.getElementById('import-total-filas').innerText = `Total de filas detectadas en el archivo: ${importState.rows.length}`;
+            document.getElementById('import-total-filas').innerText = `Total de filas: ${importState.rows.length}`;
         }
 
         function confirmarImportacionMapeada() {
@@ -1130,10 +1178,32 @@
             actualizarMetricasInicio();
             renderActivosRecientes();
             cerrarModal('modal-import');
-            alert(`Importación completa.\n\nActivos nuevos: ${nuevos}\nOmitidos (sin datos válidos / resumen): ${omitidos}\nDuplicados (ID ya existente): ${duplicados}\n\nPuedes corregir cualquier dato manualmente tocando el activo en la lista.`);
+            alert(`Importación completa.\n\nActivos nuevos: ${nuevos}\nOmitidos: ${omitidos}\nDuplicados: ${duplicados}`);
         }
 
-        // Funcionalidad Edición, Creación y Foto
+        // =====================================================
+        // 10. EDICIÓN Y CREACIÓN DE ACTIVOS
+        // =====================================================
+        function poblarSelectTiendas(select, selected) {
+            const lista = obtenerTiendas();
+            select.innerHTML = lista.map(t => `<option value="${t}" ${t === selected ? 'selected' : ''}>${t}</option>`).join('') +
+                `<option value="__nueva__">+ Agregar nueva tienda…</option>`;
+        }
+
+        function manejarSelectTienda(selectEl) {
+            if (selectEl.value === '__nueva__') {
+                const nombre = prompt('Nombre de la nueva tienda/sucursal:');
+                if (nombre && nombre.trim()) {
+                    agregarTienda(nombre.trim());
+                    poblarSelectTiendas(selectEl, nombre.trim());
+                    poblarFiltrosActivos();
+                } else {
+                    const tiendasList = obtenerTiendas();
+                    poblarSelectTiendas(selectEl, tiendasList[0] || '');
+                }
+            }
+        }
+
         function abrirNuevoActivo() {
             document.getElementById('edit-id').value = '';
             document.getElementById('modal-edit-title').innerText = 'Nuevo Activo';
@@ -1205,7 +1275,6 @@
             const foto = (previewSrc && previewSrc !== location.href) ? previewSrc : '';
 
             if (idOriginal) {
-                // Editar existente
                 const asset = masterDB.find(a => a.id === idOriginal);
                 if (asset) {
                     asset.name = nombre;
@@ -1218,13 +1287,11 @@
                     if (foto) asset.img = foto;
                 }
             } else {
-                // Crear nuevo
                 let codigo = document.getElementById('edit-code').value.trim().toUpperCase();
                 if (!codigo) codigo = `AST-${Date.now()}`;
                 if (masterDB.find(a => a.id === codigo)) { alert('Ese ID de activo ya existe.'); return; }
                 masterDB.push({
-                    id: codigo, 
-                    name: nombre,
+                    id: codigo, name: nombre,
                     category: document.getElementById('edit-category').value,
                     status: document.getElementById('edit-status').value,
                     responsable: document.getElementById('edit-responsable').value.trim(),
@@ -1258,33 +1325,12 @@
             actualizarMetricasInicio();
         }
 
-        // --- 6. VISTA 3: ESCÁNER, GESTOR Y PDF ---
-        function poblarSelectTiendas(select, selected) {
-            const lista = obtenerTiendas();
-            select.innerHTML = lista.map(t => `<option value="${t}" ${t === selected ? 'selected' : ''}>${t}</option>`).join('') +
-                `<option value="__nueva__">+ Agregar nueva tienda…</option>`;
-        }
-
-        function manejarSelectTienda(selectEl) {
-            if (selectEl.value === '__nueva__') {
-                const nombre = prompt('Nombre de la nueva tienda/sucursal:');
-                if (nombre && nombre.trim()) {
-                    agregarTienda(nombre.trim());
-                    poblarSelectTiendas(selectEl, nombre.trim());
-                    poblarFiltrosActivos();
-                } else {
-                    const tiendasList = obtenerTiendas();
-                    poblarSelectTiendas(selectEl, tiendasList[0] || '');
-                }
-            }
-        }
-
+        // =====================================================
+        // 11. VISTA ESCÁNER - SESIONES
+        // =====================================================
         function crearSesion(sucursal) {
             const inv = masterDB.filter(a => a.sucursal === sucursal).map(a => ({ 
-                id: a.id, 
-                name: a.name, 
-                status: 'missing', 
-                isExtra: false 
+                id: a.id, name: a.name, status: 'missing', isExtra: false 
             }));
             sessions.push({ 
                 id: Date.now(), 
@@ -1295,61 +1341,6 @@
             });
             guardarDB(SESSIONS_KEY, sessions);
             actualizarMetricasInicio();
-        }
-
-        function abrirModalNuevoLevantamiento() {
-            modoModalTienda = 'nuevo';
-            sesionTiendaObjetivo = null;
-            document.getElementById('modal-tienda-title').innerText = 'Nuevo Levantamiento';
-            document.getElementById('modal-tienda-confirm-label').innerText = 'Iniciar Levantamiento';
-            poblarSelectTiendas(document.getElementById('tienda-modal-select'));
-            document.getElementById('modal-tienda').classList.remove('hidden');
-        }
-
-        function abrirModalCambiarTienda() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            if (!session) return;
-            modoModalTienda = 'cambiar';
-            sesionTiendaObjetivo = currentSessionId;
-            document.getElementById('modal-tienda-title').innerText = 'Cambiar Tienda de la Auditoría';
-            document.getElementById('modal-tienda-confirm-label').innerText = 'Guardar Cambio';
-            poblarSelectTiendas(document.getElementById('tienda-modal-select'), session.sucursal);
-            document.getElementById('modal-tienda').classList.remove('hidden');
-        }
-
-        function confirmarModalTienda() {
-            const select = document.getElementById('tienda-modal-select');
-            const tienda = select.value;
-            if (!tienda || tienda === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
-            
-            if (modoModalTienda === 'nuevo') {
-                crearSesion(tienda);
-                renderizarSesiones();
-            } else if (modoModalTienda === 'cambiar' && sesionTiendaObjetivo) {
-                cambiarTiendaSesion(sesionTiendaObjetivo, tienda);
-            }
-            cerrarModal('modal-tienda');
-        }
-
-        function cambiarTiendaSesion(sessionId, nuevaTienda) {
-            const session = sessions.find(s => s.id === sessionId);
-            if (!session) return;
-            session.sucursal = nuevaTienda;
-            // Actualizar inventario: agregar activos de la nueva tienda que falten
-            const idsActuales = new Set(session.inventory.map(i => i.id));
-            masterDB.filter(a => a.sucursal === nuevaTienda).forEach(a => {
-                if (!idsActuales.has(a.id)) {
-                    session.inventory.push({ id: a.id, name: a.name, status: 'missing', isExtra: false });
-                }
-            });
-            guardarDB(SESSIONS_KEY, sessions);
-            renderizarSesiones();
-            actualizarMetricasInicio();
-            // Si es la sesión actual, actualizar vista
-            if (currentSessionId === sessionId) {
-                document.getElementById('current-store-name').innerText = nuevaTienda;
-                renderListaAuditoria();
-            }
         }
 
         function renderizarSesiones() {
@@ -1392,6 +1383,26 @@
             });
         }
 
+        function abrirModalNuevoLevantamiento() {
+            modoModalTienda = 'nuevo';
+            sesionTiendaObjetivo = null;
+            document.getElementById('modal-tienda-title').innerText = 'Nuevo Levantamiento';
+            document.getElementById('modal-tienda-confirm-label').innerText = 'Iniciar Levantamiento';
+            poblarSelectTiendas(document.getElementById('tienda-modal-select'));
+            document.getElementById('modal-tienda').classList.remove('hidden');
+        }
+
+        function abrirModalCambiarTienda() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
+            modoModalTienda = 'cambiar';
+            sesionTiendaObjetivo = currentSessionId;
+            document.getElementById('modal-tienda-title').innerText = 'Cambiar Tienda de la Auditoría';
+            document.getElementById('modal-tienda-confirm-label').innerText = 'Guardar Cambio';
+            poblarSelectTiendas(document.getElementById('tienda-modal-select'), session.sucursal);
+            document.getElementById('modal-tienda').classList.remove('hidden');
+        }
+
         function abrirModalCambiarTiendaDesdeSesion(sessionId) {
             const session = sessions.find(s => s.id === sessionId);
             if (!session) return;
@@ -1401,6 +1412,39 @@
             document.getElementById('modal-tienda-confirm-label').innerText = 'Guardar Cambio';
             poblarSelectTiendas(document.getElementById('tienda-modal-select'), session.sucursal);
             document.getElementById('modal-tienda').classList.remove('hidden');
+        }
+
+        function confirmarModalTienda() {
+            const select = document.getElementById('tienda-modal-select');
+            const tienda = select.value;
+            if (!tienda || tienda === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
+            
+            if (modoModalTienda === 'nuevo') {
+                crearSesion(tienda);
+                renderizarSesiones();
+            } else if (modoModalTienda === 'cambiar' && sesionTiendaObjetivo) {
+                cambiarTiendaSesion(sesionTiendaObjetivo, tienda);
+            }
+            cerrarModal('modal-tienda');
+        }
+
+        function cambiarTiendaSesion(sessionId, nuevaTienda) {
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+            session.sucursal = nuevaTienda;
+            const idsActuales = new Set(session.inventory.map(i => i.id));
+            masterDB.filter(a => a.sucursal === nuevaTienda).forEach(a => {
+                if (!idsActuales.has(a.id)) {
+                    session.inventory.push({ id: a.id, name: a.name, status: 'missing', isExtra: false });
+                }
+            });
+            guardarDB(SESSIONS_KEY, sessions);
+            renderizarSesiones();
+            actualizarMetricasInicio();
+            if (currentSessionId === sessionId) {
+                document.getElementById('current-store-name').innerText = nuevaTienda;
+                renderListaAuditoria();
+            }
         }
 
         function abrirSesion(id) {
@@ -1454,6 +1498,69 @@
             document.getElementById('metric-progreso').innerText = `${evals}/${session.inventory.length}`;
         }
 
+        // =====================================================
+        // 12. ESCÁNER QR
+        // =====================================================
+        function startScanner() {
+            const container = document.getElementById('qr-reader-container');
+            if (!container) return;
+            
+            container.classList.remove('hidden');
+            container.classList.add('active');
+            document.getElementById('btn-start-scan').classList.add('hidden');
+            document.getElementById('btn-stop-scan').classList.remove('hidden');
+            
+            if (html5QrcodeScanner) return;
+            
+            try {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+                isScanning = true;
+                
+                html5QrcodeScanner.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (text) => { 
+                        if (isScanning) processScan(text.toUpperCase()); 
+                    }, 
+                    () => {} 
+                ).catch(err => {
+                    console.error('Error al iniciar la cámara:', err);
+                    alert("Verifica permisos de cámara o asegúrate de usar HTTPS.");
+                    stopScanner();
+                });
+            } catch (error) {
+                console.error('Error al crear el escáner:', error);
+                alert('No se pudo iniciar el escáner.');
+                stopScanner();
+            }
+        }
+
+        function stopScanner() {
+            isScanning = false;
+            const container = document.getElementById('qr-reader-container');
+            if (container) {
+                container.classList.remove('active');
+                container.classList.add('hidden');
+            }
+            const bStart = document.getElementById('btn-start-scan');
+            const bStop = document.getElementById('btn-stop-scan');
+            if (bStart) bStart.classList.remove('hidden');
+            if (bStop) bStop.classList.add('hidden');
+            
+            if (html5QrcodeScanner) {
+                try {
+                    html5QrcodeScanner.stop().then(() => {
+                        html5QrcodeScanner.clear();
+                        html5QrcodeScanner = null;
+                    }).catch(() => {
+                        html5QrcodeScanner = null;
+                    });
+                } catch (e) {
+                    html5QrcodeScanner = null;
+                }
+            }
+        }
+
         function processScan(code) {
             const session = sessions.find(s => s.id === currentSessionId);
             if (!session) {
@@ -1500,7 +1607,6 @@
             const session = sessions.find(s => s.id === currentSessionId);
             if (!session) return;
             
-            // Verificar si ya existe en la sesión
             const existing = session.inventory.find(i => i.id === pendingTransferAsset.id);
             if (existing) {
                 existing.status = 'found';
@@ -1514,7 +1620,6 @@
                 });
             }
             
-            // Actualizar sucursal en la base de datos maestra
             const asset = masterDB.find(a => a.id === pendingTransferAsset.id);
             if (asset) {
                 asset.sucursal = session.sucursal;
@@ -1529,7 +1634,9 @@
             stopScanner();
         }
 
-        // GENERACIÓN DE REPORTE PDF (Finalizar Inventario)
+        // =====================================================
+        // 13. FINALIZAR INVENTARIO - PDF
+        // =====================================================
         function finalizarInventario() {
             const session = sessions.find(s => s.id === currentSessionId);
             if (!session) {
@@ -1542,17 +1649,14 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // Título
                 doc.setFontSize(18);
                 doc.text(`Informe de Levantamiento Físico`, 14, 22);
                 doc.setFontSize(12);
                 doc.text(`Sucursal: ${session.sucursal}`, 14, 30);
                 doc.text(`Fecha: ${session.fecha || new Date().toLocaleDateString()}`, 14, 36);
 
-                // Tabla con jsPDF AutoTable
                 const tableData = session.inventory.map(item => [
-                    item.id, 
-                    item.name, 
+                    item.id, item.name, 
                     item.status === 'found' ? 'Encontrado' : 'Faltante',
                     item.isExtra ? 'Transferido' : 'Regular'
                 ]);
@@ -1562,14 +1666,12 @@
                     head: [['ID Activo', 'Descripción', 'Estado', 'Observación']],
                     body: tableData,
                     theme: 'grid',
-                    headStyles: { fillColor: [0, 30, 87] } // Azul Kuroda
+                    headStyles: { fillColor: [0, 30, 87] }
                 });
 
-                // Guardar
                 const filename = `Auditoria_${session.sucursal}_${Date.now()}.pdf`;
                 doc.save(filename);
 
-                // Agregar al historial de informes (persistido)
                 const encontrados = session.inventory.filter(i => i.status === 'found').length;
                 reportesGuardados.unshift({ 
                     sucursal: session.sucursal, 
@@ -1581,7 +1683,6 @@
                 guardarDB(REPORTS_KEY, reportesGuardados);
                 renderizarReportes();
 
-                // Eliminar sesión de pendientes
                 const index = sessions.findIndex(s => s.id === currentSessionId);
                 if (index !== -1) {
                     sessions.splice(index, 1);
@@ -1593,10 +1694,13 @@
                 cambiarVista('vista-informes');
             } catch (error) {
                 console.error('Error al generar PDF:', error);
-                alert('Ocurrió un error al generar el PDF. Verifica la consola para más detalles.');
+                alert('Ocurrió un error al generar el PDF.');
             }
         }
 
+        // =====================================================
+        // 14. VISTA INFORMES
+        // =====================================================
         function renderizarReportes() {
             const container = document.getElementById('lista-reportes-pdf');
             if (!container) return;
@@ -1618,79 +1722,47 @@
             });
         }
 
-        function cerrarModal(id) { 
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.add('hidden');
-        }
+        // =====================================================
+        // 15. INICIALIZACIÓN
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            poblarFiltrosActivos();
+            actualizarMetricasInicio();
+            renderActivosRecientes();
+            renderDirectorio();
+            if (sessions.length === 0) {
+                crearSesion('Oficina Central');
+            }
+            renderizarSesiones();
+            renderizarReportes();
+        });
 
-        // --- Lector QR ---
-        function startScanner() {
-            const container = document.getElementById('qr-reader-container');
-            if (!container) return;
-            
-            container.classList.remove('hidden');
-            container.classList.add('active');
-            document.getElementById('btn-start-scan').classList.add('hidden');
-            document.getElementById('btn-stop-scan').classList.remove('hidden');
-            
-            if (html5QrcodeScanner) {
-                // Si ya existe, solo mostramos el contenedor
-                return;
-            }
-            
-            try {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                isScanning = true;
-                
-                html5QrcodeScanner.start(
-                    { facingMode: "environment" }, 
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    (text) => { 
-                        if (isScanning) {
-                            processScan(text.toUpperCase()); 
-                        }
-                    }, 
-                    () => {} 
-                ).catch(err => {
-                    console.error('Error al iniciar la cámara:', err);
-                    alert("Verifica permisos de cámara o asegúrate de usar HTTPS.");
-                    stopScanner();
-                });
-            } catch (error) {
-                console.error('Error al crear el escáner:', error);
-                alert('No se pudo iniciar el escáner. Verifica la consola para más detalles.');
-                stopScanner();
-            }
-        }
-
-        function stopScanner() {
-            isScanning = false;
-            const container = document.getElementById('qr-reader-container');
-            if (container) {
-                container.classList.remove('active');
-                container.classList.add('hidden');
-            }
-            const bStart = document.getElementById('btn-start-scan');
-            const bStop = document.getElementById('btn-stop-scan');
-            if (bStart) bStart.classList.remove('hidden');
-            if (bStop) bStop.classList.add('hidden');
-            
-            if (html5QrcodeScanner) {
-                try {
-                    html5QrcodeScanner.stop().then(() => {
-                        html5QrcodeScanner.clear();
-                        html5QrcodeScanner = null;
-                    }).catch(() => {
-                        html5QrcodeScanner = null;
-                    });
-                } catch (e) {
-                    html5QrcodeScanner = null;
-                }
-            }
-        }
-
-        // Función global para cerrar modales desde el HTML
+        // Exponer funciones globales para los onclick del HTML
+        window.cambiarVista = cambiarVista;
+        window.filtrarPorCategoria = filtrarPorCategoria;
+        window.exportarExcel = exportarExcel;
+        window.descargarPlantilla = descargarPlantilla;
+        window.importarExcel = importarExcel;
+        window.abrirNuevoActivo = abrirNuevoActivo;
+        window.abrirEdicion = abrirEdicion;
+        window.guardarEdicion = guardarEdicion;
+        window.eliminarActivo = eliminarActivo;
+        window.previewPhoto = previewPhoto;
+        window.manejarSelectTienda = manejarSelectTienda;
+        window.abrirModalNuevoLevantamiento = abrirModalNuevoLevantamiento;
+        window.abrirModalCambiarTienda = abrirModalCambiarTienda;
+        window.abrirModalCambiarTiendaDesdeSesion = abrirModalCambiarTiendaDesdeSesion;
+        window.confirmarModalTienda = confirmarModalTienda;
+        window.abrirSesion = abrirSesion;
+        window.volverAGestor = volverAGestor;
+        window.startScanner = startScanner;
+        window.stopScanner = stopScanner;
+        window.searchManual = searchManual;
+        window.confirmarTransferencia = confirmarTransferencia;
+        window.finalizarInventario = finalizarInventario;
         window.cerrarModal = cerrarModal;
+        window.confirmarImportacionMapeada = confirmarImportacionMapeada;
+        window.renderDirectorio = renderDirectorio;
     </script>
 </body>
 </html>
