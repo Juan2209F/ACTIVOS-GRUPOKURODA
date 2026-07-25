@@ -494,7 +494,7 @@
                         <button onclick="volverAGestor()" class="text-on-surface-variant hover:text-primary flex items-center gap-1 font-bold text-sm">
                             <span class="material-symbols-outlined text-[18px]">arrow_back</span> Salir
                         </button>
-                        <button onclick="abrirModalCambiarTienda(currentSessionId)" class="flex items-center gap-1 text-sm font-bold text-primary hover:underline" id="current-store-name">Sucursal</button>
+                        <button onclick="abrirModalCambiarTienda()" class="flex items-center gap-1 text-sm font-bold text-primary hover:underline" id="current-store-name">Sucursal</button>
                         <span class="text-xs font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full" id="metric-progreso">0/0</span>
                     </div>
 
@@ -747,6 +747,7 @@
         let currentSessionId = null;
         let html5QrcodeScanner = null;
         let pendingTransferAsset = null;
+        let isScanning = false;
 
         const TIENDAS_KEY = 'kuroda_tiendas';
         let tiendas = cargarDB(TIENDAS_KEY, ['Oficina Central', 'Planta A']);
@@ -774,16 +775,20 @@
             actualizarMetricasInicio();
             renderActivosRecientes();
             renderDirectorio();
-            if (sessions.length === 0) crearSesion('Oficina Central');
+            // Si no hay sesiones, crear una por defecto
+            if (sessions.length === 0) {
+                crearSesion('Oficina Central');
+            }
             renderizarSesiones();
             renderizarReportes();
         });
 
         // --- 3. NAVEGACIÓN ---
         function cambiarVista(vistaId) {
-            if(vistaId !== 'vista-escaneo') stopScanner(); 
+            if (vistaId !== 'vista-escaneo') stopScanner(); 
             document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(vistaId).classList.add('active');
+            const target = document.getElementById(vistaId);
+            if (target) target.classList.add('active');
             window.scrollTo({ top: 0, behavior: 'instant' });
 
             // Reset Desktop
@@ -797,24 +802,29 @@
 
             // Set Active
             const i = { 'vista-inicio': 0, 'vista-activos': 1, 'vista-escaneo': 2, 'vista-informes': 3 }[vistaId];
-            if(i !== undefined) {
+            if (i !== undefined) {
                 const deskBtn = document.querySelectorAll('#desktop-nav .nav-btn')[i];
-                if(deskBtn) { deskBtn.classList.remove('text-on-surface-variant'); deskBtn.classList.add('active'); }
+                if (deskBtn) { deskBtn.classList.remove('text-on-surface-variant'); deskBtn.classList.add('active'); }
                 const mobBtn = document.querySelectorAll('#mobile-nav .nav-btn-mob')[i];
-                if(mobBtn) mobBtn.classList.add('active');
+                if (mobBtn) mobBtn.classList.add('active');
             }
         }
 
         function cambiarSubVista(subId) {
             document.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(subId).classList.add('active');
+            const target = document.getElementById(subId);
+            if (target) target.classList.add('active');
         }
 
         // --- 4. VISTA 1: INICIO ---
         function actualizarMetricasInicio() {
             document.getElementById('dash-total').innerText = masterDB.length;
             let encontrados = 0, noEncontrados = 0;
-            sessions.forEach(s => s.inventory.forEach(i => { if (i.status === 'found') encontrados++; else noEncontrados++; }));
+            sessions.forEach(s => {
+                if (s.inventory) {
+                    s.inventory.forEach(i => { if (i.status === 'found') encontrados++; else noEncontrados++; });
+                }
+            });
             document.getElementById('dash-encontrados').innerText = encontrados;
             document.getElementById('dash-no-encontrados').innerText = noEncontrados;
             document.getElementById('dash-bd-count').innerText = masterDB.length;
@@ -831,10 +841,16 @@
 
         function renderActivosRecientes() {
             const container = document.getElementById('home-recent-list');
+            if (!container) return;
             container.innerHTML = '';
-            masterDB.slice(0, 3).forEach(asset => {
+            const recent = masterDB.slice(0, 3);
+            if (recent.length === 0) {
+                container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No hay activos registrados aún.</p>';
+                return;
+            }
+            recent.forEach(asset => {
                 const isOp = asset.status === 'OPERATIVO';
-                const badgeColor = isOp ? 'bg-success text-white' : 'bg-error-container text-error';
+                const badgeColor = isOp ? 'bg-success-container text-success' : 'bg-error-container text-error';
                 container.insertAdjacentHTML('beforeend', `
                     <div class="bg-surface rounded-xl p-3 flex gap-4 shadow-sm border border-outline-variant items-center">
                         <div class="w-16 h-16 bg-surface-variant rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center border border-outline-variant shadow-sm">
@@ -845,7 +861,7 @@
                                 <h3 class="font-bold text-sm text-on-surface truncate pr-2">${asset.name}</h3>
                                 <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${badgeColor} whitespace-nowrap">${asset.status}</span>
                             </div>
-                            <p class="text-xs text-on-surface-variant flex items-center gap-1 mb-1 truncate"><span class="material-symbols-outlined text-[14px]">location_on</span> ${asset.sucursal} - ${asset.location}</p>
+                            <p class="text-xs text-on-surface-variant flex items-center gap-1 mb-1 truncate"><span class="material-symbols-outlined text-[14px]">location_on</span> ${asset.sucursal || 'Sin asignar'} - ${asset.location || ''}</p>
                             <p class="text-[10px] font-mono text-outline">ID: ${asset.id}</p>
                         </div>
                     </div>
@@ -865,6 +881,7 @@
 
         function renderDirectorio() {
             const container = document.getElementById('lista-directorio');
+            if (!container) return;
             const term = document.getElementById('search-input').value.toLowerCase();
             const tiendaSel = document.getElementById('filtro-tienda-select').value;
             const catSel = document.getElementById('filtro-categoria-select').value;
@@ -901,7 +918,7 @@
                             </button>
                         </div>
                         <div class="flex justify-between items-center pt-2 border-t border-surface-variant">
-                            <span class="text-xs text-on-surface-variant flex items-center gap-1 truncate"><span class="material-symbols-outlined text-[14px]">store</span> ${asset.sucursal}</span>
+                            <span class="text-xs text-on-surface-variant flex items-center gap-1 truncate"><span class="material-symbols-outlined text-[14px]">store</span> ${asset.sucursal || 'Sin asignar'}</span>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${asset.status === 'OPERATIVO' ? 'bg-success-container text-success' : 'bg-error-container text-error'}">${asset.status}</span>
                         </div>
                         ${(asset.responsable || asset.departamento) ? `<p class="text-[10px] text-on-surface-variant flex items-center gap-1 truncate"><span class="material-symbols-outlined text-[10px]">badge</span> ${asset.responsable || 'Sin responsable'}${asset.departamento ? ' · ' + asset.departamento : ''}</p>` : ''}
@@ -912,15 +929,21 @@
 
         // Funcionalidad EXCEL (Importar y Exportar)
         function exportarExcel() {
-            const ws = XLSX.utils.json_to_sheet(masterDB.map(a => ({ ID: a.id, Nombre: a.name, Categoria: a.category, Sucursal: a.sucursal, Ubicacion: a.location, Estado: a.status, Responsable: a.responsable || '', Departamento: a.departamento || '' })));
+            const ws = XLSX.utils.json_to_sheet(masterDB.map(a => ({ 
+                ID: a.id, 
+                Nombre: a.name, 
+                Categoria: a.category, 
+                Sucursal: a.sucursal || '', 
+                Ubicacion: a.location || '', 
+                Estado: a.status, 
+                Responsable: a.responsable || '', 
+                Departamento: a.departamento || '' 
+            })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Activos");
             XLSX.writeFile(wb, "Padrón_Activos_Kuroda.xlsx");
         }
 
-        // --- CENTRO DE CARGA DE ACTIVOS: Plantilla + Importación con mapeo flexible ---
-
-        // Descarga una plantilla lista para llenar manualmente y volver a subir
         function descargarPlantilla() {
             const wsData = [
                 ['ID', 'Nombre', 'Categoria', 'Sucursal', 'Ubicacion', 'Estado', 'Responsable', 'Departamento'],
@@ -987,7 +1010,6 @@
             return '';
         }
 
-        // Busca la fila que mejor parece un encabezado real (útil para reportes contables sin encabezado claro)
         function detectarFilaEncabezado(rows) {
             let mejorIdx = 0, mejorScore = -1;
             const limite = Math.min(rows.length, 15);
@@ -1080,8 +1102,6 @@
                 const id = (obj.id || '').toUpperCase();
                 const nombre = obj.name || '';
 
-                // Filas de resumen/agrupación (típicas de reportes contables) casi siempre
-                // no traen descripción en la columna mapeada como Nombre: se descartan.
                 if (nombreMapeado && !nombre) { omitidos++; return; }
                 if (soloConId && (!id || !/\d/.test(id))) { omitidos++; return; }
                 if (!id && !nombre) { omitidos++; return; }
@@ -1135,7 +1155,7 @@
 
         function abrirEdicion(id) {
             const asset = masterDB.find(a => a.id === id);
-            if(!asset) return;
+            if (!asset) return;
             document.getElementById('edit-id').value = asset.id;
             document.getElementById('modal-edit-title').innerText = 'Editar Activo';
             document.getElementById('edit-code').value = asset.id;
@@ -1151,7 +1171,7 @@
 
             const preview = document.getElementById('edit-photo-preview');
             const icon = document.getElementById('edit-photo-icon');
-            if(asset.img) {
+            if (asset.img) {
                 preview.src = asset.img; preview.classList.remove('hidden'); icon.classList.add('hidden');
             } else {
                 preview.src = ''; preview.classList.add('hidden'); icon.classList.remove('hidden');
@@ -1161,7 +1181,7 @@
 
         function previewPhoto(event) {
             const file = event.target.files[0];
-            if(file) {
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.getElementById('edit-photo-preview');
@@ -1176,32 +1196,35 @@
         function guardarEdicion() {
             const idOriginal = document.getElementById('edit-id').value;
             const nombre = document.getElementById('edit-name').value.trim();
-            if(!nombre) { alert('Ponle un nombre al activo.'); return; }
+            if (!nombre) { alert('Ponle un nombre al activo.'); return; }
 
             const sucursalSel = document.getElementById('edit-sucursal').value;
-            if(sucursalSel === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
+            if (sucursalSel === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
 
             const previewSrc = document.getElementById('edit-photo-preview').src;
             const foto = (previewSrc && previewSrc !== location.href) ? previewSrc : '';
 
-            if(idOriginal) {
+            if (idOriginal) {
                 // Editar existente
                 const asset = masterDB.find(a => a.id === idOriginal);
-                asset.name = nombre;
-                asset.category = document.getElementById('edit-category').value;
-                asset.status = document.getElementById('edit-status').value;
-                asset.responsable = document.getElementById('edit-responsable').value.trim();
-                asset.departamento = document.getElementById('edit-departamento').value.trim();
-                asset.sucursal = sucursalSel;
-                asset.location = document.getElementById('edit-location').value.trim();
-                if(foto) asset.img = foto;
+                if (asset) {
+                    asset.name = nombre;
+                    asset.category = document.getElementById('edit-category').value;
+                    asset.status = document.getElementById('edit-status').value;
+                    asset.responsable = document.getElementById('edit-responsable').value.trim();
+                    asset.departamento = document.getElementById('edit-departamento').value.trim();
+                    asset.sucursal = sucursalSel;
+                    asset.location = document.getElementById('edit-location').value.trim();
+                    if (foto) asset.img = foto;
+                }
             } else {
                 // Crear nuevo
                 let codigo = document.getElementById('edit-code').value.trim().toUpperCase();
-                if(!codigo) codigo = `AST-${Date.now()}`;
-                if(masterDB.find(a => a.id === codigo)) { alert('Ese ID de activo ya existe.'); return; }
+                if (!codigo) codigo = `AST-${Date.now()}`;
+                if (masterDB.find(a => a.id === codigo)) { alert('Ese ID de activo ya existe.'); return; }
                 masterDB.push({
-                    id: codigo, name: nombre,
+                    id: codigo, 
+                    name: nombre,
                     category: document.getElementById('edit-category').value,
                     status: document.getElementById('edit-status').value,
                     responsable: document.getElementById('edit-responsable').value.trim(),
@@ -1210,6 +1233,9 @@
                     location: document.getElementById('edit-location').value.trim(),
                     img: foto
                 });
+                if (sucursalSel && !tiendas.includes(sucursalSel)) {
+                    agregarTienda(sucursalSel);
+                }
             }
 
             guardarDB(DB_KEY, masterDB);
@@ -1222,8 +1248,8 @@
 
         function eliminarActivo() {
             const id = document.getElementById('edit-id').value;
-            if(!id) return;
-            if(!confirm(`¿Eliminar el activo ${id} de forma permanente?`)) return;
+            if (!id) return;
+            if (!confirm(`¿Eliminar el activo ${id} de forma permanente?`)) return;
             masterDB = masterDB.filter(a => a.id !== id);
             guardarDB(DB_KEY, masterDB);
             cerrarModal('modal-edit');
@@ -1240,38 +1266,51 @@
         }
 
         function manejarSelectTienda(selectEl) {
-            if(selectEl.value === '__nueva__') {
+            if (selectEl.value === '__nueva__') {
                 const nombre = prompt('Nombre de la nueva tienda/sucursal:');
-                if(nombre && nombre.trim()) {
+                if (nombre && nombre.trim()) {
                     agregarTienda(nombre.trim());
                     poblarSelectTiendas(selectEl, nombre.trim());
                     poblarFiltrosActivos();
                 } else {
-                    poblarSelectTiendas(selectEl, obtenerTiendas()[0] || '');
+                    const tiendasList = obtenerTiendas();
+                    poblarSelectTiendas(selectEl, tiendasList[0] || '');
                 }
             }
         }
 
         function crearSesion(sucursal) {
-            let inv = masterDB.filter(a => a.sucursal === sucursal).map(a => ({ id: a.id, name: a.name, status: 'missing', isExtra: false }));
-            sessions.push({ id: Date.now(), sucursal: sucursal, estado: 'progreso', fecha: new Date().toLocaleDateString(), inventory: inv });
+            const inv = masterDB.filter(a => a.sucursal === sucursal).map(a => ({ 
+                id: a.id, 
+                name: a.name, 
+                status: 'missing', 
+                isExtra: false 
+            }));
+            sessions.push({ 
+                id: Date.now(), 
+                sucursal: sucursal, 
+                estado: 'progreso', 
+                fecha: new Date().toLocaleDateString(), 
+                inventory: inv 
+            });
             guardarDB(SESSIONS_KEY, sessions);
             actualizarMetricasInicio();
         }
 
         function abrirModalNuevoLevantamiento() {
             modoModalTienda = 'nuevo';
+            sesionTiendaObjetivo = null;
             document.getElementById('modal-tienda-title').innerText = 'Nuevo Levantamiento';
             document.getElementById('modal-tienda-confirm-label').innerText = 'Iniciar Levantamiento';
             poblarSelectTiendas(document.getElementById('tienda-modal-select'));
             document.getElementById('modal-tienda').classList.remove('hidden');
         }
 
-        function abrirModalCambiarTienda(sessionId) {
-            const session = sessions.find(s => s.id === sessionId);
-            if(!session) return;
+        function abrirModalCambiarTienda() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
             modoModalTienda = 'cambiar';
-            sesionTiendaObjetivo = sessionId;
+            sesionTiendaObjetivo = currentSessionId;
             document.getElementById('modal-tienda-title').innerText = 'Cambiar Tienda de la Auditoría';
             document.getElementById('modal-tienda-confirm-label').innerText = 'Guardar Cambio';
             poblarSelectTiendas(document.getElementById('tienda-modal-select'), session.sucursal);
@@ -1281,11 +1320,12 @@
         function confirmarModalTienda() {
             const select = document.getElementById('tienda-modal-select');
             const tienda = select.value;
-            if(!tienda || tienda === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
-            if(modoModalTienda === 'nuevo') {
+            if (!tienda || tienda === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
+            
+            if (modoModalTienda === 'nuevo') {
                 crearSesion(tienda);
                 renderizarSesiones();
-            } else {
+            } else if (modoModalTienda === 'cambiar' && sesionTiendaObjetivo) {
                 cambiarTiendaSesion(sesionTiendaObjetivo, tienda);
             }
             cerrarModal('modal-tienda');
@@ -1293,16 +1333,20 @@
 
         function cambiarTiendaSesion(sessionId, nuevaTienda) {
             const session = sessions.find(s => s.id === sessionId);
-            if(!session) return;
+            if (!session) return;
             session.sucursal = nuevaTienda;
+            // Actualizar inventario: agregar activos de la nueva tienda que falten
             const idsActuales = new Set(session.inventory.map(i => i.id));
             masterDB.filter(a => a.sucursal === nuevaTienda).forEach(a => {
-                if(!idsActuales.has(a.id)) session.inventory.push({ id: a.id, name: a.name, status: 'missing', isExtra: false });
+                if (!idsActuales.has(a.id)) {
+                    session.inventory.push({ id: a.id, name: a.name, status: 'missing', isExtra: false });
+                }
             });
             guardarDB(SESSIONS_KEY, sessions);
             renderizarSesiones();
             actualizarMetricasInicio();
-            if(currentSessionId === sessionId) {
+            // Si es la sesión actual, actualizar vista
+            if (currentSessionId === sessionId) {
                 document.getElementById('current-store-name').innerText = nuevaTienda;
                 renderListaAuditoria();
             }
@@ -1310,10 +1354,17 @@
 
         function renderizarSesiones() {
             const container = document.getElementById('sessions-container');
+            if (!container) return;
             container.innerHTML = '';
+            if (sessions.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-10 text-on-surface-variant">
+                    <p class="text-sm">No hay auditorías activas. ¡Inicia una nueva!</p>
+                </div>`;
+                return;
+            }
             sessions.forEach(session => {
-                const total = session.inventory.length;
-                const enc = session.inventory.filter(i => i.status === 'found').length;
+                const total = session.inventory ? session.inventory.length : 0;
+                const enc = session.inventory ? session.inventory.filter(i => i.status === 'found').length : 0;
                 
                 container.insertAdjacentHTML('beforeend', `
                     <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col gap-4">
@@ -1323,7 +1374,7 @@
                                 <p class="text-xs text-on-surface-variant">Registrado: ${session.fecha}</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button onclick="abrirModalCambiarTienda(${session.id})" class="text-on-surface-variant hover:text-primary p-1 rounded-full bg-surface-variant" title="Cambiar tienda">
+                                <button onclick="abrirModalCambiarTiendaDesdeSesion(${session.id})" class="text-on-surface-variant hover:text-primary p-1 rounded-full bg-surface-variant" title="Cambiar tienda">
                                     <span class="material-symbols-outlined text-[16px]">store</span>
                                 </button>
                                 <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">PAUSADO</span>
@@ -1334,16 +1385,32 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-semibold text-on-surface-variant">${enc} / ${total}</span>
-                            <button onclick="abrirSesion(${session.id})" class="text-xs font-bold bg-primary text-white px-4 py-2 rounded-lg shadow-sm hover:bg-primary-container">CONTINUAR</button>
+                            <button onclick="abrirSesion(${session.id})" class="text-xs font-bold bg-primary text-white px-4 py-2 rounded-lg shadow-sm hover:bg-primary-container hover:text-primary transition-colors">CONTINUAR</button>
                         </div>
                     </div>
                 `);
             });
         }
 
+        function abrirModalCambiarTiendaDesdeSesion(sessionId) {
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+            modoModalTienda = 'cambiar';
+            sesionTiendaObjetivo = sessionId;
+            document.getElementById('modal-tienda-title').innerText = 'Cambiar Tienda de la Auditoría';
+            document.getElementById('modal-tienda-confirm-label').innerText = 'Guardar Cambio';
+            poblarSelectTiendas(document.getElementById('tienda-modal-select'), session.sucursal);
+            document.getElementById('modal-tienda').classList.remove('hidden');
+        }
+
         function abrirSesion(id) {
+            const session = sessions.find(s => s.id === id);
+            if (!session) {
+                alert('La sesión ya no existe.');
+                return;
+            }
             currentSessionId = id;
-            document.getElementById('current-store-name').innerText = sessions.find(s => s.id === id).sucursal;
+            document.getElementById('current-store-name').innerText = session.sucursal;
             renderListaAuditoria();
             cambiarSubVista('sub-escaneo-activo');
         }
@@ -1358,13 +1425,18 @@
         function renderListaAuditoria() {
             const session = sessions.find(s => s.id === currentSessionId);
             const container = document.getElementById('asset-status-list');
+            if (!container) return;
             container.innerHTML = '';
-            let evals = 0;
+            if (!session || !session.inventory) {
+                container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No hay activos en esta auditoría.</p>';
+                return;
+            }
 
+            let evals = 0;
             let sorted = [...session.inventory].sort((a,b) => (a.status === 'found' ? -1 : 1));
             sorted.forEach(item => {
                 const found = item.status === 'found';
-                if(found) evals++;
+                if (found) evals++;
                 let bgClass = found ? 'bg-success-container/30 border-l-success' : 'bg-surface border-l-error';
                 let icon = found ? '<span class="material-symbols-outlined text-success text-[18px]">check_circle</span>' : '<span class="material-symbols-outlined text-error text-[18px]">cancel</span>';
                 
@@ -1375,6 +1447,7 @@
                             <p class="font-bold text-sm text-on-surface font-mono truncate">${item.id}</p>
                             <p class="text-xs text-on-surface-variant truncate">${item.name}</p>
                         </div>
+                        ${item.isExtra ? '<span class="text-[9px] font-bold text-secondary bg-blue-100 px-1.5 py-0.5 rounded">EXTRA</span>' : ''}
                     </div>
                 `);
             });
@@ -1383,87 +1456,155 @@
 
         function processScan(code) {
             const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) {
+                alert('No hay una sesión activa.');
+                stopScanner();
+                return;
+            }
             
             let inSession = session.inventory.find(i => i.id === code);
-            if(inSession) {
-                inSession.status = 'found'; guardarDB(SESSIONS_KEY, sessions); renderListaAuditoria(); actualizarMetricasInicio(); document.getElementById('asset-code-input').value = ''; stopScanner(); return;
+            if (inSession) {
+                if (inSession.status === 'found') {
+                    alert('Este activo ya fue marcado como encontrado.');
+                    stopScanner();
+                    return;
+                }
+                inSession.status = 'found';
+                guardarDB(SESSIONS_KEY, sessions);
+                renderListaAuditoria();
+                actualizarMetricasInicio();
+                document.getElementById('asset-code-input').value = '';
+                stopScanner();
+                return;
             }
 
             let inMaster = masterDB.find(i => i.id === code);
-            if(inMaster) {
+            if (inMaster) {
                 pendingTransferAsset = inMaster;
                 document.getElementById('transfer-id').innerText = inMaster.id;
-                document.getElementById('transfer-store').innerText = inMaster.sucursal;
+                document.getElementById('transfer-store').innerText = inMaster.sucursal || 'Sin asignar';
                 document.getElementById('modal-transfer').classList.remove('hidden');
-                stopScanner(); return;
+                stopScanner();
+                return;
             }
             alert("El activo escaneado NO existe en la base de datos.");
+            stopScanner();
         }
-        function searchManual() { const c = document.getElementById('asset-code-input').value.trim().toUpperCase(); if(c) processScan(c); }
+
+        function searchManual() {
+            const c = document.getElementById('asset-code-input').value.trim().toUpperCase();
+            if (c) processScan(c);
+        }
 
         function confirmarTransferencia() {
-            sessions.find(s => s.id === currentSessionId).inventory.push({ id: pendingTransferAsset.id, name: pendingTransferAsset.name, status: 'found', isExtra: true });
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
+            
+            // Verificar si ya existe en la sesión
+            const existing = session.inventory.find(i => i.id === pendingTransferAsset.id);
+            if (existing) {
+                existing.status = 'found';
+                existing.isExtra = true;
+            } else {
+                session.inventory.push({ 
+                    id: pendingTransferAsset.id, 
+                    name: pendingTransferAsset.name, 
+                    status: 'found', 
+                    isExtra: true 
+                });
+            }
+            
+            // Actualizar sucursal en la base de datos maestra
             const asset = masterDB.find(a => a.id === pendingTransferAsset.id);
-            if(asset) asset.sucursal = sessions.find(s => s.id === currentSessionId).sucursal;
+            if (asset) {
+                asset.sucursal = session.sucursal;
+                guardarDB(DB_KEY, masterDB);
+            }
+            
             guardarDB(SESSIONS_KEY, sessions);
-            guardarDB(DB_KEY, masterDB);
             actualizarMetricasInicio();
-            cerrarModal('modal-transfer'); renderListaAuditoria(); document.getElementById('asset-code-input').value = '';
+            cerrarModal('modal-transfer');
+            renderListaAuditoria();
+            document.getElementById('asset-code-input').value = '';
+            stopScanner();
         }
 
         // GENERACIÓN DE REPORTE PDF (Finalizar Inventario)
         function finalizarInventario() {
-            if(!confirm("¿Deseas finalizar este levantamiento y generar el informe en PDF?")) return;
-            
             const session = sessions.find(s => s.id === currentSessionId);
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            if (!session) {
+                alert('No hay una sesión activa.');
+                return;
+            }
+            if (!confirm("¿Deseas finalizar este levantamiento y generar el informe en PDF?")) return;
             
-            // Título
-            doc.setFontSize(18);
-            doc.text(`Informe de Levantamiento Físico`, 14, 22);
-            doc.setFontSize(12);
-            doc.text(`Sucursal: ${session.sucursal}`, 14, 30);
-            doc.text(`Fecha: ${session.fecha}`, 14, 36);
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Título
+                doc.setFontSize(18);
+                doc.text(`Informe de Levantamiento Físico`, 14, 22);
+                doc.setFontSize(12);
+                doc.text(`Sucursal: ${session.sucursal}`, 14, 30);
+                doc.text(`Fecha: ${session.fecha || new Date().toLocaleDateString()}`, 14, 36);
 
-            // Tabla con jsPDF AutoTable
-            const tableData = session.inventory.map(item => [
-                item.id, 
-                item.name, 
-                item.status === 'found' ? 'Encontrado' : 'Faltante',
-                item.isExtra ? 'Transferido' : 'Regular'
-            ]);
+                // Tabla con jsPDF AutoTable
+                const tableData = session.inventory.map(item => [
+                    item.id, 
+                    item.name, 
+                    item.status === 'found' ? 'Encontrado' : 'Faltante',
+                    item.isExtra ? 'Transferido' : 'Regular'
+                ]);
 
-            doc.autoTable({
-                startY: 45,
-                head: [['ID Activo', 'Descripción', 'Estado', 'Observación']],
-                body: tableData,
-                theme: 'grid',
-                headStyles: { fillColor: [0, 30, 87] } // Azul Kuroda
-            });
+                doc.autoTable({
+                    startY: 45,
+                    head: [['ID Activo', 'Descripción', 'Estado', 'Observación']],
+                    body: tableData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [0, 30, 87] } // Azul Kuroda
+                });
 
-            // Guardar
-            doc.save(`Auditoria_${session.sucursal}_${Date.now()}.pdf`);
+                // Guardar
+                const filename = `Auditoria_${session.sucursal}_${Date.now()}.pdf`;
+                doc.save(filename);
 
-            // Agregar al historial de informes (persistido)
-            reportesGuardados.unshift({ sucursal: session.sucursal, fecha: new Date().toLocaleDateString(), encontrados: session.inventory.filter(i=>i.status==='found').length, total: session.inventory.length });
-            guardarDB(REPORTS_KEY, reportesGuardados);
-            renderizarReportes();
+                // Agregar al historial de informes (persistido)
+                const encontrados = session.inventory.filter(i => i.status === 'found').length;
+                reportesGuardados.unshift({ 
+                    sucursal: session.sucursal, 
+                    fecha: new Date().toLocaleDateString(), 
+                    encontrados: encontrados, 
+                    total: session.inventory.length,
+                    filename: filename
+                });
+                guardarDB(REPORTS_KEY, reportesGuardados);
+                renderizarReportes();
 
-            // Eliminar sesión de pendientes
-            const index = sessions.findIndex(s => s.id === currentSessionId);
-            sessions.splice(index, 1);
-            guardarDB(SESSIONS_KEY, sessions);
-            actualizarMetricasInicio();
-            alert("Informe PDF descargado correctamente.");
-            volverAGestor();
-            cambiarVista('vista-informes'); // Vamos a la pestaña informes
+                // Eliminar sesión de pendientes
+                const index = sessions.findIndex(s => s.id === currentSessionId);
+                if (index !== -1) {
+                    sessions.splice(index, 1);
+                    guardarDB(SESSIONS_KEY, sessions);
+                }
+                actualizarMetricasInicio();
+                alert("Informe PDF descargado correctamente.");
+                volverAGestor();
+                cambiarVista('vista-informes');
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                alert('Ocurrió un error al generar el PDF. Verifica la consola para más detalles.');
+            }
         }
 
         function renderizarReportes() {
             const container = document.getElementById('lista-reportes-pdf');
-            if(!container) return;
+            if (!container) return;
             container.innerHTML = '';
+            if (reportesGuardados.length === 0) {
+                container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No hay reportes generados aún.</p>';
+                return;
+            }
             reportesGuardados.forEach(r => {
                 container.insertAdjacentHTML('beforeend', `
                     <div class="bg-surface border border-outline-variant p-3 rounded-lg flex justify-between items-center shadow-sm">
@@ -1477,31 +1618,79 @@
             });
         }
 
-        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function cerrarModal(id) { 
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('hidden');
+        }
 
         // --- Lector QR ---
         function startScanner() {
             const container = document.getElementById('qr-reader-container');
-            container.classList.remove('hidden'); container.classList.add('active');
-            document.getElementById('btn-start-scan').classList.add('hidden'); document.getElementById('btn-stop-scan').classList.remove('hidden');
-
-            if(html5QrcodeScanner) return; 
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
-                (text) => { processScan(text.toUpperCase()); }, () => {} 
-            ).catch(err => { alert("Verifica permisos de cámara."); stopScanner(); });
+            if (!container) return;
+            
+            container.classList.remove('hidden');
+            container.classList.add('active');
+            document.getElementById('btn-start-scan').classList.add('hidden');
+            document.getElementById('btn-stop-scan').classList.remove('hidden');
+            
+            if (html5QrcodeScanner) {
+                // Si ya existe, solo mostramos el contenedor
+                return;
+            }
+            
+            try {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+                isScanning = true;
+                
+                html5QrcodeScanner.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (text) => { 
+                        if (isScanning) {
+                            processScan(text.toUpperCase()); 
+                        }
+                    }, 
+                    () => {} 
+                ).catch(err => {
+                    console.error('Error al iniciar la cámara:', err);
+                    alert("Verifica permisos de cámara o asegúrate de usar HTTPS.");
+                    stopScanner();
+                });
+            } catch (error) {
+                console.error('Error al crear el escáner:', error);
+                alert('No se pudo iniciar el escáner. Verifica la consola para más detalles.');
+                stopScanner();
+            }
         }
 
         function stopScanner() {
+            isScanning = false;
             const container = document.getElementById('qr-reader-container');
-            if(container) { container.classList.remove('active'); container.classList.add('hidden'); }
-            const bStart = document.getElementById('btn-start-scan'), bStop = document.getElementById('btn-stop-scan');
-            if(bStart) bStart.classList.remove('hidden'); if(bStop) bStop.classList.add('hidden');
-            if(html5QrcodeScanner && html5QrcodeScanner.getState() !== 1) { 
-                html5QrcodeScanner.stop().then(() => { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }).catch(() => { html5QrcodeScanner = null; });
+            if (container) {
+                container.classList.remove('active');
+                container.classList.add('hidden');
+            }
+            const bStart = document.getElementById('btn-start-scan');
+            const bStop = document.getElementById('btn-stop-scan');
+            if (bStart) bStart.classList.remove('hidden');
+            if (bStop) bStop.classList.add('hidden');
+            
+            if (html5QrcodeScanner) {
+                try {
+                    html5QrcodeScanner.stop().then(() => {
+                        html5QrcodeScanner.clear();
+                        html5QrcodeScanner = null;
+                    }).catch(() => {
+                        html5QrcodeScanner = null;
+                    });
+                } catch (e) {
+                    html5QrcodeScanner = null;
+                }
             }
         }
+
+        // Función global para cerrar modales desde el HTML
+        window.cerrarModal = cerrarModal;
     </script>
 </body>
 </html>
