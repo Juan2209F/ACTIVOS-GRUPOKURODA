@@ -11,353 +11,367 @@
     <meta name="apple-mobile-web-app-title" content="Kuroda Activos">
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Activos%20Kuroda%22%2C%22short_name%22%3A%22Kuroda%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%23001e57%22%7D">
     
-    <!-- Librerías Funcionales -->
+    <!-- Estilos: hoja compilada localmente (sin CDN de Tailwind) -->
+    
+    <!-- Librerías Funcionales (Escáner QR, Excel, PDF) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     
     <!-- Fuentes e Iconos -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
     <style>
-        /* ===== RESET BASE ===== */
+        /* Reset base (reemplaza el preflight de Tailwind) */
         *, *::before, *::after { box-sizing: border-box; margin: 0; }
         button, input, select { font: inherit; color: inherit; border: none; background: none; padding: 0; }
         button { cursor: pointer; }
         img { display: block; max-width: 100%; }
         a { color: inherit; text-decoration: none; }
 
-        body { 
-            min-height: 100dvh; 
-            -webkit-tap-highlight-color: transparent;
-            background-color: #f8fafc;
-            color: #0f172a;
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ===== UTILIDADES ===== */
+        body { min-height: 100dvh; -webkit-tap-highlight-color: transparent; }
         .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 80px); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* ===== SPA (Single Page Application) ===== */
+        /* Sistema SPA (Single Page Application) */
         .view-content, .sub-view { display: none; animation: fadeIn 0.3s ease; }
         .view-content.active, .sub-view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ===== ESCÁNER QR ===== */
+        /* Escáner */
         .scanner-line { animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        #qr-reader-container { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 5; background: #000; display: none; 
-        }
+        #qr-reader-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #000; display: none; }
         #qr-reader-container.active { display: block; }
         #reader { width: 100%; height: 100%; }
         #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
 
-        /* ===== MENÚ DESKTOP ===== */
-        .nav-btn.active { background-color: #e0e7ff; color: #001e57; font-weight: 700; }
-        .nav-btn.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+        /* Sidebar oscuro con degradado (firma visual de Argon Dashboard) */
+        .sidebar-argon { background-image:linear-gradient(127deg,#0b1437 0%,#151a45 50%,#241b57 100%); box-shadow:0 0 2rem 0 rgba(136,152,170,0.15); }
+        .nav-btn-argon { color:rgba(255,255,255,0.65); }
+        .nav-btn-argon .material-symbols-outlined { font-size:1.15rem; }
+        .nav-btn-argon:hover { background-color:rgba(255,255,255,0.06); color:#fff; }
+        .nav-btn-argon.active { background-color:rgba(255,255,255,0.1); color:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+        .nav-btn-argon.active .material-symbols-outlined { font-variation-settings:'FILL' 1; color:#11cdef; }
 
-        /* ===== MENÚ MÓVIL ===== */
-        .nav-btn-mob { color: #475569; transition: all 0.2s ease; }
-        .nav-btn-mob.active { background-color: #e0e7ff; color: #4f46e5; border-radius: 12px; }
-        .nav-btn-mob.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+        /* Ritmo vertical y tarjetas: base para una interfaz menos amontonada */
+        /* Argon Dashboard: sombra azulada difusa, radio moderado (no tan redondeado) */
+        .card { background:#ffffff; border:1px solid transparent; border-radius:0.75rem; box-shadow:0 0 2rem 0 rgba(136,152,170,0.15); }
+        .card-hover { transition:box-shadow .18s ease, transform .18s ease; }
+        .card-hover:hover { box-shadow:0 0.5rem 1.5rem 0 rgba(20,23,39,0.15); transform:translateY(-2px); }
+        .section-block { display:flex; flex-direction:column; gap:1.25rem; }
+        .section-heading { display:flex; flex-direction:column; gap:0.25rem; }
+        .section-heading .eyebrow { font-size:0.6875rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#8392ab; }
+        .section-heading h2 { font-size:1.25rem; font-weight:700; color:#344767; letter-spacing:-0.01em; }
+        .section-heading p { font-size:0.8125rem; color:#8392ab; }
+        .kpi-icon { width:2.75rem; height:2.75rem; border-radius:0.75rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; box-shadow:0 4px 6px rgba(50,50,93,0.11), 0 1px 3px rgba(0,0,0,0.08); }
+        .kpi-icon-primary { background-image:linear-gradient(310deg,#5e72e4,#825ee4); }
+        .kpi-icon-success { background-image:linear-gradient(310deg,#2dce89,#2dcecc); }
+        .kpi-icon-error { background-image:linear-gradient(310deg,#f5365c,#f56036); }
+        .kpi-icon-info { background-image:linear-gradient(310deg,#1171ef,#11cdef); }
+        select:focus-visible, input:focus-visible, button:focus-visible { outline:2px solid #5e72e4; outline-offset:2px; }
+        ::selection { background:#cdd6f9; }
 
-        /* ===== RESPONSIVE ===== */
-        /* Desktop (> 768px) */
-        @media (min-width: 769px) { 
-            main.with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); }
-            header.with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); }
+        /* Botones degradados Argon Dashboard */
+        .btn-grad { border:none; color:#fff; box-shadow:0 4px 6px rgba(50,50,93,0.11), 0 1px 3px rgba(0,0,0,0.08); transition:transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+        .btn-grad:hover { transform:translateY(-1px); filter:brightness(1.06); }
+        .btn-grad:active { transform:translateY(1px); }
+        .btn-grad-primary { background-image:linear-gradient(310deg,#5e72e4,#825ee4); }
+        .btn-grad-success { background-image:linear-gradient(310deg,#2dce89,#2dcecc); }
+        .btn-grad-info { background-image:linear-gradient(310deg,#1171ef,#11cdef); }
+        .btn-grad-error { background-image:linear-gradient(310deg,#f5365c,#f56036); }
+
+        @media (min-width: 768px) { 
+            main.with-sidebar { margin-left: 17.5rem; width: calc(100% - 17.5rem); }
+            header.with-sidebar { margin-left: 17.5rem; width: calc(100% - 17.5rem); }
             .pb-safe { padding-bottom: 32px; }
-            .desktop-menu { display: flex; }
-            .mobile-menu { display: none; }
-            .mobile-header-brand { display: none; }
         }
 
-        /* Mobile (< 768px) */
-        @media (max-width: 768px) { 
-            .desktop-menu { display: none; }
-            .mobile-menu { display: flex; }
-            .mobile-header-brand { display: flex; }
-            main.with-sidebar { margin-left: 0; width: 100%; }
-            header.with-sidebar { margin-left: 0; width: 100%; }
-            .mobile-full-height { height: calc(100vh - 80px); }
-        }
-
-        /* ===== ESTILOS ADICIONALES ===== */
-        .bg-background { background-color: #f8fafc; }
-        .bg-primary { background-color: #001e57; }
-        .bg-primary-container { background-color: #e0e7ff; }
-        .bg-surface { background-color: #ffffff; }
-        .bg-surface-variant { background-color: #f1f5f9; }
-        .bg-error { background-color: #dc2626; }
-        .bg-error-container { background-color: #fee2e2; }
-        .bg-success-container { background-color: #dcfce7; }
-        .bg-warning { background-color: #eab308; }
-        .bg-green-600 { background-color: #16a34a; }
-        .bg-green-700 { background-color: #15803d; }
-        .bg-gray-900 { background-color: #111827; }
-        .bg-black\/60 { background-color: rgba(0,0,0,0.6); }
-        .bg-white\/70 { background-color: rgba(255,255,255,0.7); }
-        .bg-surface\/50 { background-color: rgba(255,255,255,0.5); }
-        
-        .text-primary { color: #001e57; }
-        .text-on-surface { color: #0f172a; }
-        .text-on-surface-variant { color: #475569; }
-        .text-outline { color: #94a3b8; }
-        .text-error { color: #dc2626; }
-        .text-success { color: #16a34a; }
-        .text-warning { color: #eab308; }
-        .text-white { color: #fff; }
-        .text-black { color: #000; }
-        .text-blue-800 { color: #1e40af; }
-        .text-secondary { color: #4059aa; }
-
-        .border { border: 1px solid; }
-        .border-outline-variant { border-color: #cbd5e1; }
-        .border-primary { border-color: #001e57; }
-        .border-primary-container { border-color: #e0e7ff; }
-        .border-error { border-color: #dc2626; }
-        .border-warning { border-color: #eab308; }
-        .border-success\/20 { border-color: rgba(22,163,74,0.2); }
-        .border-error\/20 { border-color: rgba(220,38,38,0.2); }
-        .border-blue-200\/60 { border-color: rgba(191,219,254,0.6); }
-        .border-dashed { border-style: dashed; }
-        .border-t-4 { border-top-width: 4px; border-top-style: solid; }
-        .border-t-primary { border-top-color: #001e57; }
-        .border-t-success { border-top-color: #16a34a; }
-        .border-t-error { border-top-color: #dc2626; }
-        .border-l-4 { border-left-width: 4px; border-left-style: solid; }
-        .border-l-success { border-left-color: #16a34a; }
-        .border-l-error { border-left-color: #dc2626; }
-        
-        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
-        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); }
-        .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
-        .shadow-\[0_-4px_6px_-1px_rgba\(0\,0\,0\,0\.05\)\] { box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.05); }
-        .shadow-\[0_0_8px_rgba\(74\,222\,128\,0\.8\)\] { box-shadow: 0 0 8px rgba(74,222,128,0.8); }
-
-        .rounded { border-radius: 0.25rem; }
-        .rounded-lg { border-radius: 0.5rem; }
-        .rounded-xl { border-radius: 0.75rem; }
-        .rounded-2xl { border-radius: 1rem; }
-        .rounded-full { border-radius: 9999px; }
-        .rounded-t-xl { border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
-        .rounded-b-xl { border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
-        .rounded-r-lg { border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem; }
-        .rounded-tl-lg { border-top-left-radius: 0.5rem; }
-        .rounded-tr-lg { border-top-right-radius: 0.5rem; }
-        .rounded-bl-lg { border-bottom-left-radius: 0.5rem; }
-        .rounded-br-lg { border-bottom-right-radius: 0.5rem; }
-
-        .backdrop-blur-sm { backdrop-filter: blur(4px); }
-        .transition { transition: all 0.15s ease; }
-        .transition-colors { transition: color 0.15s, background-color 0.15s, border-color 0.15s; }
-        .transition-transform { transition: transform 0.15s; }
-        .active\:scale-95:active { transform: scale(0.95); }
-        .hover\:scale-110:hover { transform: scale(1.1); }
-        .group-hover\:scale-110:hover { transform: scale(1.1); }
-        .hover\:bg-primary-container:hover { background-color: #e0e7ff; }
-        .hover\:bg-surface-variant:hover { background-color: #f1f5f9; }
-        .hover\:bg-error-container:hover { background-color: #fee2e2; }
-        .hover\:bg-green-700:hover { background-color: #15803d; }
-        .hover\:bg-red-700:hover { background-color: #b91c1c; }
-        .hover\:text-primary:hover { color: #001e57; }
-        .hover\:underline:hover { text-decoration: underline; }
-        .focus\:border-primary:focus { border-color: #001e57; }
-        .focus\:outline-none:focus { outline: none; }
-
-        .snap-x { scroll-snap-type: x mandatory; }
-        .snap-start { scroll-snap-align: start; }
-
-        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .uppercase { text-transform: uppercase; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        .font-sans { font-family: 'Inter', sans-serif; }
-        .tracking-tight { letter-spacing: -0.025em; }
-        .antialiased { -webkit-font-smoothing: antialiased; }
-
-        .z-10 { z-index: 10; }
-        .z-20 { z-index: 20; }
-        .z-30 { z-index: 30; }
-        .z-40 { z-index: 40; }
-        .z-50 { z-index: 50; }
-        .z-\[100\] { z-index: 100; }
-
-        .fixed { position: fixed; }
-        .absolute { position: absolute; }
-        .relative { position: relative; }
-        .sticky { position: sticky; }
-        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-        .inset-y-0 { top: 0; bottom: 0; }
-        .top-0 { top: 0; }
-        .bottom-0 { bottom: 0; }
-        .bottom-6 { bottom: 1.5rem; }
-        .left-0 { left: 0; }
-        .right-0 { right: 0; }
-
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .flex-wrap { flex-wrap: wrap; }
-        .flex-1 { flex: 1 1 0%; }
-        .flex-shrink-0 { flex-shrink: 0; }
-        .items-center { align-items: center; }
-        .items-start { align-items: flex-start; }
-        .justify-center { justify-content: center; }
-        .justify-between { justify-content: space-between; }
-        .justify-end { justify-content: flex-end; }
-        .justify-around { justify-content: space-around; }
-        .gap-1 { gap: 0.25rem; }
-        .gap-2 { gap: 0.5rem; }
-        .gap-3 { gap: 0.75rem; }
-        .gap-4 { gap: 1rem; }
-        .gap-6 { gap: 1.5rem; }
-        .gap-8 { gap: 2rem; }
-
-        .grid { display: grid; }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .col-span-full { grid-column: 1 / -1; }
-
-        .w-full { width: 100%; }
-        .w-8 { width: 2rem; }
-        .w-10 { width: 2.5rem; }
-        .w-12 { width: 3rem; }
-        .w-14 { width: 3.5rem; }
-        .w-16 { width: 4rem; }
-        .w-48 { width: 12rem; }
-        .w-64 { width: 16rem; }
-        .min-w-0 { min-width: 0; }
-        .min-w-\[100px\] { min-width: 100px; }
-        .max-w-sm { max-width: 24rem; }
-        .max-w-md { max-width: 28rem; }
-        .max-w-\[1152px\] { max-width: 1152px; }
-        .max-h-\[90vh\] { max-height: 90vh; }
-
-        .h-full { height: 100%; }
-        .h-2 { height: 0.5rem; }
-        .h-0\.5 { height: 0.125rem; }
-        .h-8 { height: 2rem; }
-        .h-10 { height: 2.5rem; }
-        .h-12 { height: 3rem; }
-        .h-14 { height: 3.5rem; }
-        .h-16 { height: 4rem; }
-        .h-20 { height: 5rem; }
-        .h-32 { height: 8rem; }
-        .h-48 { height: 12rem; }
-        .h-\[500px\] { height: 500px; }
-        .h-fit { height: fit-content; }
-        .aspect-square { aspect-ratio: 1 / 1; }
-
-        .m-0 { margin: 0; }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .mt-1 { margin-top: 0.25rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .mt-6 { margin-top: 1.5rem; }
-        .mb-1 { margin-bottom: 0.25rem; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-3 { margin-bottom: 0.75rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-8 { margin-bottom: 2rem; }
-
-        .p-1 { padding: 0.25rem; }
-        .p-2 { padding: 0.5rem; }
-        .p-2\.5 { padding: 0.625rem; }
-        .p-3 { padding: 0.75rem; }
-        .p-4 { padding: 1rem; }
-        .p-5 { padding: 1.25rem; }
-        .p-6 { padding: 1.5rem; }
-        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-        .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
-        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-        .py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
-        .pt-1 { padding-top: 0.25rem; }
-        .pt-2 { padding-top: 0.5rem; }
-        .pt-5 { padding-top: 1.25rem; }
-        .pt-6 { padding-top: 1.5rem; }
-        .pb-2 { padding-bottom: 0.5rem; }
-        .pb-6 { padding-bottom: 1.5rem; }
-        .pl-3 { padding-left: 0.75rem; }
-        .pl-10 { padding-left: 2.5rem; }
-        .pr-2 { padding-right: 0.5rem; }
-        .pr-4 { padding-right: 1rem; }
-
-        .text-left { text-align: left; }
-        .text-center { text-align: center; }
-        .text-xs { font-size: 0.75rem; }
-        .text-sm { font-size: 0.875rem; }
-        .text-lg { font-size: 1.125rem; }
-        .text-xl { font-size: 1.25rem; }
-        .text-2xl { font-size: 1.5rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .text-4xl { font-size: 2.25rem; }
-        .text-6xl { font-size: 3.75rem; }
-        .text-\[9px\] { font-size: 9px; }
-        .text-\[10px\] { font-size: 10px; }
-        .text-\[11px\] { font-size: 11px; }
-        .text-\[14px\] { font-size: 14px; }
-        .text-\[16px\] { font-size: 16px; }
-        .text-\[18px\] { font-size: 18px; }
-        .text-\[26px\] { font-size: 26px; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .whitespace-nowrap { white-space: nowrap; }
-        .overflow-hidden { overflow: hidden; }
-        .overflow-x-auto { overflow-x: auto; }
-        .overflow-y-auto { overflow-y: auto; }
-        .object-cover { object-fit: cover; }
-        .pointer-events-none { pointer-events: none; }
-        .cursor-pointer { cursor: pointer; }
-        .block { display: block; }
-        .hidden { display: none; }
-        .inline-flex { display: inline-flex; }
-
-        /* ===== RESPONSIVE GRID ===== */
-        @media (min-width: 640px) {
-            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-        @media (min-width: 768px) {
-            .md\:flex { display: flex; }
-            .md\:flex-row { flex-direction: row; }
-            .md\:items-center { align-items: center; }
-            .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .md\:w-auto { width: auto; }
-            .md\:w-64 { width: 16rem; }
-            .md\:h-64 { height: 16rem; }
-            .md\:aspect-\[4\/3\] { aspect-ratio: 4 / 3; }
-            .md\:flex-none { flex: none; }
-            .md\:px-8 { padding-left: 2rem; padding-right: 2rem; }
-            .md\:hidden { display: none; }
-        }
-        @media (min-width: 1024px) {
-            .lg\:flex-row { flex-direction: row; }
-            .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .lg\:w-1\/2 { width: 50%; }
-            .lg\:h-auto { height: auto; }
-        }
+        /* Utilidades equivalentes a Tailwind (generadas localmente, sin CDN) */
+.absolute{position:absolute}
+.active\:scale-95:active{transform:scale(0.95)}
+.antialiased{-webkit-font-smoothing:antialiased}
+.aspect-square{aspect-ratio:1 / 1}
+.backdrop-blur-sm{backdrop-filter:blur(4px)}
+.bg-background{background-color:#f8f9fe}
+.bg-black{background-color:#000000}
+.bg-black\/60{background-color:rgba(0,0,0,0.6)}
+.bg-blue-100{background-color:#dbeafe}
+.bg-error{background-color:#dc2626}
+.bg-error-container{background-color:#fee2e2}
+.bg-gray-900{background-color:#111827}
+.bg-green-400{background-color:#4ade80}
+.bg-green-600{background-color:#16a34a}
+.bg-primary{background-color:#5e72e4}
+.bg-primary-container{background-color:#e9edfc}
+.bg-success-container{background-color:#dcfce7}
+.bg-surface{background-color:#ffffff}
+.bg-surface-variant{background-color:#f1f5f9}
+.bg-surface-variant\/50{background-color:rgba(241,245,249,0.5)}
+.bg-surface\/50{background-color:rgba(255,255,255,0.5)}
+.bg-warning{background-color:#eab308}
+.bg-white\/70{background-color:rgba(255,255,255,0.7)}
+.block{display:block}
+.border{border-width:1px;border-style:solid}
+.border-2{border-width:2px;border-style:solid}
+.border-b{border-bottom-width:1px;border-bottom-style:solid}
+.border-b-4{border-bottom-width:4px;border-bottom-style:solid}
+.border-blue-200\/60{border-color:rgba(191,219,254,0.6)}
+.border-current{border-color:currentColor}
+.border-dashed{border-style:dashed}
+.border-error{border-color:#dc2626}
+.border-error\/20{border-color:rgba(220,38,38,0.2)}
+.border-l-4{border-left-width:4px;border-left-style:solid}
+.border-outline-variant{border-color:#e9ecef}
+.border-primary{border-color:#001e57}
+.border-primary-container{border-color:#cdd6f9}
+.border-r{border-right-width:1px;border-right-style:solid}
+.border-r-4{border-right-width:4px;border-right-style:solid}
+.border-success\/20{border-color:rgba(22,163,74,0.2)}
+.border-surface-variant{border-color:#f1f5f9}
+.border-t{border-top-width:1px;border-top-style:solid}
+.border-t-4{border-top-width:4px;border-top-style:solid}
+.border-t-error{border-top-color:#dc2626}
+.border-t-primary{border-top-color:#001e57}
+.border-t-success{border-top-color:#16a34a}
+.border-warning{border-color:#eab308}
+.border-white{border-color:#ffffff}
+.border-y{border-top-width:1px;border-bottom-width:1px;border-style:solid}
+.bottom-0{bottom:0}
+.bottom-6{bottom:1.5rem}
+.col-span-full{grid-column:1 / -1}
+.cursor-pointer{cursor:pointer}
+.fixed{position:fixed}
+.flex{display:flex}
+.flex-1{flex:1 1 0%}
+.flex-col{flex-direction:column}
+.flex-shrink-0{flex-shrink:0}
+.flex-wrap{flex-wrap:wrap}
+.focus\:border-primary:focus{border-color:#001e57}
+.focus\:outline-none:focus{outline:none}
+.font-bold{font-weight:700}
+.font-mono{font-family:'JetBrains Mono',monospace}
+.font-sans{font-family:'Open Sans',sans-serif}
+.font-semibold{font-weight:600}
+.gap-1{gap:0.25rem}
+.gap-2{gap:0.5rem}
+.gap-3{gap:0.75rem}
+.gap-4{gap:1.0rem}
+.gap-6{gap:1.5rem}
+.gap-8{gap:2.0rem}
+.grid{display:grid}
+.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}
+.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}
+.group:hover .group-hover\:scale-110{transform:scale(1.1)}
+.h-0\.5{height:0.125rem}
+.h-10{height:2.5rem}
+.h-12{height:3.0rem}
+.h-14{height:3.5rem}
+.h-16{height:4.0rem}
+.h-2{height:0.5rem}
+.h-20{height:5.0rem}
+.h-32{height:8.0rem}
+.h-48{height:12.0rem}
+.h-8{height:2.0rem}
+.h-\[500px\]{height:500px}
+.h-fit{height:fit-content}
+.h-full{height:100%}
+.hidden{display:none}
+.hover\:bg-error-container:hover{background-color:#fee2e2}
+.hover\:bg-green-700:hover{background-color:#15803d}
+.hover\:bg-primary-container:hover{background-color:#e0e7ff}
+.hover\:bg-red-700:hover{background-color:#b91c1c}
+.hover\:bg-surface-variant:hover{background-color:#f1f5f9}
+.hover\:text-primary:hover{color:#001e57}
+.hover\:underline:hover{text-decoration:underline}
+.inline-flex{display:inline-flex}
+.inset-0{top:0;right:0;bottom:0;left:0}
+.inset-y-0{top:0;bottom:0}
+.items-center{align-items:center}
+.items-start{align-items:flex-start}
+.justify-around{justify-content:space-around}
+.justify-between{justify-content:space-between}
+.justify-center{justify-content:center}
+.justify-end{justify-content:flex-end}
+.left-0{left:0}
+.max-h-\[90vh\]{max-height:90vh}
+.max-w-\[1152px\]{max-width:1152px}
+.max-w-md{max-width:28rem}
+.max-w-sm{max-width:24rem}
+.mb-1{margin-bottom:0.25rem}
+.mb-2{margin-bottom:0.5rem}
+.mb-3{margin-bottom:0.75rem}
+.mb-4{margin-bottom:1.0rem}
+.mb-8{margin-bottom:2.0rem}
+.min-w-0{min-width:0}
+.min-w-\[100px\]{min-width:100px}
+.mt-1{margin-top:0.25rem}
+.mt-2{margin-top:0.5rem}
+.mt-6{margin-top:1.5rem}
+.mx-auto{margin-left:auto;margin-right:auto}
+.ml-auto{margin-left:auto}
+.object-cover{object-fit:cover}
+.outline-none{outline:none}
+.overflow-hidden{overflow:hidden}
+.overflow-x-auto{overflow-x:auto}
+.overflow-y-auto{overflow-y:auto}
+.p-0\.5{padding:0.125rem}
+.p-1{padding:0.25rem}
+.p-2{padding:0.5rem}
+.p-2\.5{padding:0.625rem}
+.p-3{padding:0.75rem}
+.p-4{padding:1.0rem}
+.p-5{padding:1.25rem}
+.p-6{padding:1.5rem}
+.pb-2{padding-bottom:0.5rem}
+.pb-6{padding-bottom:1.5rem}
+.pl-10{padding-left:2.5rem}
+.pl-11{padding-left:2.75rem}
+.pl-3{padding-left:0.75rem}
+.pl-4{padding-left:1rem}
+.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}
+.pointer-events-none{pointer-events:none}
+.pr-2{padding-right:0.5rem}
+.pr-4{padding-right:1.0rem}
+.pt-1{padding-top:0.25rem}
+.pt-2{padding-top:0.5rem}
+.pt-5{padding-top:1.25rem}
+.pt-6{padding-top:1.5rem}
+.px-2{padding-left:0.5rem;padding-right:0.5rem}
+.px-3{padding-left:0.75rem;padding-right:0.75rem}
+.px-4{padding-left:1.0rem;padding-right:1.0rem}
+.px-5{padding-left:1.25rem;padding-right:1.25rem}
+.px-6{padding-left:1.5rem;padding-right:1.5rem}
+.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}
+.py-1{padding-top:0.25rem;padding-bottom:0.25rem}
+.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}
+.py-10{padding-top:2.5rem;padding-bottom:2.5rem}
+.py-2{padding-top:0.5rem;padding-bottom:0.5rem}
+.py-3{padding-top:0.75rem;padding-bottom:0.75rem}
+.py-6{padding-top:1.5rem;padding-bottom:1.5rem}
+.relative{position:relative}
+.right-0{right:0}
+.rounded{border-radius:0.25rem}
+.rounded-2xl{border-radius:1rem}
+.rounded-b-xl{border-bottom-left-radius:0.75rem;border-bottom-right-radius:0.75rem}
+.rounded-bl-lg{border-bottom-left-radius:0.5rem}
+.rounded-br-lg{border-bottom-right-radius:0.5rem}
+.rounded-full{border-radius:9999px}
+.rounded-lg{border-radius:0.5rem}
+.rounded-md{border-radius:0.375rem}
+.rounded-r-lg{border-top-right-radius:0.5rem;border-bottom-right-radius:0.5rem}
+.rounded-t-xl{border-top-left-radius:0.75rem;border-top-right-radius:0.75rem}
+.rounded-tl-lg{border-top-left-radius:0.5rem}
+.rounded-tr-lg{border-top-right-radius:0.5rem}
+.rounded-xl{border-radius:0.75rem}
+.shadow-\[0_-4px_6px_-1px_rgba\(0\,0\,0\,0\.05\)\]{box-shadow:0 -4px 6px -1px rgba(0,0,0,0.05)}
+.shadow-\[0_0_8px_rgba\(74\,222\,128\,0\.8\)\]{box-shadow:0 0 8px rgba(74,222,128,0.8)}
+.shadow-lg{box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1)}
+.shadow-md{box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -2px rgba(0,0,0,0.1)}
+.shadow-sm{box-shadow:0 1px 2px 0 rgba(0,0,0,0.05)}
+.shadow-xl{box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1)}
+.snap-start{scroll-snap-align:start}
+.snap-x{scroll-snap-type:x mandatory}
+.space-y-2 > * + *{margin-top:0.5rem}
+.space-y-3 > * + *{margin-top:0.75rem}
+.space-y-4 > * + *{margin-top:1rem}
+.sticky{position:sticky}
+.text-2xl{font-size:1.5rem}
+.text-3xl{font-size:1.875rem}
+.text-4xl{font-size:2.25rem}
+.text-6xl{font-size:3.75rem}
+.text-\[10px\]{font-size:10px}
+.text-\[11px\]{font-size:11px}
+.text-\[12px\]{font-size:12px}
+.text-\[13px\]{font-size:13px}
+.text-\[14px\]{font-size:14px}
+.text-\[16px\]{font-size:16px}
+.text-\[18px\]{font-size:18px}
+.text-\[26px\]{font-size:26px}
+.text-\[9px\]{font-size:9px}
+.text-black{color:#000}
+.text-blue-800{color:#1e40af}
+.text-center{text-align:center}
+.text-error{color:#dc2626}
+.text-left{text-align:left}
+.text-lg{font-size:1.125rem}
+.text-on-surface{color:#344767}
+.text-on-surface-variant{color:#8392ab}
+.text-outline{color:#94a3b8}
+.text-primary{color:#5e72e4}
+.text-secondary{color:#4059aa}
+.text-sm{font-size:0.875rem}
+.text-success{color:#16a34a}
+.text-warning{color:#eab308}
+.text-white{color:#fff}
+.text-xl{font-size:1.25rem}
+.text-xs{font-size:0.75rem}
+.leading-relaxed{line-height:1.6}
+.leading-snug{line-height:1.35}
+.top-0{top:0}
+.top-4{top:1rem}
+.left-4{left:1rem}
+.bottom-4{bottom:1rem}
+.tracking-tight{letter-spacing:-0.025em}
+.transition{transition-property:all;transition-duration:0.15s}
+.transition-all{transition-property:all;transition-duration:0.15s}
+.transition-colors{transition-property:color,background-color,border-color;transition-duration:0.15s}
+.transition-transform{transition-property:transform;transition-duration:0.15s}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.uppercase{text-transform:uppercase}
+.w-10{width:2.5rem}
+.w-12{width:3.0rem}
+.w-14{width:3.5rem}
+.w-16{width:4.0rem}
+.w-48{width:12.0rem}
+.w-56{width:14rem}
+.w-64{width:16.0rem}
+.w-8{width:2.0rem}
+.w-full{width:100%}
+.whitespace-nowrap{white-space:nowrap}
+.z-10{z-index:10}
+.z-20{z-index:20}
+.z-30{z-index:30}
+.z-40{z-index:40}
+.z-50{z-index:50}
+.z-\[100\]{z-index:100}
+.gap-5{gap:1.25rem}
+.gap-7{gap:1.75rem}
+.gap-10{gap:2.5rem}
+.p-7{padding:1.75rem}
+.p-8{padding:2rem}
+.px-7{padding-left:1.75rem;padding-right:1.75rem}
+.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}
+.pt-3{padding-top:0.75rem}
+.pt-4{padding-top:1rem}
+.pb-1{padding-bottom:0.25rem}
+.pb-3{padding-bottom:0.75rem}
+.pb-4{padding-bottom:1rem}
+.mb-5{margin-bottom:1.25rem}
+.mb-6{margin-bottom:1.5rem}
+.mb-10{margin-bottom:2.5rem}
+.mt-3{margin-top:0.75rem}
+.mt-4{margin-top:1rem}
+.rounded-2\.5xl{border-radius:1.25rem}
+.max-w-\[1280px\]{max-width:1280px}
+.min-w-\[140px\]{min-width:140px}
+.min-w-\[160px\]{min-width:160px}
+.divide-y > * + *{border-top-width:1px;border-top-style:solid;border-color:#f1f5f9}
+@media (min-width:640px){.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:flex-none{flex:none}.sm\:w-auto{width:auto}.sm\:items-center{align-items:center}.sm\:min-w-\[160px\]{min-width:160px}}
+@media (min-width:1024px){.lg\:flex-row{flex-direction:row}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:h-auto{height:auto}.lg\:w-1\/2{width:50.0%}}
+@media (min-width:768px){.md\:aspect-\[4\/3\]{aspect-ratio:4 / 3}.md\:flex{display:flex}.md\:flex-none{flex:none}.md\:flex-row{flex-direction:row}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:h-64{height:16.0rem}.md\:hidden{display:none}.md\:items-center{align-items:center}.md\:px-8{padding-left:2.0rem;padding-right:2.0rem}.md\:w-64{width:16.0rem}.md\:w-auto{width:auto}}
     </style>
 </head>
-<body>
+<body class="bg-background text-on-surface font-sans h-full flex flex-col antialiased">
 
-    <!-- ===== HEADER ===== -->
-    <header class="bg-surface border-b border-outline-variant shadow-sm w-full sticky top-0 z-40 with-sidebar h-16 flex items-center">
-        <div class="flex justify-between items-center w-full px-4 md:px-8 mx-auto max-w-[1152px]">
-            <!-- Mobile Brand -->
-            <div class="mobile-header-brand flex items-center gap-2">
+    <!-- HEADER -->
+    <header class="bg-surface w-full sticky top-0 z-40 with-sidebar h-16 md:h-20 flex items-center shadow-sm">
+        <div class="flex justify-between items-center w-full px-4 md:px-8 mx-auto max-w-[1280px]">
+            <div class="flex items-center gap-2 md:hidden">
                 <span class="material-symbols-outlined text-primary text-2xl font-bold">inventory_2</span>
             </div>
             <h1 class="text-xl font-bold text-primary tracking-tight">Grupo Kuroda</h1>
@@ -367,139 +381,184 @@
         </div>
     </header>
 
-    <!-- ===== MENU LATERAL DESKTOP ===== -->
-    <div class="desktop-menu hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant z-50 pt-6 px-4 shadow-sm">
-        <div class="flex items-center gap-3 px-4 mb-8">
-            <span class="material-symbols-outlined text-primary text-3xl font-bold">inventory_2</span>
-            <span class="text-2xl font-bold text-primary tracking-tight">Activos Kuroda</span>
+    <!-- MENU LATERAL (PC) - Sidebar oscuro con degradado, estilo Argon Dashboard -->
+    <div class="hidden md:flex flex-col fixed left-4 top-4 bottom-4 w-64 rounded-xl z-50 pt-7 px-5 sidebar-argon">
+        <div class="flex items-center gap-3 px-3 mb-10">
+            <span class="material-symbols-outlined text-2xl font-bold" style="color:#fff">inventory_2</span>
+            <span class="text-xl font-bold tracking-tight" style="color:#fff">Activos Kuroda</span>
         </div>
-        <nav class="flex flex-col gap-2" id="desktop-nav">
-            <button onclick="cambiarVista('vista-inicio')" class="nav-btn active w-full flex items-center gap-4 text-on-surface-variant px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-surface-variant">
+        <nav class="flex flex-col gap-1.5" id="desktop-nav">
+            <button onclick="cambiarVista('vista-inicio')" class="nav-btn-argon active w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-colors">
                 <span class="material-symbols-outlined text-xl">home</span> Inicio
             </button>
-            <button onclick="cambiarVista('vista-activos')" class="nav-btn w-full flex items-center gap-4 text-on-surface-variant px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-surface-variant">
+            <button onclick="cambiarVista('vista-activos')" class="nav-btn-argon w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-colors">
                 <span class="material-symbols-outlined text-xl">account_tree</span> Activos
             </button>
-            <button onclick="cambiarVista('vista-escaneo')" class="nav-btn w-full flex items-center gap-4 text-on-surface-variant px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-surface-variant">
+            <button onclick="cambiarVista('vista-escaneo')" class="nav-btn-argon w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-colors">
                 <span class="material-symbols-outlined text-xl">qr_code_scanner</span> Escaneo
             </button>
-            <button onclick="cambiarVista('vista-informes')" class="nav-btn w-full flex items-center gap-4 text-on-surface-variant px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-surface-variant">
+            <button onclick="cambiarVista('vista-informes')" class="nav-btn-argon w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-colors">
                 <span class="material-symbols-outlined text-xl">pie_chart</span> Informes
             </button>
         </nav>
     </div>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="flex-1 w-full max-w-[1152px] mx-auto px-4 md:px-8 py-6 pb-safe flex flex-col gap-8 with-sidebar relative">
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="flex-1 w-full max-w-[1280px] mx-auto px-4 md:px-8 py-7 md:py-10 pb-safe flex flex-col gap-10 with-sidebar relative">
         
-        <!-- ===== VISTA 1: INICIO ===== -->
-        <section id="vista-inicio" class="view-content active flex flex-col gap-6">
-            
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex items-center justify-between border-t-4 border-t-primary">
-                    <div><p class="text-xs font-bold text-on-surface-variant mb-1">Total Activos</p><p class="text-3xl font-bold text-primary" id="dash-total">0</p></div>
-                    <div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary"><span class="material-symbols-outlined">dataset</span></div>
+        <!-- =================== VISTA 1: INICIO (Diseño Imagen 2) =================== -->
+        <section id="vista-inicio" class="view-content active section-block">
+
+            <div class="section-heading">
+                <span class="eyebrow">Dashboard</span>
+                <h2>Panorama general</h2>
+                <p>Datos en vivo de tu inventario y de los levantamientos realizados.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <!-- Total -->
+                <div class="card p-6 flex items-center justify-between">
+                    <div><p class="text-[13px] font-bold text-on-surface-variant mb-2 uppercase tracking-tight">Total Activos</p><p class="text-3xl font-bold text-on-surface" id="dash-total">0</p></div>
+                    <div class="kpi-icon kpi-icon-primary"><span class="material-symbols-outlined">dataset</span></div>
                 </div>
-                <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex items-center justify-between border-t-4 border-t-success">
-                    <div><p class="text-xs font-bold text-on-surface-variant mb-1">Encontrados</p><p class="text-3xl font-bold text-primary" id="dash-encontrados">0</p></div>
-                    <div class="w-10 h-10 rounded-full bg-success-container flex items-center justify-center text-success border border-success/20"><span class="material-symbols-outlined">check_circle</span></div>
+                <!-- Encontrados -->
+                <div class="card p-6 flex items-center justify-between">
+                    <div><p class="text-[13px] font-bold text-on-surface-variant mb-2 uppercase tracking-tight">Encontrados</p><p class="text-3xl font-bold text-on-surface" id="dash-encontrados">0</p></div>
+                    <div class="kpi-icon kpi-icon-success"><span class="material-symbols-outlined">check_circle</span></div>
                 </div>
-                <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex items-center justify-between border-t-4 border-t-error">
-                    <div><p class="text-xs font-bold text-on-surface-variant mb-1">No Encontrados</p><p class="text-3xl font-bold text-primary" id="dash-no-encontrados">0</p></div>
-                    <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error border border-error/20"><span class="material-symbols-outlined">cancel</span></div>
+                <!-- No Encontrados -->
+                <div class="card p-6 flex items-center justify-between">
+                    <div><p class="text-[13px] font-bold text-on-surface-variant mb-2 uppercase tracking-tight">No Encontrados</p><p class="text-3xl font-bold text-on-surface" id="dash-no-encontrados">0</p></div>
+                    <div class="kpi-icon kpi-icon-error"><span class="material-symbols-outlined">cancel</span></div>
                 </div>
             </div>
 
-            <!-- Quick Access -->
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="cambiarVista('vista-activos')" class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex items-center gap-3 hover:bg-surface-variant transition text-left">
-                    <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined">database</span></div>
-                    <div class="min-w-0"><p class="text-xs font-bold text-on-surface-variant truncate">Base de Datos</p><p class="text-lg font-bold text-primary" id="dash-bd-count">0</p></div>
-                </button>
-                <button onclick="cambiarVista('vista-informes')" class="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex items-center gap-3 hover:bg-surface-variant transition text-left">
-                    <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary flex-shrink-0"><span class="material-symbols-outlined">pie_chart</span></div>
-                    <div class="min-w-0"><p class="text-xs font-bold text-on-surface-variant truncate">Informes Generados</p><p class="text-lg font-bold text-primary" id="dash-informes-count">0</p></div>
-                </button>
+            <!-- Progreso general de auditorías -->
+            <div class="card p-6" id="progreso-auditoria-card">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base font-bold text-on-surface">Progreso de auditorías</h2>
+                    <span class="text-sm font-bold text-on-surface-variant" id="progreso-auditoria-pct">0%</span>
+                </div>
+                <div class="w-full h-3 bg-surface-variant rounded-full overflow-hidden">
+                    <div id="progreso-auditoria-bar" class="h-full rounded-full" style="width:0%; background-image:linear-gradient(90deg,#2dce89,#2dcecc); transition:width .4s ease;"></div>
+                </div>
+                <p class="text-xs text-on-surface-variant mt-2" id="progreso-auditoria-detalle">Aún no se han registrado escaneos.</p>
             </div>
 
-            <!-- Categories -->
-            <div>
-                <h2 class="text-sm font-bold text-primary mb-3">Categorías</h2>
-                <div class="flex overflow-x-auto gap-4 pb-2 scrollbar-hide snap-x">
-                    <button onclick="filtrarPorCategoria('Vehículos')" class="snap-start min-w-[100px] bg-surface border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:bg-surface-variant active:scale-95 transition">
-                        <div class="text-primary bg-primary-container rounded-full p-3"><span class="material-symbols-outlined">directions_car</span></div>
-                        <span class="text-xs font-bold text-on-surface">Vehículos</span>
-                    </button>
-                    <button onclick="filtrarPorCategoria('IT')" class="snap-start min-w-[100px] bg-surface border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:bg-surface-variant active:scale-95 transition">
-                        <div class="text-primary bg-primary-container rounded-full p-3"><span class="material-symbols-outlined">computer</span></div>
-                        <span class="text-xs font-bold text-on-surface">IT</span>
-                    </button>
-                    <button onclick="filtrarPorCategoria('Maquinaria')" class="snap-start min-w-[100px] bg-surface border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:bg-surface-variant active:scale-95 transition">
-                        <div class="text-primary bg-primary-container rounded-full p-3"><span class="material-symbols-outlined">precision_manufacturing</span></div>
-                        <span class="text-xs font-bold text-on-surface">Maquinaria</span>
-                    </button>
-                    <button onclick="filtrarPorCategoria('Mobiliario')" class="snap-start min-w-[100px] bg-surface border border-outline-variant rounded-xl p-4 flex flex-col items-center justify-center gap-2 shadow-sm hover:bg-surface-variant active:scale-95 transition">
-                        <div class="text-primary bg-primary-container rounded-full p-3"><span class="material-symbols-outlined">chair</span></div>
-                        <span class="text-xs font-bold text-on-surface">Mobiliario</span>
-                    </button>
+            <!-- Gráficas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="card p-6">
+                    <h2 class="text-base font-bold text-on-surface mb-1">Activos por categoría</h2>
+                    <p class="text-xs text-on-surface-variant mb-4">Distribución actual del inventario.</p>
+                    <div style="height:240px"><canvas id="chart-categorias"></canvas></div>
                 </div>
-            </div>
-            
-            <!-- Recent Assets -->
-            <div class="flex flex-col gap-4 border border-blue-200/60 rounded-2xl p-4 bg-surface/50 border-dashed">
-                <div class="flex justify-between items-center mb-1">
-                    <h2 class="text-sm font-bold text-primary">Activos Recientes</h2>
-                    <button onclick="cambiarVista('vista-activos')" class="text-xs font-semibold text-secondary hover:underline">Ver Todos</button>
+                <div class="card p-6">
+                    <h2 class="text-base font-bold text-on-surface mb-1">Activos por estado</h2>
+                    <p class="text-xs text-on-surface-variant mb-4">Operativos, en reparación y de baja.</p>
+                    <div style="height:240px"><canvas id="chart-estados"></canvas></div>
                 </div>
-                <div id="home-recent-list" class="flex flex-col gap-3"></div>
+                <div class="card p-6 lg:col-span-2">
+                    <h2 class="text-base font-bold text-on-surface mb-1">Encontrados vs. no encontrados</h2>
+                    <p class="text-xs text-on-surface-variant mb-4">Resultado acumulado de todos los levantamientos realizados.</p>
+                    <div style="height:220px"><canvas id="chart-encontrados"></canvas></div>
+                </div>
             </div>
         </section>
 
-        <!-- ===== VISTA 2: ACTIVOS ===== -->
+        <!-- =================== VISTA 2: PADRÓN DE ACTIVOS (Carga y Edición) =================== -->
         <section id="vista-activos" class="view-content flex flex-col gap-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 class="text-xl font-bold text-primary">Base de Datos de Activos</h2>
-                <div class="flex gap-2 w-full md:w-auto flex-wrap">
-                    <button onclick="abrirNuevoActivo()" class="flex-1 md:flex-none bg-primary text-white font-bold px-4 py-2 rounded-lg hover:bg-primary-container hover:text-primary transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="section-heading">
+                    <span class="eyebrow">Inventario</span>
+                    <h2>Base de datos de activos</h2>
+                    <p>Consulta, edita y carga tu inventario completo.</p>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <!-- Botón Nuevo Activo (acción principal) -->
+                    <button onclick="abrirNuevoActivo()" class="flex-1 sm:flex-none btn-grad btn-grad-primary font-bold px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm">
                         <span class="material-symbols-outlined text-[18px]">add</span> Nuevo
                     </button>
-                    <button onclick="descargarPlantilla()" class="flex-1 md:flex-none bg-surface border border-outline-variant text-on-surface-variant font-bold px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
-                        <span class="material-symbols-outlined text-[18px]">description</span> Plantilla
-                    </button>
-                    <label class="flex-1 md:flex-none cursor-pointer bg-surface border border-outline-variant text-on-surface-variant font-bold px-4 py-2 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
-                        <span class="material-symbols-outlined text-[18px]">upload_file</span> Importar
-                        <input type="file" id="excel-upload" accept=".xlsx, .xls" class="hidden" onchange="importarExcel(event)">
-                    </label>
-                    <button onclick="exportarExcel()" class="flex-1 md:flex-none bg-green-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm">
-                        <span class="material-symbols-outlined text-[18px]">download</span> Exportar
-                    </button>
+                    <!-- Menú Herramientas: Plantilla / Importar / Exportar -->
+                    <div class="relative flex-1 sm:flex-none">
+                        <button onclick="toggleMenuHerramientas(event)" class="w-full bg-surface border border-outline-variant text-on-surface-variant font-bold px-4 py-2.5 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-1.5 shadow-sm text-sm">
+                            <span class="material-symbols-outlined text-[18px]">build</span> Herramientas
+                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                        </button>
+                        <div id="menu-herramientas" class="hidden absolute right-0 mt-2 w-64 card p-2 z-30 flex flex-col gap-1 shadow-lg">
+                            <button onclick="descargarPlantilla()" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-3 text-sm font-semibold text-on-surface">
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">description</span> Descargar plantilla
+                            </button>
+                            <label class="w-full cursor-pointer text-left px-3 py-2.5 rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-3 text-sm font-semibold text-on-surface">
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">upload_file</span> Importar Excel
+                                <input type="file" id="excel-upload" accept=".xlsx, .xls" class="hidden" onchange="importarExcel(event)">
+                            </label>
+                            <button onclick="exportarExcel()" class="w-full text-left px-3 py-2.5 rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-3 text-sm font-semibold text-on-surface">
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">download</span> Exportar a Excel
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Info Banner -->
-            <div class="bg-primary-container/40 border border-primary-container rounded-xl p-4 flex items-start gap-3">
+            <!-- Aviso: Centro de carga de activos -->
+            <div class="bg-primary-container/40 border border-primary-container rounded-xl p-5 flex items-start gap-4">
                 <span class="material-symbols-outlined text-primary">info</span>
-                <div class="text-sm text-on-surface">
+                <div class="text-sm text-on-surface leading-relaxed">
                     <p class="font-bold text-primary mb-1">Toda la app se alimenta desde aquí</p>
-                    <p class="text-on-surface-variant">Carga tus activos de forma manual con "Nuevo", o sube un Excel. Descarga la <strong>Plantilla</strong> si quieres el formato ideal, o sube tu archivo tal cual lo tengas: el sistema te dejará indicar qué columna es cada dato antes de importar.</p>
+                    <p class="text-on-surface-variant">Carga tus activos de forma manual con <strong>Nuevo</strong>, o desde <strong>Herramientas</strong> descarga la plantilla ideal o sube tu Excel tal cual lo tengas (por ejemplo un reporte contable). El sistema te deja indicar qué columna es cada dato antes de importar, y luego puedes corregir cualquier campo manualmente.</p>
                 </div>
             </div>
 
-            <!-- Search -->
+            <!-- Categorías (filtro rápido) -->
+            <div class="section-block" style="gap:0.875rem">
+                <h2 class="text-base font-bold text-on-surface">Categorías</h2>
+                <div class="flex overflow-x-auto gap-4 pb-2 scrollbar-hide snap-x">
+                    <button onclick="filtrarPorCategoria('Vehículos')" class="snap-start min-w-[140px] card card-hover p-5 flex flex-col items-center justify-center gap-3">
+                        <div class="text-primary bg-primary-container rounded-full p-3.5"><span class="material-symbols-outlined">directions_car</span></div>
+                        <span class="text-sm font-bold text-on-surface">Vehículos</span>
+                    </button>
+                    <button onclick="filtrarPorCategoria('IT')" class="snap-start min-w-[140px] card card-hover p-5 flex flex-col items-center justify-center gap-3">
+                        <div class="text-primary bg-primary-container rounded-full p-3.5"><span class="material-symbols-outlined">computer</span></div>
+                        <span class="text-sm font-bold text-on-surface">IT</span>
+                    </button>
+                    <button onclick="filtrarPorCategoria('Maquinaria')" class="snap-start min-w-[140px] card card-hover p-5 flex flex-col items-center justify-center gap-3">
+                        <div class="text-primary bg-primary-container rounded-full p-3.5"><span class="material-symbols-outlined">precision_manufacturing</span></div>
+                        <span class="text-sm font-bold text-on-surface">Maquinaria</span>
+                    </button>
+                    <button onclick="filtrarPorCategoria('Mobiliario')" class="snap-start min-w-[140px] card card-hover p-5 flex flex-col items-center justify-center gap-3">
+                        <div class="text-primary bg-primary-container rounded-full p-3.5"><span class="material-symbols-outlined">chair</span></div>
+                        <span class="text-sm font-bold text-on-surface">Mobiliario</span>
+                    </button>
+                    <button onclick="filtrarPorCategoria('General')" class="snap-start min-w-[140px] card card-hover p-5 flex flex-col items-center justify-center gap-3">
+                        <div class="text-primary bg-primary-container rounded-full p-3.5"><span class="material-symbols-outlined">category</span></div>
+                        <span class="text-sm font-bold text-on-surface">General</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Activos Recientes -->
+            <div class="section-block card p-6" style="gap:1rem">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-base font-bold text-on-surface">Activos recientes</h2>
+                </div>
+                <div id="home-recent-list" class="flex flex-col gap-3">
+                    <!-- Inyectado por JS -->
+                </div>
+            </div>
+
             <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-outline">search</span>
                 </div>
-                <input id="search-input" onkeyup="renderDirectorio()" class="w-full bg-surface border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary shadow-sm" placeholder="Buscar por nombre, ID o sucursal..." type="text">
+                <input id="search-input" onkeyup="renderDirectorio()" class="w-full bg-surface border border-outline-variant rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-primary shadow-sm" placeholder="Buscar por nombre, ID o sucursal..." type="text">
             </div>
 
-            <!-- Filters -->
-            <div class="flex flex-col md:flex-row gap-3">
-                <select id="filtro-tienda-select" onchange="renderDirectorio()" class="w-full md:w-auto bg-surface border border-outline-variant rounded-xl px-4 py-2 text-sm shadow-sm">
+            <div class="flex flex-col sm:flex-row gap-3">
+                <select id="filtro-tienda-select" onchange="renderDirectorio()" class="w-full sm:w-auto sm:min-w-[160px] bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm shadow-sm">
                     <option value="">Todas las sucursales</option>
                 </select>
-                <select id="filtro-categoria-select" onchange="renderDirectorio()" class="w-full md:w-auto bg-surface border border-outline-variant rounded-xl px-4 py-2 text-sm shadow-sm">
+                <select id="filtro-categoria-select" onchange="renderDirectorio()" class="w-full sm:w-auto sm:min-w-[160px] bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm shadow-sm">
                     <option value="">Todas las categorías</option>
                     <option value="IT">IT</option>
                     <option value="Vehículos">Vehículos</option>
@@ -509,28 +568,31 @@
                 </select>
             </div>
 
-            <!-- Asset Grid -->
-            <div id="lista-directorio" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="lista-directorio" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Inyectado por JS -->
+            </div>
         </section>
 
-        <!-- ===== VISTA 3: ESCÁNER ===== -->
+        <!-- =================== VISTA 3: ESCÁNER / GESTOR =================== -->
         <section id="vista-escaneo" class="view-content h-full">
             
-            <!-- Sub: Gestor -->
-            <div id="sub-gestor" class="sub-view active flex flex-col gap-6">
-                <div class="flex flex-col md:flex-row justify-between md:items-center bg-surface rounded-xl p-6 shadow-sm border border-outline-variant gap-4">
+            <!-- SUB-VISTA: GESTOR DE SESIONES -->
+            <div id="sub-gestor" class="sub-view active section-block">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center card p-6 gap-4">
                     <div>
-                        <h2 class="text-xl font-bold text-primary">Auditorías Físicas</h2>
-                        <p class="text-sm text-on-surface-variant mt-1">Inicia o retoma un inventario por sucursal.</p>
+                        <h2 class="text-xl font-bold text-primary">Auditorías físicas</h2>
+                        <p class="text-sm text-on-surface-variant mt-1.5">Inicia o retoma un inventario por sucursal.</p>
                     </div>
-                    <button onclick="abrirModalNuevoLevantamiento()" class="bg-primary text-white font-bold px-5 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-primary-container hover:text-primary transition-colors shadow-md">
-                        <span class="material-symbols-outlined">add</span> NUEVO LEVANTAMIENTO
+                    <button onclick="abrirModalNuevoLevantamiento()" class="btn-grad btn-grad-primary font-bold px-5 py-3 rounded-xl flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">add</span> Nuevo levantamiento
                     </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="sessions-container"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="sessions-container">
+                    <!-- Inyectado por JS -->
+                </div>
             </div>
 
-            <!-- Sub: Escáner Activo -->
+            <!-- SUB-VISTA: ESCÁNER ACTIVO (Cambia de pantalla) -->
             <div id="sub-escaneo-activo" class="sub-view flex flex-col lg:flex-row gap-6">
                 
                 <!-- Columna Izquierda: Cámara -->
@@ -539,11 +601,11 @@
                         <button onclick="volverAGestor()" class="text-on-surface-variant hover:text-primary flex items-center gap-1 font-bold text-sm">
                             <span class="material-symbols-outlined text-[18px]">arrow_back</span> Salir
                         </button>
-                        <button onclick="abrirModalCambiarTienda()" class="flex items-center gap-1 text-sm font-bold text-primary hover:underline" id="current-store-name">Sucursal</button>
+                        <button onclick="abrirModalCambiarTienda(currentSessionId)" class="flex items-center gap-1 text-sm font-bold text-primary hover:underline" id="current-store-name">Sucursal</button>
                         <span class="text-xs font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full" id="metric-progreso">0/0</span>
                     </div>
 
-                    <!-- QR Reader -->
+                    <!-- Lector QR -->
                     <div class="relative w-full aspect-square md:aspect-[4/3] bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-outline-variant">
                         <div id="qr-reader-container" class="absolute inset-0 z-10 hidden bg-black">
                             <div id="reader" class="w-full h-full"></div>
@@ -558,124 +620,160 @@
                             </div>
                         </div>
                         <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-30">
-                            <button onclick="startScanner()" id="btn-start-scan" class="bg-primary text-white font-bold px-6 py-3 rounded-full shadow-lg flex items-center gap-2 active:scale-95">
+                            <button onclick="startScanner()" id="btn-start-scan" class="btn-grad btn-grad-info font-bold px-6 py-3 rounded-full flex items-center gap-2">
                                 <span class="material-symbols-outlined">camera_alt</span> Iniciar Cámara
                             </button>
-                            <button onclick="stopScanner()" id="btn-stop-scan" class="hidden bg-error text-white font-bold px-6 py-3 rounded-full shadow-lg flex items-center gap-2 active:scale-95">
+                            <button onclick="stopScanner()" id="btn-stop-scan" class="hidden btn-grad btn-grad-error font-bold px-6 py-3 rounded-full flex items-center gap-2">
                                 <span class="material-symbols-outlined">stop</span> Detener
                             </button>
                         </div>
                     </div>
 
-                    <!-- Manual Input -->
+                    <!-- Ingreso Manual -->
                     <div class="bg-surface p-4 rounded-xl border border-outline-variant shadow-sm flex gap-2">
                         <input type="text" id="asset-code-input" placeholder="ID del activo..." class="flex-1 border border-outline-variant rounded-lg px-3 py-2 text-sm font-mono focus:border-primary outline-none uppercase">
-                        <button onclick="searchManual()" class="bg-primary text-white font-bold px-4 rounded-lg flex items-center gap-1 active:scale-95">Buscar</button>
+                        <button onclick="searchManual()" class="btn-grad btn-grad-primary font-bold px-4 rounded-lg flex items-center gap-1">Buscar</button>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Lista -->
+                <!-- Columna Derecha: Lista y Generación PDF -->
                 <div class="w-full lg:w-1/2 bg-surface rounded-xl shadow-sm border border-outline-variant flex flex-col h-[500px] lg:h-auto">
                     <div class="p-4 border-b border-outline-variant bg-surface-variant rounded-t-xl flex justify-between items-center">
                         <h3 class="text-sm font-bold text-primary flex items-center gap-2">
                             <span class="material-symbols-outlined">checklist</span> Progreso Actual
                         </h3>
+                        <!-- Boton para finalizar y generar PDF -->
                         <button onclick="finalizarInventario()" class="text-xs font-bold text-white bg-error px-3 py-1.5 rounded-lg shadow-sm hover:bg-red-700 transition flex items-center gap-1">
                             <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> Finalizar
                         </button>
                     </div>
-                    <div id="asset-status-list" class="flex-1 overflow-y-auto p-4 space-y-2 bg-surface rounded-b-xl"></div>
+                    <div id="asset-status-list" class="flex-1 overflow-y-auto p-4 space-y-2 bg-surface rounded-b-xl">
+                        <!-- JS Inyecta lista de activos -->
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== VISTA 4: INFORMES ===== -->
-        <section id="vista-informes" class="view-content flex flex-col gap-6">
-            <h2 class="text-xl font-bold text-primary">Informes Generados</h2>
-            <div class="bg-surface rounded-xl p-6 border border-outline-variant shadow-sm text-center">
-                <span class="material-symbols-outlined text-6xl text-outline mb-4">description</span>
-                <h3 class="text-lg font-bold text-primary">Historial de Reportes</h3>
-                <p class="text-sm text-on-surface-variant mt-2 max-w-md mx-auto">Al finalizar una auditoría en la pestaña "Escaneo", los reportes PDF se guardarán aquí para su consulta posterior.</p>
-                <div id="lista-reportes-pdf" class="mt-6 flex flex-col gap-3 text-left"></div>
+        <!-- =================== VISTA 4: INFORMES =================== -->
+        <section id="vista-informes" class="view-content section-block">
+            <div class="section-heading">
+                <span class="eyebrow">Auditoría</span>
+                <h2>Informes generados</h2>
+                <p>Consulta el historial de auditorías finalizadas y filtra por fecha.</p>
+            </div>
+
+            <div class="card p-5 flex flex-col sm:flex-row sm:items-end gap-4">
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Desde</label>
+                    <input type="date" id="filtro-informes-desde" onchange="renderizarReportes()" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface focus:border-primary outline-none">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Hasta</label>
+                    <input type="date" id="filtro-informes-hasta" onchange="renderizarReportes()" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface focus:border-primary outline-none">
+                </div>
+                <button onclick="limpiarFiltroInformes()" class="px-4 py-2.5 rounded-lg border border-outline-variant text-on-surface-variant font-bold text-sm hover:bg-surface-variant transition-colors">Limpiar</button>
+            </div>
+
+            <div id="informes-lista-wrap" class="flex flex-col gap-3">
+                <div id="lista-reportes-pdf" class="flex flex-col gap-3">
+                    <!-- Inyectado por JS -->
+                </div>
+                <div id="informes-empty-state" class="card p-10 text-center hidden">
+                    <span class="material-symbols-outlined text-6xl text-outline mb-4">description</span>
+                    <h3 class="text-lg font-bold text-on-surface" id="informes-empty-title">Aún no hay informes</h3>
+                    <p class="text-sm text-on-surface-variant mt-2 max-w-md mx-auto leading-relaxed" id="informes-empty-text">Al finalizar una auditoría en la pestaña "Escaneo", los reportes PDF se guardarán aquí para su consulta posterior.</p>
+                </div>
             </div>
         </section>
 
-        <!-- ===== MODALES ===== -->
+        <!-- =================== MODALES =================== -->
         
-        <!-- Modal Editar Activo -->
+        <!-- Modal Editar Activo (con Fotografía) -->
         <div id="modal-edit" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
-            <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-primary max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
+            <div class="bg-surface p-7 rounded-2xl shadow-xl max-w-md w-full border-t-4 border-primary max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold text-on-surface" id="modal-edit-title">Editar Activo</h3>
-                    <button onclick="cerrarModal('modal-edit')" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+                    <button onclick="cerrarModal('modal-edit')" class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                <input type="hidden" id="edit-id">
 
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">Fotografía</label>
-                <div class="mb-4">
-                    <label class="flex items-center justify-center w-full h-32 border-2 border-dashed border-primary-container rounded-xl cursor-pointer hover:bg-surface-variant relative overflow-hidden group bg-surface-variant/50">
-                        <img id="edit-photo-preview" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-primary z-10 group-hover:scale-110 transition-transform bg-white/70 rounded-full w-12 h-12 shadow-sm backdrop-blur-sm" id="edit-photo-icon">
-                            <span class="material-symbols-outlined">photo_camera</span>
+                <div class="flex flex-col gap-4">
+                    <input type="hidden" id="edit-id">
+
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Fotografía del activo</label>
+                        <!-- El capture="environment" abre la cámara directamente en móviles -->
+                        <label class="flex items-center justify-center w-full h-36 border-2 border-dashed border-primary-container rounded-xl cursor-pointer hover:bg-surface-variant relative overflow-hidden group bg-surface-variant/50 transition-colors">
+                            <img id="edit-photo-preview" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <div class="flex flex-col items-center justify-center text-primary z-10 group-hover:scale-110 transition-transform bg-white/70 rounded-full w-12 h-12 shadow-sm backdrop-blur-sm" id="edit-photo-icon">
+                                <span class="material-symbols-outlined">photo_camera</span>
+                            </div>
+                            <input id="edit-photo" type="file" accept="image/*" capture="environment" class="hidden" onchange="previewPhoto(event)">
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">ID de activo</label>
+                        <input type="text" id="edit-code" placeholder="Se genera automático si se deja vacío" class="w-full border border-outline-variant rounded-lg p-3 text-sm font-mono uppercase focus:border-primary outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Nombre</label>
+                        <input type="text" id="edit-name" class="w-full border border-outline-variant rounded-lg p-3 text-sm focus:border-primary outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Categoría</label>
+                            <select id="edit-category" class="w-full border border-outline-variant rounded-lg p-3 text-sm bg-surface focus:border-primary outline-none">
+                                <option value="IT">IT</option>
+                                <option value="Vehículos">Vehículos</option>
+                                <option value="Maquinaria">Maquinaria</option>
+                                <option value="Mobiliario">Mobiliario</option>
+                                <option value="General">General</option>
+                            </select>
                         </div>
-                        <input id="edit-photo" type="file" accept="image/*" capture="environment" class="hidden" onchange="previewPhoto(event)">
-                    </label>
-                </div>
-
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">ID de Activo</label>
-                <input type="text" id="edit-code" placeholder="Se genera automático si se deja vacío" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm mb-3 font-mono uppercase">
-
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">Nombre</label>
-                <input type="text" id="edit-name" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm mb-3">
-
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-bold text-on-surface-variant mb-1">Categoría</label>
-                        <select id="edit-category" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface">
-                            <option value="IT">IT</option>
-                            <option value="Vehículos">Vehículos</option>
-                            <option value="Maquinaria">Maquinaria</option>
-                            <option value="Mobiliario">Mobiliario</option>
-                            <option value="General">General</option>
-                        </select>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Estado</label>
+                            <select id="edit-status" class="w-full border border-outline-variant rounded-lg p-3 text-sm bg-surface focus:border-primary outline-none">
+                                <option value="OPERATIVO">Operativo</option>
+                                <option value="EN REPARACIÓN">En reparación</option>
+                                <option value="BAJA">Baja</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-on-surface-variant mb-1">Estado</label>
-                        <select id="edit-status" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface">
-                            <option value="OPERATIVO">Operativo</option>
-                            <option value="EN REPARACIÓN">En reparación</option>
-                            <option value="BAJA">Baja</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-bold text-on-surface-variant mb-1">Responsable</label>
-                        <input type="text" id="edit-responsable" placeholder="Nombre" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Responsable</label>
+                            <input type="text" id="edit-responsable" placeholder="Nombre" class="w-full border border-outline-variant rounded-lg p-3 text-sm focus:border-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Departamento</label>
+                            <input type="text" id="edit-departamento" placeholder="Departamento" class="w-full border border-outline-variant rounded-lg p-3 text-sm focus:border-primary outline-none">
+                        </div>
                     </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-on-surface-variant mb-1">Departamento</label>
-                        <input type="text" id="edit-departamento" placeholder="Departamento" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm">
+                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Sucursal</label>
+                        <select id="edit-sucursal" onchange="manejarSelectTienda(this)" class="w-full border border-outline-variant rounded-lg p-3 text-sm bg-surface focus:border-primary outline-none"></select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Ubicación</label>
+                        <input type="text" id="edit-location" class="w-full border border-outline-variant rounded-lg p-3 text-sm focus:border-primary outline-none">
                     </div>
                 </div>
 
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">Sucursal</label>
-                <select id="edit-sucursal" onchange="manejarSelectTienda(this)" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface mb-3"></select>
-
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">Ubicación</label>
-                <input type="text" id="edit-location" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm mb-4">
-
-                <div class="flex gap-2">
+                <div class="flex gap-2 mt-6">
                     <button id="btn-eliminar-activo" onclick="eliminarActivo()" class="hidden px-4 py-3 rounded-xl border border-error text-error font-bold hover:bg-error-container transition-colors">
                         <span class="material-symbols-outlined text-[18px]">delete</span>
                     </button>
-                    <button onclick="guardarEdicion()" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl shadow-md hover:bg-primary-container hover:text-primary transition-colors">Guardar Cambios</button>
+                    <button onclick="guardarEdicion()" class="flex-1 btn-grad btn-grad-primary font-bold py-3 rounded-xl">Guardar cambios</button>
                 </div>
             </div>
         </div>
 
-        <!-- Modal Transferencia -->
+        <!-- Modal Alertas (Transferencia) -->
         <div id="modal-transfer" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
             <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-warning">
                 <h3 class="text-lg font-bold text-on-surface mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-warning">warning</span> Cambio de Sucursal</h3>
@@ -687,47 +785,51 @@
             </div>
         </div>
 
-        <!-- Modal Tienda -->
+        <!-- Modal Selección de Tienda (Nuevo Levantamiento / Cambiar Tienda) -->
         <div id="modal-tienda" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
-            <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-primary">
-                <div class="flex justify-between items-center mb-4">
+            <div class="bg-surface p-7 rounded-2xl shadow-xl max-w-sm w-full border-t-4 border-primary">
+                <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold text-on-surface" id="modal-tienda-title">Nuevo Levantamiento</h3>
-                    <button onclick="cerrarModal('modal-tienda')" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+                    <button onclick="cerrarModal('modal-tienda')" class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                <label class="block text-xs font-bold text-on-surface-variant mb-1">Tienda / Sucursal</label>
-                <select id="tienda-modal-select" onchange="manejarSelectTienda(this)" class="w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface mb-4"></select>
-                <button onclick="confirmarModalTienda()" class="w-full bg-primary text-white font-bold py-3 rounded-xl shadow-md hover:bg-primary-container hover:text-primary transition-colors" id="modal-tienda-confirm-label">Iniciar Levantamiento</button>
+                <label class="block text-xs font-bold text-on-surface-variant mb-1.5 uppercase tracking-tight">Tienda / Sucursal</label>
+                <select id="tienda-modal-select" onchange="manejarSelectTienda(this)" class="w-full border border-outline-variant rounded-lg p-3 text-sm bg-surface mb-6 focus:border-primary outline-none"></select>
+                <button onclick="confirmarModalTienda()" class="w-full btn-grad btn-grad-primary font-bold py-3 rounded-xl" id="modal-tienda-confirm-label">Iniciar Levantamiento</button>
             </div>
         </div>
 
-        <!-- Modal Import -->
+        <!-- Modal Mapeo de Columnas (Importación flexible de Excel) -->
         <div id="modal-import" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
-            <div class="bg-surface p-6 rounded-2xl shadow-xl max-w-2xl w-full border-t-4 border-primary max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-on-surface">Mapeo de Columnas — Importar Excel</h3>
-                    <button onclick="cerrarModal('modal-import')" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+            <div class="bg-surface p-7 rounded-2xl shadow-xl max-w-2xl w-full border-t-4 border-primary max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-on-surface">Mapeo de columnas — Importar Excel</h3>
+                    <button onclick="cerrarModal('modal-import')" class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">close</span></button>
                 </div>
-                <p class="text-sm text-on-surface-variant mb-4">Indica qué dato contiene cada columna de tu archivo. El sistema intenta adivinarlo automáticamente; ajústalo si hace falta.</p>
-                <div id="import-mapping-fields" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
-                <label class="flex items-center gap-2 text-sm font-semibold text-on-surface-variant mb-2 bg-surface-variant/60 p-3 rounded-lg">
-                    <input type="checkbox" id="import-filtrar-resumen" checked class="w-4 h-4 accent-current"> Omitir filas sin un ID válido
+                <p class="text-sm text-on-surface-variant mb-5 leading-relaxed">Indica qué dato contiene cada columna de tu archivo. El sistema intenta adivinarlo automáticamente; ajústalo si hace falta. Las columnas en "Ignorar" no se importan.</p>
+
+                <div id="import-mapping-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5"></div>
+
+                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant mb-5 bg-surface-variant/60 p-3.5 rounded-lg">
+                    <input type="checkbox" id="import-filtrar-resumen" checked class="w-4 h-4 accent-current flex-shrink-0"> Omitir filas sin un ID válido (encabezados, totales o filas de resumen)
                 </label>
-                <h4 class="text-xs font-bold text-on-surface-variant mb-2 mt-3">Vista previa</h4>
-                <div class="overflow-x-auto border border-outline-variant rounded-lg mb-1">
+
+                <h4 class="text-xs font-bold text-on-surface-variant mb-2 uppercase tracking-tight">Vista previa (primeras filas)</h4>
+                <div class="overflow-x-auto border border-outline-variant rounded-lg mb-2">
                     <table class="w-full text-xs" id="import-preview-table"></table>
                 </div>
-                <p class="text-xs text-on-surface-variant mb-4" id="import-total-filas"></p>
-                <div class="flex gap-2">
-                    <button onclick="cerrarModal('modal-import')" class="px-4 py-3 rounded-xl border border-outline-variant text-on-surface-variant font-bold">Cancelar</button>
-                    <button onclick="confirmarImportacionMapeada()" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl shadow-md hover:bg-primary-container hover:text-primary transition-colors">Importar Activos</button>
+                <p class="text-xs text-on-surface-variant mb-6" id="import-total-filas"></p>
+
+                <div class="flex gap-3">
+                    <button onclick="cerrarModal('modal-import')" class="px-5 py-3 rounded-xl border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-variant transition-colors">Cancelar</button>
+                    <button onclick="confirmarImportacionMapeada()" class="flex-1 btn-grad btn-grad-success font-bold py-3 rounded-xl">Importar activos</button>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- ===== NAVEGACIÓN INFERIOR (MÓVIL) ===== -->
-    <nav class="mobile-menu md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-20 px-2 pb-2 pt-1" id="mobile-nav">
+    <!-- NAVEGACIÓN INFERIOR (MÓVIL - Diseño exacto Imagen 2) -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-20 px-2 pb-2 pt-1" id="mobile-nav">
         <button onclick="cambiarVista('vista-inicio')" class="nav-btn-mob active flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all">
             <span class="material-symbols-outlined text-[26px] mb-1">home</span>
             <span class="text-[11px] font-semibold">Inicio</span>
@@ -741,63 +843,141 @@
             <span class="text-[11px] font-semibold">Escaneo</span>
         </button>
         <button onclick="cambiarVista('vista-informes')" class="nav-btn-mob flex flex-col items-center justify-center w-16 py-1.5 rounded-xl transition-all">
-            <span class="material-symbols-outlined text-[26px] mb-1">person</span>
-            <span class="text-[11px] font-semibold">Perfil</span>
+            <span class="material-symbols-outlined text-[26px] mb-1">pie_chart</span>
+            <span class="text-[11px] font-semibold">Informes</span>
         </button>
     </nav>
+    <style>
+        /* Colores activos menú móvil (paleta Argon) */
+        .nav-btn-mob { color: #8392ab; }
+        .nav-btn-mob.active { background-color: #e9edfc; color: #5e72e4; border-radius: 12px; }
+        .nav-btn-mob.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    </style>
 
-    <!-- ===== JAVASCRIPT ===== -->
+    <!-- LOGICA JAVASCRIPT -->
     <script>
-        // =====================================================
-        // 1. CONFIGURACIÓN Y CONSTANTES
-        // =====================================================
+        // --- 1. BASE DE DATOS MAESTRA (persistida en este dispositivo) ---
         const DB_KEY = 'kuroda_master_db';
         const SESSIONS_KEY = 'kuroda_sessions';
         const REPORTS_KEY = 'kuroda_reportes';
-        const TIENDAS_KEY = 'kuroda_tiendas';
 
-        // =====================================================
-        // 2. DATOS DE EJEMPLO
-        // =====================================================
         const datosEjemplo = [
-            { id: "AST-2023-0891", name: 'Laptop Dell XPS 15', category: 'IT', status: 'OPERATIVO', sucursal: 'Oficina Central', location: 'Piso 3', img: '', responsable: 'Juan Pérez', departamento: 'Sistemas' },
-            { id: "VEH-2021-0042", name: 'Toyota Hilux 4x4', category: 'Vehículos', status: 'EN REPARACIÓN', sucursal: 'Planta A', location: 'Taller Mecánico', img: '', responsable: 'María López', departamento: 'Logística' },
-            { id: "MOB-2022-1105", name: 'Silla Ergonómica Herman', category: 'Mobiliario', status: 'OPERATIVO', sucursal: 'Oficina Central', location: 'Sala Juntas', img: '', responsable: 'Carlos Ruiz', departamento: 'Administración' }
+            { id: '25000002', name: 'RAM 4000 CHASIS CABINA "PL"TRANS.MAN 5 VEL TR4050', category: 'Vehículos', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '25000009', name: 'NISSAN NP300 NP300 ESTACAS TM DH AC 6 VEL BCO/GRIS', category: 'Vehículos', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '25000015', name: 'MONTACARGAS EQUIPO HYSTER FORKLIFT MOD. UT 25P', category: 'Maquinaria', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '25000087', name: 'CHEVROLET TORNADO PICK UP LS PAQ B MOD 2020', category: 'Vehículos', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000079', name: 'LOCKER BOX TN ,LOCKER', category: 'Mobiliario', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000082', name: 'RELOJ CHECADOR LATHEM', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000083', name: 'MOLDURA RACK FISHER MOD.DJ987', category: 'Mobiliario', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000084', name: 'FISHER MODULAR EXPRESS', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000085', name: 'EQUIPO DE SONIDO COMPLETO', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000086', name: 'CHECADOR TIENDA', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000152', name: 'AC PORTATIL RHEEM 1TON 115V', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000158', name: 'MINISPLIT R-410A FRIO/CALOR 2T 220V RHEEM', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000171', name: 'MINISPLIT INVERTER 17 SEER FRIO/CAL 1T 110', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000172', name: 'MINISPLIT INVERTER 17 SEER FRIO/CAL 1T 110', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '30000198', name: 'REFRIGERADOR 21´ MT2170S MAYTAG TOP MOUNT', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000026', name: 'SOFTWARE FUNCIONAL ESPECIFICO', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000056', name: 'LICENCIA OFFICE STANDARD 2021', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000163', name: 'FABRICACION Y MANTENIMIENTO A ESTRUCTURAS', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000164', name: 'TORRES METALICAS 6MTS x 60CMS, 6MTS X 90CMS,', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000165', name: '15 MAMPARAS PARA SANITARIOS LAMINADO COMPACTO', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000167', name: 'FAB.Y HAB.ESTRUCTURA METALICA MEZZANINE,', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000168', name: 'SUM.Y FAB.DE SITE AREA MEZZANINE,PINTURA AREA EXH.', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000169', name: 'HAB.Y FAB.EXTENSION DE MEZZANINE, PINTURA', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000170', name: 'INSTALACIONES ELECTRICAS, DESCONECTADORES', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000171', name: 'SUM.Y HABILITADO LOSETA EN PISO TIENDA', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000172', name: 'SUM.Y FAB.DE MUROS INT,EXT A 2 CARAS,CON POSTE MET', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000173', name: 'CAMBIO Y SELLADO DE 18 LAMINAS ACANALADAS ZINCALUM', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000174', name: 'PTR 3/16" X 3" X 3" X 20\',1/8" X 2" X 3" X 6 MTS 1', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000175', name: 'INSTALACIONES ELECTRICAS AREA DE CAJA,ALUMBRADO', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000176', name: 'INSTALACIONES ELECTRICAS JAULA Y EXHIBICION', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '45000177', name: 'COLOCACION DE LOSETA,SOBRE PISO PARA NIVELACION', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000015', name: 'DELL INSPIRON 15 INTEL CORE I3 3217U', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000017', name: 'LED 40" 1080P 60HZ 40PFL4708/F8 PHILIPS', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000029', name: 'LECTOR VOYAGER 1250G NEGRO USB CABLE/BASE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000045', name: 'NETBOOK 11.6 SLIMBOOKKII SPA 32GB SPA KB WTH WIN10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000058', name: 'DISCO DURO WD PURPLE 3TB SERIAL ATA III 7200 RPM 3', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000084', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000085', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000086', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000087', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000088', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000089', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000090', name: 'ALL IN ONE HP 200 G3 13813OU 8GB 240GB W10', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000097', name: 'HP 200 G3 AIO CORE 15 8250U 1.6HGZ 8TH 6MB 8GB', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000098', name: 'COMPUTADORA PORTATIL HP250 G7 13 8 GB 240GB SSD', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000110', name: 'MERAKI MX84 ROUTER SECURITY, AC POWER CORD', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000112', name: 'MINIPRINTER EPSON TM-U220D-806 NS:P3QF355888', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000123', name: 'INST.CONMUTADOR IP-PBX DE 4 PUERTOS FXO', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000124', name: 'EQ. DE VIDEOGRABACION ,CABLEADO,13 CAMARAS,', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000131', name: 'CAJERO AUTOMÁTICO PIN PAD RECICLADOR BILLETES', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000141', name: 'OPTIPLEX 3280 ALL-IN-ONE XCTO, CORE I5-10500T,DDR4', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000153', name: 'OPTIPLEX 3280 ALL-IN-ONE XCTO, CORE I5-10500T,DDR4', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000181', name: 'IMPRESORA HP LASERJET ENTERPRISE M507DN 1200', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000222', name: 'ESCÁNER DUPLEX A4 DE SUPERFICIE PLANA BROTHER', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000239', name: 'TABLET SAMSUNG GALAXY TAB A7 SM-T500 10.4 OCTACORE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000242', name: 'ESCÁNER EPSON PORTATIL WORKFORCE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000256', name: 'TABLETA SAMSUNG GALAXY TAB A8(2022 3 GB, 10.5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000333', name: 'ALL IN ONE HP 200 G3 I3 8130U 8GB 240GB SSD 21.5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000334', name: 'DELL LATITUDE 3510,CORE I5-10210U 10 GEN 8GB DDR4', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000335', name: 'IMPRESORA HP LASERJET PRO M404N 4800 X 600 DPI LAS', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000342', name: 'DELL LATITUDE 3510,CORE I5-10210U 10 GEN 8GB DDR4', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000347', name: 'LAPTOP DELL LATITUDE 3520 15 PULGADAS I5 8GB', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000388', name: 'CISCOMERAKI MR36 WI-FI 6 INDOOR AP', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000389', name: 'CISCOMERAKI MR36 WI-FI 6 INDOOR AP', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000398', name: 'CISCOMERAKI MR ADVANCED LICENSE AND SUPPORT, 5YR', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000399', name: 'CISCOMERAKI MR ADVANCED LICENSE AND SUPPORT, 5YR', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000459', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000460', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000461', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000462', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000463', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000464', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000465', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000466', name: 'COMPUTADORA DELL OPTIPLEX ALL-IN-ONE PLUS 7420', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000480', name: 'OPTIPLEX 5480 ALL IN ONE XCTO, CORE I5-10500T,8GB', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000512', name: 'MONITOR ELO TOUCHSYSTEMS INC 2202L 22"', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000522', name: 'DELL ATTITUDE 3520,XCTO CORE I5-1135G7 8GB 1X8GB', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000561', name: 'EPSON T20IV-L IMPRESORA DE TICKETS TÉRMICA DIRECTA', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000562', name: 'EPSON T20IV-L IMPRESORA DE TICKETS TÉRMICA DIRECTA', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000563', name: 'EPSON T20IV-L IMPRESORA DE TICKETS TÉRMICA DIRECTA', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000564', name: 'TABLET SAMSUNG GALAXY TAB A9 PROCESADOR OCTA CORE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000565', name: 'TABLET SAMSUNG GALAXY TAB A9 PROCESADOR OCTA CORE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000566', name: 'TABLET SAMSUNG GALAXY TAB A9 PROCESADOR OCTA CORE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000621', name: 'INSTALACION DE VOZ Y DATOS,51 NODOS,SIST.DE CAMARA', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000622', name: 'CENTRO DE CARGA 30 CIRCUITOS 200 AMPERES', category: 'General', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000628', name: 'PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000629', name: 'PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000630', name: 'PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000631', name: 'PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000632', name: 'PC ALL IN ONE HP PROONE 240 G10 PROCESADOR INTEL 5', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '55000012', name: 'LICENCIA SAP ALL IN ONE USUARIO PROFESIONAL', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' },
+            { id: '35000615', name: 'TABLET SAMSUNG GALAXY TAB A11 PROCESADOR OCTA-CORE', category: 'IT', status: 'OPERATIVO', sucursal: 'Sin Asignar', location: '', responsable: '', departamento: '', img: '' }
         ];
 
-        // =====================================================
-        // 3. GESTIÓN DE DATOS (localStorage)
-        // =====================================================
         function cargarDB(key, fallback) {
             try {
                 const raw = localStorage.getItem(key);
                 return raw ? JSON.parse(raw) : fallback;
             } catch (e) { return fallback; }
         }
-
         function guardarDB(key, data) {
             try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { console.warn('No se pudo guardar', e); }
         }
 
-        // =====================================================
-        // 4. ESTADO GLOBAL
-        // =====================================================
         let masterDB = cargarDB(DB_KEY, datosEjemplo);
         let sessions = cargarDB(SESSIONS_KEY, []);
         let reportesGuardados = cargarDB(REPORTS_KEY, []);
-        let tiendas = cargarDB(TIENDAS_KEY, ['Oficina Central', 'Planta A']);
-        
         let currentSessionId = null;
         let html5QrcodeScanner = null;
         let pendingTransferAsset = null;
-        let isScanning = false;
-        let modoModalTienda = 'nuevo';
-        let sesionTiendaObjetivo = null;
-        let importState = { headers: [], rows: [] };
 
-        // =====================================================
-        // 5. FUNCIONES AUXILIARES
-        // =====================================================
+        const TIENDAS_KEY = 'kuroda_tiendas';
+        let tiendas = cargarDB(TIENDAS_KEY, ['Oficina Central', 'Planta A']);
+        let modoModalTienda = 'nuevo'; // 'nuevo' | 'cambiar'
+        let sesionTiendaObjetivo = null;
+
         function obtenerTiendas() {
             const set = new Set(tiendas);
             masterDB.forEach(a => { if (a.sucursal) set.add(a.sucursal); });
@@ -806,75 +986,153 @@
         }
 
         function agregarTienda(nombre) {
-            if (!tiendas.includes(nombre)) { 
-                tiendas.push(nombre); 
-                guardarDB(TIENDAS_KEY, tiendas); 
-            }
+            if (!tiendas.includes(nombre)) { tiendas.push(nombre); guardarDB(TIENDAS_KEY, tiendas); }
         }
 
         function iconoPorCategoria(cat) {
-            const map = { 'IT': 'computer', 'Vehículos': 'directions_car', 'Maquinaria': 'precision_manufacturing', 'Mobiliario': 'chair' };
-            return map[cat] || 'inventory_2';
+            return { 'IT': 'computer', 'Vehículos': 'directions_car', 'Maquinaria': 'precision_manufacturing', 'Mobiliario': 'chair' }[cat] || 'inventory_2';
         }
 
-        function cerrarModal(id) { 
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.add('hidden');
-        }
+        // --- 2. INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            poblarFiltrosActivos();
+            actualizarMetricasInicio();
+            renderActivosRecientes();
+            renderDirectorio();
+            if (sessions.length === 0) crearSesion('Oficina Central');
+            renderizarSesiones();
+            renderizarReportes();
+        });
 
-        // =====================================================
-        // 6. NAVEGACIÓN
-        // =====================================================
+        // --- 3. NAVEGACIÓN ---
         function cambiarVista(vistaId) {
-            if (vistaId !== 'vista-escaneo') stopScanner();
-            
+            if(vistaId !== 'vista-escaneo') stopScanner(); 
             document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(vistaId);
-            if (target) target.classList.add('active');
+            document.getElementById(vistaId).classList.add('active');
             window.scrollTo({ top: 0, behavior: 'instant' });
 
-            // Desktop nav
-            document.querySelectorAll('#desktop-nav .nav-btn').forEach(btn => {
-                btn.className = "nav-btn w-full flex items-center gap-4 text-on-surface-variant px-4 py-3 rounded-lg font-semibold transition-colors hover:bg-surface-variant";
+            // Reset Desktop
+            document.querySelectorAll('#desktop-nav .nav-btn-argon').forEach(btn => {
+                btn.className = "nav-btn-argon w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-colors";
             });
-            // Mobile nav
+            // Reset Mobile
             document.querySelectorAll('#mobile-nav .nav-btn-mob').forEach(btn => {
                 btn.classList.remove('active');
             });
 
+            // Set Active
             const i = { 'vista-inicio': 0, 'vista-activos': 1, 'vista-escaneo': 2, 'vista-informes': 3 }[vistaId];
-            if (i !== undefined) {
-                const deskBtn = document.querySelectorAll('#desktop-nav .nav-btn')[i];
-                if (deskBtn) { deskBtn.classList.remove('text-on-surface-variant'); deskBtn.classList.add('active'); }
+            if(i !== undefined) {
+                const deskBtn = document.querySelectorAll('#desktop-nav .nav-btn-argon')[i];
+                if(deskBtn) { deskBtn.classList.add('active'); }
                 const mobBtn = document.querySelectorAll('#mobile-nav .nav-btn-mob')[i];
-                if (mobBtn) mobBtn.classList.add('active');
+                if(mobBtn) mobBtn.classList.add('active');
             }
         }
 
         function cambiarSubVista(subId) {
             document.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById(subId);
-            if (target) target.classList.add('active');
+            document.getElementById(subId).classList.add('active');
         }
 
-        // =====================================================
-        // 7. VISTA INICIO
-        // =====================================================
+        // --- 4. VISTA 1: INICIO ---
+        let chartCategorias = null, chartEstados = null, chartEncontrados = null;
+
         function actualizarMetricasInicio() {
             document.getElementById('dash-total').innerText = masterDB.length;
-            let encontrados = 0, noEncontrados = 0;
-            sessions.forEach(s => {
-                if (s.inventory) {
-                    s.inventory.forEach(i => { 
-                        if (i.status === 'found') encontrados++; 
-                        else noEncontrados++; 
-                    });
-                }
-            });
+
+            // Acumulado histórico: informes ya finalizados + sesiones en curso (para que
+            // el dato no se pierda al finalizar un levantamiento).
+            let encontrados = 0, totalEscaneado = 0;
+            reportesGuardados.forEach(r => { encontrados += r.encontrados; totalEscaneado += r.total; });
+            sessions.forEach(s => s.inventory.forEach(i => { totalEscaneado++; if (i.status === 'found') encontrados++; }));
+            const noEncontrados = totalEscaneado - encontrados;
+
             document.getElementById('dash-encontrados').innerText = encontrados;
             document.getElementById('dash-no-encontrados').innerText = noEncontrados;
-            document.getElementById('dash-bd-count').innerText = masterDB.length;
-            document.getElementById('dash-informes-count').innerText = reportesGuardados.length;
+
+            const pct = totalEscaneado > 0 ? Math.round((encontrados / totalEscaneado) * 100) : 0;
+            const bar = document.getElementById('progreso-auditoria-bar');
+            const pctLabel = document.getElementById('progreso-auditoria-pct');
+            const detalle = document.getElementById('progreso-auditoria-detalle');
+            if (bar) bar.style.width = pct + '%';
+            if (pctLabel) pctLabel.innerText = pct + '%';
+            if (detalle) {
+                if (totalEscaneado === 0) {
+                    detalle.innerText = 'Aún no se han registrado escaneos.';
+                } else {
+                    const enCurso = sessions.length;
+                    detalle.innerText = `${encontrados} de ${totalEscaneado} activos escaneados encontrados`
+                        + (reportesGuardados.length ? ` · ${reportesGuardados.length} auditoría(s) finalizada(s)` : '')
+                        + (enCurso ? ` · ${enCurso} en curso` : '');
+                }
+            }
+
+            actualizarGraficasInicio(encontrados, noEncontrados);
+
+            // IDs de accesos rápidos ya movidos a otras pestañas; se actualizan si existen.
+            const bd = document.getElementById('dash-bd-count'); if (bd) bd.innerText = masterDB.length;
+            const inf = document.getElementById('dash-informes-count'); if (inf) inf.innerText = reportesGuardados.length;
+        }
+
+        function actualizarGraficasInicio(encontrados, noEncontrados) {
+            if (typeof Chart === 'undefined') return; // CDN sin conexión: se omiten las gráficas
+
+            const paletaCategorias = ['#5e72e4', '#2dce89', '#f5365c', '#fb6340', '#11cdef', '#8392ab'];
+            const fontBase = { family: 'Open Sans', size: 11 };
+
+            // --- Activos por categoría ---
+            const catCounts = {};
+            masterDB.forEach(a => { const c = a.category || 'General'; catCounts[c] = (catCounts[c] || 0) + 1; });
+            const ctxCat = document.getElementById('chart-categorias');
+            if (ctxCat) {
+                if (chartCategorias) chartCategorias.destroy();
+                chartCategorias = new Chart(ctxCat, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(catCounts),
+                        datasets: [{ data: Object.values(catCounts), backgroundColor: Object.keys(catCounts).map((_, i) => paletaCategorias[i % paletaCategorias.length]), borderWidth: 0 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: fontBase, color: '#8392ab', padding: 12 } } } }
+                });
+            }
+
+            // --- Activos por estado ---
+            const estCounts = { 'OPERATIVO': 0, 'EN REPARACIÓN': 0, 'BAJA': 0 };
+            masterDB.forEach(a => { const s = a.status || 'OPERATIVO'; estCounts[s] = (estCounts[s] || 0) + 1; });
+            const ctxEst = document.getElementById('chart-estados');
+            if (ctxEst) {
+                if (chartEstados) chartEstados.destroy();
+                chartEstados = new Chart(ctxEst, {
+                    type: 'doughnut',
+                    data: { labels: Object.keys(estCounts), datasets: [{ data: Object.values(estCounts), backgroundColor: ['#2dce89', '#fb6340', '#f5365c'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: fontBase, color: '#8392ab', padding: 12 } } } }
+                });
+            }
+
+            // --- Encontrados vs No Encontrados (acumulado) ---
+            const ctxEnc = document.getElementById('chart-encontrados');
+            if (ctxEnc) {
+                if (chartEncontrados) chartEncontrados.destroy();
+                chartEncontrados = new Chart(ctxEnc, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Resultado acumulado'],
+                        datasets: [
+                            { label: 'Encontrados', data: [encontrados], backgroundColor: '#2dce89', borderRadius: 6, maxBarThickness: 46 },
+                            { label: 'No encontrados', data: [noEncontrados], backgroundColor: '#f5365c', borderRadius: 6, maxBarThickness: 46 }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { beginAtZero: true, ticks: { color: '#8392ab', font: fontBase, precision: 0 }, grid: { color: '#e9ecef' } },
+                            y: { ticks: { color: '#8392ab', font: fontBase }, grid: { display: false } }
+                        },
+                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: fontBase, color: '#8392ab', padding: 12 } } }
+                    }
+                });
+            }
         }
 
         function filtrarPorCategoria(cat) {
@@ -887,37 +1145,29 @@
 
         function renderActivosRecientes() {
             const container = document.getElementById('home-recent-list');
-            if (!container) return;
             container.innerHTML = '';
-            const recent = masterDB.slice(0, 3);
-            if (recent.length === 0) {
-                container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No hay activos registrados aún.</p>';
-                return;
-            }
-            recent.forEach(asset => {
+            masterDB.slice(0, 3).forEach(asset => {
                 const isOp = asset.status === 'OPERATIVO';
-                const badgeColor = isOp ? 'bg-success-container text-success' : 'bg-error-container text-error';
+                const badgeColor = isOp ? 'bg-success text-white' : 'bg-error-container text-error';
                 container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-surface rounded-xl p-3 flex gap-4 shadow-sm border border-outline-variant items-center">
-                        <div class="w-16 h-16 bg-surface-variant rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center border border-outline-variant shadow-sm">
+                    <div class="rounded-xl p-3.5 flex gap-4 border border-outline-variant items-center hover:bg-surface-variant/50 transition-colors">
+                        <div class="w-16 h-16 bg-surface-variant rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center border border-outline-variant">
                             ${asset.img ? `<img src="${asset.img}" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-outline text-2xl">${iconoPorCategoria(asset.category)}</span>`}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start mb-1">
-                                <h3 class="font-bold text-sm text-on-surface truncate pr-2">${asset.name}</h3>
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${badgeColor} whitespace-nowrap">${asset.status}</span>
+                            <div class="flex justify-between items-start gap-2 mb-1.5">
+                                <h3 class="font-bold text-sm text-on-surface truncate">${asset.name}</h3>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded-md ${badgeColor} whitespace-nowrap">${asset.status}</span>
                             </div>
-                            <p class="text-xs text-on-surface-variant flex items-center gap-1 mb-1 truncate"><span class="material-symbols-outlined text-[14px]">location_on</span> ${asset.sucursal || 'Sin asignar'} - ${asset.location || ''}</p>
-                            <p class="text-[10px] font-mono text-outline">ID: ${asset.id}</p>
+                            <p class="text-[13px] text-on-surface-variant flex items-center gap-1 mb-1 truncate"><span class="material-symbols-outlined text-[14px]">location_on</span> ${asset.sucursal} · ${asset.location}</p>
+                            <p class="text-[11px] font-mono text-outline">ID: ${asset.id}</p>
                         </div>
                     </div>
                 `);
             });
         }
 
-        // =====================================================
-        // 8. VISTA ACTIVOS
-        // =====================================================
+        // --- 5. VISTA 2: ACTIVOS (Excel y Edición con Foto) ---
         function poblarFiltrosActivos() {
             const sel = document.getElementById('filtro-tienda-select');
             if (!sel) return;
@@ -929,7 +1179,6 @@
 
         function renderDirectorio() {
             const container = document.getElementById('lista-directorio');
-            if (!container) return;
             const term = document.getElementById('search-input').value.toLowerCase();
             const tiendaSel = document.getElementById('filtro-tienda-select').value;
             const catSel = document.getElementById('filtro-categoria-select').value;
@@ -952,44 +1201,40 @@
 
             resultados.forEach(asset => {
                 container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-surface rounded-xl p-4 shadow-sm border border-outline-variant flex flex-col gap-3 group">
-                        <div class="flex gap-3">
+                    <div class="card card-hover p-5 flex flex-col gap-4 group">
+                        <div class="flex gap-3.5">
                             <div class="w-14 h-14 bg-surface-variant rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center border border-outline-variant">
                                 ${asset.img ? `<img src="${asset.img}" class="w-full h-full object-cover">` : `<span class="material-symbols-outlined text-outline text-xl">${iconoPorCategoria(asset.category)}</span>`}
                             </div>
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-bold text-sm text-primary truncate">${asset.name}</h3>
-                                <p class="text-[11px] font-mono text-on-surface-variant">ID: ${asset.id}</p>
+                                <p class="text-[12px] font-mono text-on-surface-variant mt-0.5">ID: ${asset.id}</p>
                             </div>
-                            <button onclick="abrirEdicion('${asset.id}')" class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full bg-surface-variant h-fit">
+                            <button onclick="abrirEdicion('${asset.id}')" class="text-on-surface-variant hover:text-primary transition-colors p-1.5 rounded-full bg-surface-variant h-fit">
                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                             </button>
                         </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-surface-variant">
-                            <span class="text-xs text-on-surface-variant flex items-center gap-1 truncate"><span class="material-symbols-outlined text-[14px]">store</span> ${asset.sucursal || 'Sin asignar'}</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${asset.status === 'OPERATIVO' ? 'bg-success-container text-success' : 'bg-error-container text-error'}">${asset.status}</span>
+                        <div class="flex justify-between items-center pt-3 border-t border-surface-variant">
+                            <span class="text-[13px] text-on-surface-variant flex items-center gap-1 truncate"><span class="material-symbols-outlined text-[14px]">store</span> ${asset.sucursal}</span>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-md ${asset.status === 'OPERATIVO' ? 'bg-success-container text-success' : 'bg-error-container text-error'}">${asset.status}</span>
                         </div>
-                        ${(asset.responsable || asset.departamento) ? `<p class="text-[10px] text-on-surface-variant flex items-center gap-1 truncate"><span class="material-symbols-outlined text-[10px]">badge</span> ${asset.responsable || 'Sin responsable'}${asset.departamento ? ' · ' + asset.departamento : ''}</p>` : ''}
+                        ${(asset.responsable || asset.departamento) ? `<p class="text-[11px] text-on-surface-variant flex items-center gap-1 truncate -mt-2"><span class="material-symbols-outlined text-[12px]">badge</span> ${asset.responsable || 'Sin responsable'}${asset.departamento ? ' · ' + asset.departamento : ''}</p>` : ''}
                     </div>
                 `);
             });
         }
 
-        // =====================================================
-        // 9. EXCEL: EXPORTAR, PLANTILLA, IMPORTAR
-        // =====================================================
+        // Funcionalidad EXCEL (Importar y Exportar)
         function exportarExcel() {
-            const ws = XLSX.utils.json_to_sheet(masterDB.map(a => ({ 
-                ID: a.id, Nombre: a.name, Categoria: a.category, 
-                Sucursal: a.sucursal || '', Ubicacion: a.location || '', 
-                Estado: a.status, Responsable: a.responsable || '', 
-                Departamento: a.departamento || '' 
-            })));
+            const ws = XLSX.utils.json_to_sheet(masterDB.map(a => ({ ID: a.id, Nombre: a.name, Categoria: a.category, Sucursal: a.sucursal, Ubicacion: a.location, Estado: a.status, Responsable: a.responsable || '', Departamento: a.departamento || '' })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Activos");
             XLSX.writeFile(wb, "Padrón_Activos_Kuroda.xlsx");
         }
 
+        // --- CENTRO DE CARGA DE ACTIVOS: Plantilla + Importación con mapeo flexible ---
+
+        // Descarga una plantilla lista para llenar manualmente y volver a subir
         function descargarPlantilla() {
             const wsData = [
                 ['ID', 'Nombre', 'Categoria', 'Sucursal', 'Ubicacion', 'Estado', 'Responsable', 'Departamento'],
@@ -1003,11 +1248,12 @@
                 ['INSTRUCCIONES — PLANTILLA DE ACTIVOS KURODA'],
                 [''],
                 ['1. Llena la hoja "Activos": un renglón por cada activo.'],
-                ['2. ID: código único del activo. Si lo dejas vacío, el sistema genera uno automático.'],
-                ['3. Categoria sugerida: IT, Vehículos, Maquinaria, Mobiliario, General.'],
+                ['2. ID: código único del activo. Si lo dejas vacío, el sistema genera uno automático al importar.'],
+                ['3. Categoria sugerida: IT, Vehículos, Maquinaria, Mobiliario, General (puedes escribir otra y se agregará).'],
                 ['4. Estado sugerido: OPERATIVO, EN REPARACIÓN, BAJA.'],
-                ['5. Sucursal: nombre de la tienda. Si es nueva, se agrega automáticamente.'],
-                ['6. Responsable y Departamento son opcionales.']
+                ['5. Sucursal: nombre de la tienda/sucursal. Si es nueva, se agrega automáticamente al sistema.'],
+                ['6. Responsable y Departamento son opcionales.'],
+                ['7. También puedes subir un Excel con otra estructura (por ejemplo un reporte contable): al importar podrás indicar manualmente qué columna corresponde a cada dato.']
             ];
             const wsInfo = XLSX.utils.aoa_to_sheet(instrucciones);
             wsInfo['!cols'] = [{wch:95}];
@@ -1018,7 +1264,7 @@
             XLSX.writeFile(wb, 'Plantilla_Activos_Kuroda.xlsx');
         }
 
-        // Mapeo de columnas
+        // Campos de destino disponibles al mapear columnas
         const CAMPOS_DESTINO = [
             { key: '', label: 'Ignorar' },
             { key: 'id', label: 'ID de Activo' },
@@ -1032,7 +1278,7 @@
         ];
 
         const SINONIMOS_CAMPOS = {
-            id: ['id', 'id activo', 'codigo', 'clave', 'no activo', 'numero de activo'],
+            id: ['id', 'id activo', 'id de activo', 'codigo', 'clave', 'no activo', 'numero de activo', 'cuenta'],
             name: ['nombre', 'descripcion', 'concepto', 'activo'],
             category: ['categoria', 'clase', 'tipo'],
             sucursal: ['sucursal', 'tienda', 'planta'],
@@ -1055,6 +1301,7 @@
             return '';
         }
 
+        // Busca la fila que mejor parece un encabezado real (útil para reportes contables sin encabezado claro)
         function detectarFilaEncabezado(rows) {
             let mejorIdx = 0, mejorScore = -1;
             const limite = Math.min(rows.length, 15);
@@ -1067,24 +1314,21 @@
             return { idx: mejorIdx, score: mejorScore };
         }
 
+        let importState = { headers: [], rows: [] };
+
         function importarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '', raw: false });
-                    rows = rows.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
-                    if (rows.length === 0) { alert('El archivo está vacío.'); event.target.value = ''; return; }
-                    iniciarWizardImportacion(rows);
-                    event.target.value = '';
-                } catch (err) {
-                    alert('Error al leer el archivo: ' + err.message);
-                    event.target.value = '';
-                }
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '', raw: false });
+                rows = rows.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+                if (rows.length === 0) { alert('El archivo está vacío o no se pudo leer.'); event.target.value = ''; return; }
+                iniciarWizardImportacion(rows);
+                event.target.value = '';
             };
             reader.readAsArrayBuffer(file);
         }
@@ -1115,8 +1359,8 @@
             const opciones = CAMPOS_DESTINO.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
             fieldsContainer.innerHTML = importState.headers.map((h, i) => `
                 <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1 truncate" title="${h}">${h || ('Columna ' + (i + 1))}</label>
-                    <select data-col="${i}" class="import-map-select w-full border border-outline-variant rounded-lg p-2 text-sm bg-surface">${opciones}</select>
+                    <label class="block text-xs font-bold text-on-surface-variant mb-1.5 truncate uppercase tracking-tight" title="${h}">${h || ('Columna ' + (i + 1))}</label>
+                    <select data-col="${i}" class="import-map-select w-full border border-outline-variant rounded-lg p-2.5 text-sm bg-surface focus:border-primary outline-none">${opciones}</select>
                 </div>
             `).join('');
             document.querySelectorAll('.import-map-select').forEach(sel => {
@@ -1129,7 +1373,7 @@
             const thead = '<thead><tr>' + importState.headers.map(h => `<th class="p-2 text-left border-b border-outline-variant bg-surface-variant whitespace-nowrap">${h || ''}</th>`).join('') + '</tr></thead>';
             const tbody = '<tbody>' + previewRows.map(r => '<tr>' + importState.headers.map((_, i) => `<td class="p-2 border-b border-outline-variant whitespace-nowrap">${(r[i] !== undefined && r[i] !== null) ? r[i] : ''}</td>`).join('') + '</tr>').join('') + '</tbody>';
             previewTable.innerHTML = thead + tbody;
-            document.getElementById('import-total-filas').innerText = `Total de filas: ${importState.rows.length}`;
+            document.getElementById('import-total-filas').innerText = `Total de filas detectadas en el archivo: ${importState.rows.length}`;
         }
 
         function confirmarImportacionMapeada() {
@@ -1150,6 +1394,8 @@
                 const id = (obj.id || '').toUpperCase();
                 const nombre = obj.name || '';
 
+                // Filas de resumen/agrupación (típicas de reportes contables) casi siempre
+                // no traen descripción en la columna mapeada como Nombre: se descartan.
                 if (nombreMapeado && !nombre) { omitidos++; return; }
                 if (soloConId && (!id || !/\d/.test(id))) { omitidos++; return; }
                 if (!id && !nombre) { omitidos++; return; }
@@ -1178,32 +1424,10 @@
             actualizarMetricasInicio();
             renderActivosRecientes();
             cerrarModal('modal-import');
-            alert(`Importación completa.\n\nActivos nuevos: ${nuevos}\nOmitidos: ${omitidos}\nDuplicados: ${duplicados}`);
+            alert(`Importación completa.\n\nActivos nuevos: ${nuevos}\nOmitidos (sin datos válidos / resumen): ${omitidos}\nDuplicados (ID ya existente): ${duplicados}\n\nPuedes corregir cualquier dato manualmente tocando el activo en la lista.`);
         }
 
-        // =====================================================
-        // 10. EDICIÓN Y CREACIÓN DE ACTIVOS
-        // =====================================================
-        function poblarSelectTiendas(select, selected) {
-            const lista = obtenerTiendas();
-            select.innerHTML = lista.map(t => `<option value="${t}" ${t === selected ? 'selected' : ''}>${t}</option>`).join('') +
-                `<option value="__nueva__">+ Agregar nueva tienda…</option>`;
-        }
-
-        function manejarSelectTienda(selectEl) {
-            if (selectEl.value === '__nueva__') {
-                const nombre = prompt('Nombre de la nueva tienda/sucursal:');
-                if (nombre && nombre.trim()) {
-                    agregarTienda(nombre.trim());
-                    poblarSelectTiendas(selectEl, nombre.trim());
-                    poblarFiltrosActivos();
-                } else {
-                    const tiendasList = obtenerTiendas();
-                    poblarSelectTiendas(selectEl, tiendasList[0] || '');
-                }
-            }
-        }
-
+        // Funcionalidad Edición, Creación y Foto
         function abrirNuevoActivo() {
             document.getElementById('edit-id').value = '';
             document.getElementById('modal-edit-title').innerText = 'Nuevo Activo';
@@ -1225,7 +1449,7 @@
 
         function abrirEdicion(id) {
             const asset = masterDB.find(a => a.id === id);
-            if (!asset) return;
+            if(!asset) return;
             document.getElementById('edit-id').value = asset.id;
             document.getElementById('modal-edit-title').innerText = 'Editar Activo';
             document.getElementById('edit-code').value = asset.id;
@@ -1241,7 +1465,7 @@
 
             const preview = document.getElementById('edit-photo-preview');
             const icon = document.getElementById('edit-photo-icon');
-            if (asset.img) {
+            if(asset.img) {
                 preview.src = asset.img; preview.classList.remove('hidden'); icon.classList.add('hidden');
             } else {
                 preview.src = ''; preview.classList.add('hidden'); icon.classList.remove('hidden');
@@ -1251,7 +1475,7 @@
 
         function previewPhoto(event) {
             const file = event.target.files[0];
-            if (file) {
+            if(file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.getElementById('edit-photo-preview');
@@ -1266,30 +1490,30 @@
         function guardarEdicion() {
             const idOriginal = document.getElementById('edit-id').value;
             const nombre = document.getElementById('edit-name').value.trim();
-            if (!nombre) { alert('Ponle un nombre al activo.'); return; }
+            if(!nombre) { alert('Ponle un nombre al activo.'); return; }
 
             const sucursalSel = document.getElementById('edit-sucursal').value;
-            if (sucursalSel === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
+            if(sucursalSel === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
 
             const previewSrc = document.getElementById('edit-photo-preview').src;
             const foto = (previewSrc && previewSrc !== location.href) ? previewSrc : '';
 
-            if (idOriginal) {
+            if(idOriginal) {
+                // Editar existente
                 const asset = masterDB.find(a => a.id === idOriginal);
-                if (asset) {
-                    asset.name = nombre;
-                    asset.category = document.getElementById('edit-category').value;
-                    asset.status = document.getElementById('edit-status').value;
-                    asset.responsable = document.getElementById('edit-responsable').value.trim();
-                    asset.departamento = document.getElementById('edit-departamento').value.trim();
-                    asset.sucursal = sucursalSel;
-                    asset.location = document.getElementById('edit-location').value.trim();
-                    if (foto) asset.img = foto;
-                }
+                asset.name = nombre;
+                asset.category = document.getElementById('edit-category').value;
+                asset.status = document.getElementById('edit-status').value;
+                asset.responsable = document.getElementById('edit-responsable').value.trim();
+                asset.departamento = document.getElementById('edit-departamento').value.trim();
+                asset.sucursal = sucursalSel;
+                asset.location = document.getElementById('edit-location').value.trim();
+                if(foto) asset.img = foto;
             } else {
+                // Crear nuevo
                 let codigo = document.getElementById('edit-code').value.trim().toUpperCase();
-                if (!codigo) codigo = `AST-${Date.now()}`;
-                if (masterDB.find(a => a.id === codigo)) { alert('Ese ID de activo ya existe.'); return; }
+                if(!codigo) codigo = `AST-${Date.now()}`;
+                if(masterDB.find(a => a.id === codigo)) { alert('Ese ID de activo ya existe.'); return; }
                 masterDB.push({
                     id: codigo, name: nombre,
                     category: document.getElementById('edit-category').value,
@@ -1300,9 +1524,6 @@
                     location: document.getElementById('edit-location').value.trim(),
                     img: foto
                 });
-                if (sucursalSel && !tiendas.includes(sucursalSel)) {
-                    agregarTienda(sucursalSel);
-                }
             }
 
             guardarDB(DB_KEY, masterDB);
@@ -1315,8 +1536,8 @@
 
         function eliminarActivo() {
             const id = document.getElementById('edit-id').value;
-            if (!id) return;
-            if (!confirm(`¿Eliminar el activo ${id} de forma permanente?`)) return;
+            if(!id) return;
+            if(!confirm(`¿Eliminar el activo ${id} de forma permanente?`)) return;
             masterDB = masterDB.filter(a => a.id !== id);
             guardarDB(DB_KEY, masterDB);
             cerrarModal('modal-edit');
@@ -1325,87 +1546,44 @@
             actualizarMetricasInicio();
         }
 
-        // =====================================================
-        // 11. VISTA ESCÁNER - SESIONES
-        // =====================================================
+        // --- 6. VISTA 3: ESCÁNER, GESTOR Y PDF ---
+        function poblarSelectTiendas(select, selected) {
+            const lista = obtenerTiendas();
+            select.innerHTML = lista.map(t => `<option value="${t}" ${t === selected ? 'selected' : ''}>${t}</option>`).join('') +
+                `<option value="__nueva__">+ Agregar nueva tienda…</option>`;
+        }
+
+        function manejarSelectTienda(selectEl) {
+            if(selectEl.value === '__nueva__') {
+                const nombre = prompt('Nombre de la nueva tienda/sucursal:');
+                if(nombre && nombre.trim()) {
+                    agregarTienda(nombre.trim());
+                    poblarSelectTiendas(selectEl, nombre.trim());
+                    poblarFiltrosActivos();
+                } else {
+                    poblarSelectTiendas(selectEl, obtenerTiendas()[0] || '');
+                }
+            }
+        }
+
         function crearSesion(sucursal) {
-            const inv = masterDB.filter(a => a.sucursal === sucursal).map(a => ({ 
-                id: a.id, name: a.name, status: 'missing', isExtra: false 
-            }));
-            sessions.push({ 
-                id: Date.now(), 
-                sucursal: sucursal, 
-                estado: 'progreso', 
-                fecha: new Date().toLocaleDateString(), 
-                inventory: inv 
-            });
+            let inv = masterDB.filter(a => a.sucursal === sucursal).map(a => ({ id: a.id, name: a.name, status: 'missing', isExtra: false }));
+            sessions.push({ id: Date.now(), sucursal: sucursal, estado: 'progreso', fecha: new Date().toLocaleDateString(), inventory: inv });
             guardarDB(SESSIONS_KEY, sessions);
             actualizarMetricasInicio();
         }
 
-        function renderizarSesiones() {
-            const container = document.getElementById('sessions-container');
-            if (!container) return;
-            container.innerHTML = '';
-            if (sessions.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-10 text-on-surface-variant">
-                    <p class="text-sm">No hay auditorías activas. ¡Inicia una nueva!</p>
-                </div>`;
-                return;
-            }
-            sessions.forEach(session => {
-                const total = session.inventory ? session.inventory.length : 0;
-                const enc = session.inventory ? session.inventory.filter(i => i.status === 'found').length : 0;
-                
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-surface border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col gap-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-primary text-lg">${session.sucursal}</h3>
-                                <p class="text-xs text-on-surface-variant">Registrado: ${session.fecha}</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="abrirModalCambiarTiendaDesdeSesion(${session.id})" class="text-on-surface-variant hover:text-primary p-1 rounded-full bg-surface-variant" title="Cambiar tienda">
-                                    <span class="material-symbols-outlined text-[16px]">store</span>
-                                </button>
-                                <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">PAUSADO</span>
-                            </div>
-                        </div>
-                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
-                            <div class="bg-primary h-full" style="width: ${total===0 ? 0 : (enc/total)*100}%"></div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-semibold text-on-surface-variant">${enc} / ${total}</span>
-                            <button onclick="abrirSesion(${session.id})" class="text-xs font-bold bg-primary text-white px-4 py-2 rounded-lg shadow-sm hover:bg-primary-container hover:text-primary transition-colors">CONTINUAR</button>
-                        </div>
-                    </div>
-                `);
-            });
-        }
-
         function abrirModalNuevoLevantamiento() {
             modoModalTienda = 'nuevo';
-            sesionTiendaObjetivo = null;
             document.getElementById('modal-tienda-title').innerText = 'Nuevo Levantamiento';
             document.getElementById('modal-tienda-confirm-label').innerText = 'Iniciar Levantamiento';
             poblarSelectTiendas(document.getElementById('tienda-modal-select'));
             document.getElementById('modal-tienda').classList.remove('hidden');
         }
 
-        function abrirModalCambiarTienda() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            if (!session) return;
-            modoModalTienda = 'cambiar';
-            sesionTiendaObjetivo = currentSessionId;
-            document.getElementById('modal-tienda-title').innerText = 'Cambiar Tienda de la Auditoría';
-            document.getElementById('modal-tienda-confirm-label').innerText = 'Guardar Cambio';
-            poblarSelectTiendas(document.getElementById('tienda-modal-select'), session.sucursal);
-            document.getElementById('modal-tienda').classList.remove('hidden');
-        }
-
-        function abrirModalCambiarTiendaDesdeSesion(sessionId) {
+        function abrirModalCambiarTienda(sessionId) {
             const session = sessions.find(s => s.id === sessionId);
-            if (!session) return;
+            if(!session) return;
             modoModalTienda = 'cambiar';
             sesionTiendaObjetivo = sessionId;
             document.getElementById('modal-tienda-title').innerText = 'Cambiar Tienda de la Auditoría';
@@ -1417,12 +1595,11 @@
         function confirmarModalTienda() {
             const select = document.getElementById('tienda-modal-select');
             const tienda = select.value;
-            if (!tienda || tienda === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
-            
-            if (modoModalTienda === 'nuevo') {
+            if(!tienda || tienda === '__nueva__') { alert('Selecciona o agrega una tienda válida.'); return; }
+            if(modoModalTienda === 'nuevo') {
                 crearSesion(tienda);
                 renderizarSesiones();
-            } else if (modoModalTienda === 'cambiar' && sesionTiendaObjetivo) {
+            } else {
                 cambiarTiendaSesion(sesionTiendaObjetivo, tienda);
             }
             cerrarModal('modal-tienda');
@@ -1430,31 +1607,57 @@
 
         function cambiarTiendaSesion(sessionId, nuevaTienda) {
             const session = sessions.find(s => s.id === sessionId);
-            if (!session) return;
+            if(!session) return;
             session.sucursal = nuevaTienda;
             const idsActuales = new Set(session.inventory.map(i => i.id));
             masterDB.filter(a => a.sucursal === nuevaTienda).forEach(a => {
-                if (!idsActuales.has(a.id)) {
-                    session.inventory.push({ id: a.id, name: a.name, status: 'missing', isExtra: false });
-                }
+                if(!idsActuales.has(a.id)) session.inventory.push({ id: a.id, name: a.name, status: 'missing', isExtra: false });
             });
             guardarDB(SESSIONS_KEY, sessions);
             renderizarSesiones();
             actualizarMetricasInicio();
-            if (currentSessionId === sessionId) {
+            if(currentSessionId === sessionId) {
                 document.getElementById('current-store-name').innerText = nuevaTienda;
                 renderListaAuditoria();
             }
         }
 
+        function renderizarSesiones() {
+            const container = document.getElementById('sessions-container');
+            container.innerHTML = '';
+            sessions.forEach(session => {
+                const total = session.inventory.length;
+                const enc = session.inventory.filter(i => i.status === 'found').length;
+                
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="card card-hover p-6 flex flex-col gap-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-primary text-lg">${session.sucursal}</h3>
+                                <p class="text-xs text-on-surface-variant">Registrado: ${session.fecha}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="abrirModalCambiarTienda(${session.id})" class="text-on-surface-variant hover:text-primary p-1 rounded-full bg-surface-variant" title="Cambiar tienda">
+                                    <span class="material-symbols-outlined text-[16px]">store</span>
+                                </button>
+                                <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">PAUSADO</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                            <div class="bg-primary h-full" style="width: ${total===0 ? 0 : (enc/total)*100}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-semibold text-on-surface-variant">${enc} / ${total}</span>
+                            <button onclick="abrirSesion(${session.id})" class="text-xs font-bold btn-grad btn-grad-primary px-4 py-2 rounded-lg">CONTINUAR</button>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
         function abrirSesion(id) {
-            const session = sessions.find(s => s.id === id);
-            if (!session) {
-                alert('La sesión ya no existe.');
-                return;
-            }
             currentSessionId = id;
-            document.getElementById('current-store-name').innerText = session.sucursal;
+            document.getElementById('current-store-name').innerText = sessions.find(s => s.id === id).sucursal;
             renderListaAuditoria();
             cambiarSubVista('sub-escaneo-activo');
         }
@@ -1469,18 +1672,13 @@
         function renderListaAuditoria() {
             const session = sessions.find(s => s.id === currentSessionId);
             const container = document.getElementById('asset-status-list');
-            if (!container) return;
             container.innerHTML = '';
-            if (!session || !session.inventory) {
-                container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No hay activos en esta auditoría.</p>';
-                return;
-            }
-
             let evals = 0;
+
             let sorted = [...session.inventory].sort((a,b) => (a.status === 'found' ? -1 : 1));
             sorted.forEach(item => {
                 const found = item.status === 'found';
-                if (found) evals++;
+                if(found) evals++;
                 let bgClass = found ? 'bg-success-container/30 border-l-success' : 'bg-surface border-l-error';
                 let icon = found ? '<span class="material-symbols-outlined text-success text-[18px]">check_circle</span>' : '<span class="material-symbols-outlined text-error text-[18px]">cancel</span>';
                 
@@ -1491,278 +1689,182 @@
                             <p class="font-bold text-sm text-on-surface font-mono truncate">${item.id}</p>
                             <p class="text-xs text-on-surface-variant truncate">${item.name}</p>
                         </div>
-                        ${item.isExtra ? '<span class="text-[9px] font-bold text-secondary bg-blue-100 px-1.5 py-0.5 rounded">EXTRA</span>' : ''}
                     </div>
                 `);
             });
             document.getElementById('metric-progreso').innerText = `${evals}/${session.inventory.length}`;
         }
 
-        // =====================================================
-        // 12. ESCÁNER QR
-        // =====================================================
-        function startScanner() {
-            const container = document.getElementById('qr-reader-container');
-            if (!container) return;
-            
-            container.classList.remove('hidden');
-            container.classList.add('active');
-            document.getElementById('btn-start-scan').classList.add('hidden');
-            document.getElementById('btn-stop-scan').classList.remove('hidden');
-            
-            if (html5QrcodeScanner) return;
-            
-            try {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                isScanning = true;
-                
-                html5QrcodeScanner.start(
-                    { facingMode: "environment" }, 
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    (text) => { 
-                        if (isScanning) processScan(text.toUpperCase()); 
-                    }, 
-                    () => {} 
-                ).catch(err => {
-                    console.error('Error al iniciar la cámara:', err);
-                    alert("Verifica permisos de cámara o asegúrate de usar HTTPS.");
-                    stopScanner();
-                });
-            } catch (error) {
-                console.error('Error al crear el escáner:', error);
-                alert('No se pudo iniciar el escáner.');
-                stopScanner();
-            }
-        }
-
-        function stopScanner() {
-            isScanning = false;
-            const container = document.getElementById('qr-reader-container');
-            if (container) {
-                container.classList.remove('active');
-                container.classList.add('hidden');
-            }
-            const bStart = document.getElementById('btn-start-scan');
-            const bStop = document.getElementById('btn-stop-scan');
-            if (bStart) bStart.classList.remove('hidden');
-            if (bStop) bStop.classList.add('hidden');
-            
-            if (html5QrcodeScanner) {
-                try {
-                    html5QrcodeScanner.stop().then(() => {
-                        html5QrcodeScanner.clear();
-                        html5QrcodeScanner = null;
-                    }).catch(() => {
-                        html5QrcodeScanner = null;
-                    });
-                } catch (e) {
-                    html5QrcodeScanner = null;
-                }
-            }
-        }
-
         function processScan(code) {
             const session = sessions.find(s => s.id === currentSessionId);
-            if (!session) {
-                alert('No hay una sesión activa.');
-                stopScanner();
-                return;
-            }
             
             let inSession = session.inventory.find(i => i.id === code);
-            if (inSession) {
-                if (inSession.status === 'found') {
-                    alert('Este activo ya fue marcado como encontrado.');
-                    stopScanner();
-                    return;
-                }
-                inSession.status = 'found';
-                guardarDB(SESSIONS_KEY, sessions);
-                renderListaAuditoria();
-                actualizarMetricasInicio();
-                document.getElementById('asset-code-input').value = '';
-                stopScanner();
-                return;
+            if(inSession) {
+                inSession.status = 'found'; guardarDB(SESSIONS_KEY, sessions); renderListaAuditoria(); actualizarMetricasInicio(); document.getElementById('asset-code-input').value = ''; stopScanner(); return;
             }
 
             let inMaster = masterDB.find(i => i.id === code);
-            if (inMaster) {
+            if(inMaster) {
                 pendingTransferAsset = inMaster;
                 document.getElementById('transfer-id').innerText = inMaster.id;
-                document.getElementById('transfer-store').innerText = inMaster.sucursal || 'Sin asignar';
+                document.getElementById('transfer-store').innerText = inMaster.sucursal;
                 document.getElementById('modal-transfer').classList.remove('hidden');
-                stopScanner();
-                return;
+                stopScanner(); return;
             }
             alert("El activo escaneado NO existe en la base de datos.");
-            stopScanner();
         }
-
-        function searchManual() {
-            const c = document.getElementById('asset-code-input').value.trim().toUpperCase();
-            if (c) processScan(c);
-        }
+        function searchManual() { const c = document.getElementById('asset-code-input').value.trim().toUpperCase(); if(c) processScan(c); }
 
         function confirmarTransferencia() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            if (!session) return;
-            
-            const existing = session.inventory.find(i => i.id === pendingTransferAsset.id);
-            if (existing) {
-                existing.status = 'found';
-                existing.isExtra = true;
-            } else {
-                session.inventory.push({ 
-                    id: pendingTransferAsset.id, 
-                    name: pendingTransferAsset.name, 
-                    status: 'found', 
-                    isExtra: true 
-                });
-            }
-            
+            sessions.find(s => s.id === currentSessionId).inventory.push({ id: pendingTransferAsset.id, name: pendingTransferAsset.name, status: 'found', isExtra: true });
             const asset = masterDB.find(a => a.id === pendingTransferAsset.id);
-            if (asset) {
-                asset.sucursal = session.sucursal;
-                guardarDB(DB_KEY, masterDB);
-            }
+            if(asset) asset.sucursal = sessions.find(s => s.id === currentSessionId).sucursal;
+            guardarDB(SESSIONS_KEY, sessions);
+            guardarDB(DB_KEY, masterDB);
+            actualizarMetricasInicio();
+            cerrarModal('modal-transfer'); renderListaAuditoria(); document.getElementById('asset-code-input').value = '';
+        }
+
+        // GENERACIÓN DE REPORTE PDF (Finalizar Inventario)
+        function finalizarInventario() {
+            if(!confirm("¿Deseas finalizar este levantamiento y generar el informe en PDF?")) return;
             
+            const session = sessions.find(s => s.id === currentSessionId);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(18);
+            doc.text(`Informe de Levantamiento Físico`, 14, 22);
+            doc.setFontSize(12);
+            doc.text(`Sucursal: ${session.sucursal}`, 14, 30);
+            doc.text(`Fecha: ${session.fecha}`, 14, 36);
+
+            // Tabla con jsPDF AutoTable
+            const tableData = session.inventory.map(item => [
+                item.id, 
+                item.name, 
+                item.status === 'found' ? 'Encontrado' : 'Faltante',
+                item.isExtra ? 'Transferido' : 'Regular'
+            ]);
+
+            doc.autoTable({
+                startY: 45,
+                head: [['ID Activo', 'Descripción', 'Estado', 'Observación']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 30, 87] } // Azul Kuroda
+            });
+
+            // Guardar
+            doc.save(`Auditoria_${session.sucursal}_${Date.now()}.pdf`);
+
+            // Agregar al historial de informes (persistido)
+            reportesGuardados.unshift({ sucursal: session.sucursal, fecha: new Date().toLocaleDateString(), fechaISO: new Date().toISOString(), encontrados: session.inventory.filter(i=>i.status==='found').length, total: session.inventory.length });
+            guardarDB(REPORTS_KEY, reportesGuardados);
+            renderizarReportes();
+
+            // Eliminar sesión de pendientes
+            const index = sessions.findIndex(s => s.id === currentSessionId);
+            sessions.splice(index, 1);
             guardarDB(SESSIONS_KEY, sessions);
             actualizarMetricasInicio();
-            cerrarModal('modal-transfer');
-            renderListaAuditoria();
-            document.getElementById('asset-code-input').value = '';
-            stopScanner();
+            alert("Informe PDF descargado correctamente.");
+            volverAGestor();
+            cambiarVista('vista-informes'); // Vamos a la pestaña informes
         }
 
-        // =====================================================
-        // 13. FINALIZAR INVENTARIO - PDF
-        // =====================================================
-        function finalizarInventario() {
-            const session = sessions.find(s => s.id === currentSessionId);
-            if (!session) {
-                alert('No hay una sesión activa.');
-                return;
-            }
-            if (!confirm("¿Deseas finalizar este levantamiento y generar el informe en PDF?")) return;
-            
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(18);
-                doc.text(`Informe de Levantamiento Físico`, 14, 22);
-                doc.setFontSize(12);
-                doc.text(`Sucursal: ${session.sucursal}`, 14, 30);
-                doc.text(`Fecha: ${session.fecha || new Date().toLocaleDateString()}`, 14, 36);
-
-                const tableData = session.inventory.map(item => [
-                    item.id, item.name, 
-                    item.status === 'found' ? 'Encontrado' : 'Faltante',
-                    item.isExtra ? 'Transferido' : 'Regular'
-                ]);
-
-                doc.autoTable({
-                    startY: 45,
-                    head: [['ID Activo', 'Descripción', 'Estado', 'Observación']],
-                    body: tableData,
-                    theme: 'grid',
-                    headStyles: { fillColor: [0, 30, 87] }
-                });
-
-                const filename = `Auditoria_${session.sucursal}_${Date.now()}.pdf`;
-                doc.save(filename);
-
-                const encontrados = session.inventory.filter(i => i.status === 'found').length;
-                reportesGuardados.unshift({ 
-                    sucursal: session.sucursal, 
-                    fecha: new Date().toLocaleDateString(), 
-                    encontrados: encontrados, 
-                    total: session.inventory.length,
-                    filename: filename
-                });
-                guardarDB(REPORTS_KEY, reportesGuardados);
-                renderizarReportes();
-
-                const index = sessions.findIndex(s => s.id === currentSessionId);
-                if (index !== -1) {
-                    sessions.splice(index, 1);
-                    guardarDB(SESSIONS_KEY, sessions);
-                }
-                actualizarMetricasInicio();
-                alert("Informe PDF descargado correctamente.");
-                volverAGestor();
-                cambiarVista('vista-informes');
-            } catch (error) {
-                console.error('Error al generar PDF:', error);
-                alert('Ocurrió un error al generar el PDF.');
-            }
-        }
-
-        // =====================================================
-        // 14. VISTA INFORMES
-        // =====================================================
         function renderizarReportes() {
             const container = document.getElementById('lista-reportes-pdf');
-            if (!container) return;
+            const emptyState = document.getElementById('informes-empty-state');
+            const emptyTitle = document.getElementById('informes-empty-title');
+            const emptyText = document.getElementById('informes-empty-text');
+            if(!container) return;
+
+            const desdeEl = document.getElementById('filtro-informes-desde');
+            const hastaEl = document.getElementById('filtro-informes-hasta');
+            const desde = desdeEl && desdeEl.value ? new Date(desdeEl.value + 'T00:00:00') : null;
+            const hasta = hastaEl && hastaEl.value ? new Date(hastaEl.value + 'T23:59:59') : null;
+
+            const filtrados = reportesGuardados.filter(r => {
+                if (!desde && !hasta) return true;
+                const fechaRef = r.fechaISO ? new Date(r.fechaISO) : null;
+                if (!fechaRef) return true; // informes antiguos sin fecha ISO: se muestran siempre
+                if (desde && fechaRef < desde) return false;
+                if (hasta && fechaRef > hasta) return false;
+                return true;
+            });
+
             container.innerHTML = '';
-            if (reportesGuardados.length === 0) {
-                container.innerHTML = '<p class="text-sm text-on-surface-variant text-center py-4">No hay reportes generados aún.</p>';
-                return;
-            }
-            reportesGuardados.forEach(r => {
+            filtrados.forEach(r => {
+                const pct = r.total > 0 ? Math.round((r.encontrados / r.total) * 100) : 0;
                 container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-surface border border-outline-variant p-3 rounded-lg flex justify-between items-center shadow-sm">
-                        <div>
-                            <p class="font-bold text-sm text-primary">Auditoría: ${r.sucursal}</p>
-                            <p class="text-xs text-on-surface-variant">${r.fecha} · ${r.encontrados}/${r.total} encontrados</p>
+                    <div class="card p-5 flex items-center gap-4">
+                        <div class="kpi-icon kpi-icon-error flex-shrink-0"><span class="material-symbols-outlined">picture_as_pdf</span></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm text-on-surface truncate">Auditoría: ${r.sucursal}</p>
+                            <p class="text-xs text-on-surface-variant mt-0.5">${r.fecha} · ${r.encontrados}/${r.total} encontrados (${pct}%)</p>
                         </div>
-                        <span class="material-symbols-outlined text-error">picture_as_pdf</span>
+                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-md ${pct === 100 ? 'bg-success-container text-success' : 'bg-error-container text-error'} whitespace-nowrap">${pct}%</span>
                     </div>
                 `);
             });
+
+            if (filtrados.length === 0) {
+                emptyState.classList.remove('hidden');
+                if (reportesGuardados.length === 0) {
+                    emptyTitle.innerText = 'Aún no hay informes';
+                    emptyText.innerText = 'Al finalizar una auditoría en la pestaña "Escaneo", los reportes PDF se guardarán aquí para su consulta posterior.';
+                } else {
+                    emptyTitle.innerText = 'Sin resultados en ese rango';
+                    emptyText.innerText = 'No hay informes generados dentro de las fechas seleccionadas. Ajusta el rango o limpia el filtro.';
+                }
+            } else {
+                emptyState.classList.add('hidden');
+            }
         }
 
-        // =====================================================
-        // 15. INICIALIZACIÓN
-        // =====================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            poblarFiltrosActivos();
-            actualizarMetricasInicio();
-            renderActivosRecientes();
-            renderDirectorio();
-            if (sessions.length === 0) {
-                crearSesion('Oficina Central');
-            }
-            renderizarSesiones();
+        function limpiarFiltroInformes() {
+            document.getElementById('filtro-informes-desde').value = '';
+            document.getElementById('filtro-informes-hasta').value = '';
             renderizarReportes();
+        }
+
+        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Menú desplegable "Herramientas" (Plantilla / Importar / Exportar)
+        function toggleMenuHerramientas(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('menu-herramientas').classList.toggle('hidden');
+        }
+        document.addEventListener('click', () => {
+            const m = document.getElementById('menu-herramientas');
+            if (m) m.classList.add('hidden');
         });
 
-        // Exponer funciones globales para los onclick del HTML
-        window.cambiarVista = cambiarVista;
-        window.filtrarPorCategoria = filtrarPorCategoria;
-        window.exportarExcel = exportarExcel;
-        window.descargarPlantilla = descargarPlantilla;
-        window.importarExcel = importarExcel;
-        window.abrirNuevoActivo = abrirNuevoActivo;
-        window.abrirEdicion = abrirEdicion;
-        window.guardarEdicion = guardarEdicion;
-        window.eliminarActivo = eliminarActivo;
-        window.previewPhoto = previewPhoto;
-        window.manejarSelectTienda = manejarSelectTienda;
-        window.abrirModalNuevoLevantamiento = abrirModalNuevoLevantamiento;
-        window.abrirModalCambiarTienda = abrirModalCambiarTienda;
-        window.abrirModalCambiarTiendaDesdeSesion = abrirModalCambiarTiendaDesdeSesion;
-        window.confirmarModalTienda = confirmarModalTienda;
-        window.abrirSesion = abrirSesion;
-        window.volverAGestor = volverAGestor;
-        window.startScanner = startScanner;
-        window.stopScanner = stopScanner;
-        window.searchManual = searchManual;
-        window.confirmarTransferencia = confirmarTransferencia;
-        window.finalizarInventario = finalizarInventario;
-        window.cerrarModal = cerrarModal;
-        window.confirmarImportacionMapeada = confirmarImportacionMapeada;
-        window.renderDirectorio = renderDirectorio;
+        // --- Lector QR ---
+        function startScanner() {
+            const container = document.getElementById('qr-reader-container');
+            container.classList.remove('hidden'); container.classList.add('active');
+            document.getElementById('btn-start-scan').classList.add('hidden'); document.getElementById('btn-stop-scan').classList.remove('hidden');
+
+            if(html5QrcodeScanner) return; 
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                (text) => { processScan(text.toUpperCase()); }, () => {} 
+            ).catch(err => { alert("Verifica permisos de cámara."); stopScanner(); });
+        }
+
+        function stopScanner() {
+            const container = document.getElementById('qr-reader-container');
+            if(container) { container.classList.remove('active'); container.classList.add('hidden'); }
+            const bStart = document.getElementById('btn-start-scan'), bStop = document.getElementById('btn-stop-scan');
+            if(bStart) bStart.classList.remove('hidden'); if(bStop) bStop.classList.add('hidden');
+            if(html5QrcodeScanner && html5QrcodeScanner.getState() !== 1) { 
+                html5QrcodeScanner.stop().then(() => { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }).catch(() => { html5QrcodeScanner = null; });
+            }
+        }
     </script>
 </body>
 </html>
