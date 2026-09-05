@@ -6,6 +6,9 @@
     <title>Bastión · Activos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
     <style>
         /* ========== VARIABLES ========== */
         :root {
@@ -296,6 +299,20 @@
         .supabase-status.online .dot { background: var(--success-color); }
         .supabase-status.offline .dot { background: var(--danger-color); }
         .supabase-status.checking .dot { background: var(--warning-color); }
+
+        /* ========== BARRA SUPERIOR: USUARIO EN SESIÓN ========== */
+        .topbar-user {
+            position: sticky; top: 0; z-index: 5;
+            display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+            padding-bottom: 1rem; background: var(--bg-color);
+        }
+        .topbar-user-info { text-align: right; line-height: 1.25; }
+        .topbar-user-name { display: block; font-weight: 700; font-size: 0.85rem; color: var(--text-main); }
+        .topbar-user-puesto { display: block; font-size: 0.68rem; color: var(--active-bg); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .topbar-user-avatar {
+            width: 38px; height: 38px; border-radius: 50%; background: var(--active-bg); color: #fff;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+        }
 
         /* ========== MAIN CONTENT ========== */
         .main-content {
@@ -949,7 +966,7 @@
                 <span>Bastión</span>
             </div>
             <div class="nav-item active" onclick="switchTab('inventario', this)">
-                <i class="fas fa-clipboard-list"></i> <span>Inventario</span>
+                <i class="fas fa-home"></i> <span>Inicio</span>
                 <span class="badge" id="inv-badge">0</span>
             </div>
             <div class="nav-item" onclick="switchTab('activos', this)">
@@ -989,10 +1006,17 @@
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
+            <div class="topbar-user">
+                <div class="topbar-user-info">
+                    <span class="topbar-user-name" id="topbar-user-nombre">-</span>
+                    <span class="topbar-user-puesto" id="topbar-user-puesto">-</span>
+                </div>
+                <div class="topbar-user-avatar" id="topbar-user-avatar">-</div>
+            </div>
 
-            <!-- ===== INVENTARIO (Inicio) ===== -->
+            <!-- ===== INICIO (dashboard) ===== -->
             <section id="inventario" class="section-view active">
-                <h2>Inventario General</h2>
+                <h2>Inicio</h2>
                 <p class="subtitle">Resumen de activos por centro y estado.</p>
                 <div class="kpi-grid">
                     <div class="kpi-card">
@@ -1089,7 +1113,12 @@
                             <span><strong>Categoría:</strong> <span id="scan-categoria">-</span></span>
                             <span><strong>Escaneados:</strong> <span id="scan-count">0</span></span>
                         </div>
-                        <button class="btn-primary" onclick="simulateScan()"><i class="fas fa-camera"></i> Simular Escaneo</button>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                            <input type="text" id="scan-input" placeholder="Escanea con lector o escribe el código y presiona Enter" autocomplete="off" style="flex:1; min-width:260px; padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; background:var(--input-bg); color:var(--text-main);">
+                            <button class="btn-primary" onclick="registrarScanManual()"><i class="fas fa-check"></i> Agregar</button>
+                            <button class="btn-secondary" onclick="abrirCamaraScan()"><i class="fas fa-camera"></i> Usar cámara</button>
+                        </div>
+                        <div id="scan-resumen-live" style="margin-top:1rem; display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.85rem;"></div>
                         <div id="scan-results" style="margin-top:1rem;"></div>
                         <div id="vehiculo-module" style="display:none;" class="vehiculo-docs">
                             <h4>🚗 Documentos del Vehículo</h4>
@@ -1246,6 +1275,34 @@
             <div class="modal-buttons">
                 <button class="btn-secondary" onclick="closeModal('modalNuevoInventario')">Cancelar</button>
                 <button class="btn-primary" onclick="crearInventario()"><i class="fas fa-play"></i> Iniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cámara de Escaneo -->
+    <div class="modal-overlay" id="modalCamaraScan">
+        <div class="modal-box" style="max-width:420px;">
+            <h3><i class="fas fa-camera"></i> Escanear con cámara</h3>
+            <p class="sub" id="camara-scan-status">Apunta la cámara al código de barras o QR del activo.</p>
+            <video id="camara-scan-video" style="width:100%; border-radius:8px; background:#000; max-height:320px; object-fit:cover;" muted playsinline></video>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="cerrarCamaraScan()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Informe Final de Auditoría -->
+    <div class="modal-overlay" id="modalInformeAuditoria">
+        <div class="modal-box" style="max-width:480px;">
+            <h3><i class="fas fa-file-alt"></i> Auditoría finalizada</h3>
+            <p class="sub">Descarga el informe ejecutivo de este levantamiento.</p>
+            <div id="informe-resumen-body" style="font-size:0.85rem; margin:1rem 0;"></div>
+            <div class="modal-buttons" style="justify-content:flex-start; flex-wrap:wrap; gap:0.5rem;">
+                <button class="btn-primary" onclick="descargarInformePDF(window.__ultimoInventarioId)"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+                <button class="btn-secondary" onclick="descargarInformeWord(window.__ultimoInventarioId)"><i class="fas fa-file-word"></i> Descargar Word</button>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal('modalInformeAuditoria')">Cerrar</button>
             </div>
         </div>
     </div>
@@ -1673,6 +1730,7 @@
                 username: perfil.username,
                 nombreCompleto: perfil.nombre_completo || perfil.username,
                 role: perfil.role,
+                puesto: perfil.puesto || '',
                 centro: perfil.centro_nombre || '',
                 centro_id: perfil.centro_id,
                 activo: perfil.activo,
@@ -1685,7 +1743,7 @@
             if (!user) return null;
             const { data, error } = await supabaseClient
                 .from('usuarios2')
-                .select('id, username, nombre_completo, role, centro_id, activo, tema')
+                .select('id, username, nombre_completo, role, puesto, centro_id, activo, tema')
                 .eq('id', user.id)
                 .single();
             if (error || !data) return null;
@@ -2541,7 +2599,9 @@
                     <td>${inv.items.length}</td>
                     <td><span class="status-badge ${estadoCls}">${inv.estado}</span></td>
                     <td>
-                        ${inv.estado === 'borrador' ? `<button class="btn-primary" style="padding:2px 8px; font-size:0.7rem;" onclick="abrirInventario('${inv.id}')"><i class="fas fa-play"></i> Continuar</button>` : ''}
+                        ${inv.estado === 'borrador' ? `<button class="btn-primary" style="padding:2px 8px; font-size:0.7rem;" onclick="abrirInventario('${inv.id}')"><i class="fas fa-play"></i> Continuar</button>` : `
+                        <button class="btn-action" style="padding:2px 8px; font-size:0.7rem; color:var(--danger-color);" onclick="descargarInformePDF('${inv.id}')" title="Informe en PDF"><i class="fas fa-file-pdf"></i></button>
+                        <button class="btn-action" style="padding:2px 8px; font-size:0.7rem; color:var(--info-color);" onclick="descargarInformeWord('${inv.id}')" title="Informe en Word"><i class="fas fa-file-word"></i></button>`}
                         <button class="btn-action" style="padding:2px 8px; font-size:0.7rem; color:var(--danger-color);" onclick="eliminarInventario('${inv.id}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
@@ -2573,14 +2633,29 @@
             if (!inventarioActivo) return;
             const inv = inventarios.find(i => i.id === inventarioActivo);
             if (!inv) return;
-            if (inv.items.length === 0) {
+            if (scanResults.length === 0) {
                 if (!confirm('El inventario está vacío. ¿Finalizar de todos modos?')) return;
             }
-            inv.estado = 'finalizado';
             inv.items = scanResults.slice();
             if (inv.categoria === 'vehiculos') {
                 inv.vehiculos = vehiculos.slice();
             }
+
+            // Congela el resultado de la auditoría en el momento del cierre,
+            // así el informe ejecutivo siempre refleja lo que pasó ese día,
+            // aunque el catálogo de activos cambie después.
+            const r = calcularResumen(inv, inv.items);
+            inv.resumen = {
+                universoTotal: r.universo.length,
+                encontradosTotal: r.encontrados.length,
+                faltantesTotal: r.faltantes.length,
+                sobrantesTotal: r.sobrantes.length,
+                fechaFin: new Date().toISOString()
+            };
+            inv.faltantesList = r.faltantes.map(a => ({ codigo: a.codigo, activoFijo: a.activoFijo, nombre: a.nombre, serie: a.serie, marca: a.marca, modelo: a.modelo }));
+            inv.sobrantesList = r.sobrantes.map(s => ({ codigo: s.code, nombre: s.name, centro: s.centro, alerta: s.alerta }));
+
+            inv.estado = 'finalizado';
             inventarioActivo = null;
             document.getElementById('scan-area').style.display = 'none';
             scanResults = [];
@@ -2588,6 +2663,24 @@
             renderInventariosList();
             saveAllData();
             showNotification('✅ Inventario finalizado', 'success');
+            mostrarModalInformeFinal(inv.id);
+        }
+
+        function mostrarModalInformeFinal(id) {
+            const inv = inventarios.find(i => i.id === id);
+            if (!inv) return;
+            window.__ultimoInventarioId = id;
+            const r = inv.resumen || {};
+            document.getElementById('informe-resumen-body').innerHTML = `
+                <p><strong>Tienda:</strong> ${inv.tienda} &nbsp; <strong>Categoría:</strong> ${inv.categoria}</p>
+                <div style="display:flex; gap:1.2rem; flex-wrap:wrap; margin-top:0.6rem;">
+                    <div>📦 Universo<br><strong>${r.universoTotal ?? 0}</strong></div>
+                    <div style="color:var(--success-color);">✅ Encontrados<br><strong>${r.encontradosTotal ?? 0}</strong></div>
+                    <div style="color:var(--danger-color);">❌ Faltantes<br><strong>${r.faltantesTotal ?? 0}</strong></div>
+                    <div style="color:var(--warning-color);">⚠️ Fuera de lugar<br><strong>${r.sobrantesTotal ?? 0}</strong></div>
+                </div>
+            `;
+            openModal('modalInformeAuditoria');
         }
 
         function cancelarInventario() {
@@ -2601,42 +2694,91 @@
             }
         }
 
-        function simulateScan() {
+        // ---- Universo de activos esperado para un levantamiento ----
+        function calcularUniverso(inv) {
+            return assets.filter(a => a.centro === inv.tienda && a.categoria === inv.categoria);
+        }
+
+        function buscarActivoPorCodigo(code) {
+            const c = String(code).trim();
+            if (!c) return null;
+            return assets.find(a => a.codigo === c) ||
+                   assets.find(a => a.activoFijo === c) ||
+                   assets.find(a => a.serie === c) || null;
+        }
+
+        // Compara lo escaneado contra el universo real de la tienda/categoría
+        // para obtener encontrados, faltantes y "fuera de lugar" reales.
+        function calcularResumen(inv, items) {
+            const universo = calcularUniverso(inv);
+            const validos = items.filter(i => i.enUniverso !== undefined ? i.enUniverso : !i.alerta);
+            const codigosValidos = new Set(validos.map(i => i.code));
+            const encontrados = universo.filter(a => codigosValidos.has(a.codigo) || codigosValidos.has(a.activoFijo));
+            const encontradosKeys = new Set(encontrados.flatMap(a => [a.codigo, a.activoFijo]));
+            const faltantes = universo.filter(a => !encontradosKeys.has(a.codigo) && !(a.activoFijo && encontradosKeys.has(a.activoFijo)));
+            const sobrantes = items.filter(i => i.enUniverso !== undefined ? !i.enUniverso : !!i.alerta);
+            return { universo, encontrados, faltantes, sobrantes };
+        }
+
+        function registrarScanManual() {
+            const input = document.getElementById('scan-input');
+            const code = input.value.trim();
+            if (!code) return;
+            registrarScan(code);
+            input.value = '';
+            input.focus();
+        }
+
+        document.getElementById('scan-input')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                registrarScanManual();
+            }
+        });
+
+        // Registra un código real (leído por lector físico, cámara o
+        // tecleado a mano) contra el inventario en curso.
+        function registrarScan(code) {
             if (!inventarioActivo) {
                 showNotification('Primero inicia o continua un inventario', 'warning');
                 return;
             }
             const inv = inventarios.find(i => i.id === inventarioActivo);
             if (!inv) return;
+            const codigo = String(code).trim();
+            if (!codigo) return;
 
-            const codigos = assets.map(a => a.codigo).filter(c => c);
-            if (codigos.length === 0) codigos.push('BST-CDMX-0001', 'BST-GDL-0023', 'BST-MTY-0012');
-            const code = codigos[Math.floor(Math.random() * codigos.length)];
-            const assetFound = assets.find(a => a.codigo === code);
-            let name = 'Desconocido';
+            if (scanResults.some(r => r.code === codigo)) {
+                showNotification(`⚠️ ${codigo} ya fue escaneado en este inventario`, 'warning');
+                return;
+            }
+
+            const assetFound = buscarActivoPorCodigo(codigo);
+            let name = 'Código no registrado en el catálogo';
             let centro = 'N/A';
             let alerta = '';
+            let enUniverso = false;
+
             if (assetFound) {
                 name = assetFound.nombre;
                 centro = assetFound.centro;
-                if (inv.tienda !== 'matriz' && centro.toLowerCase().includes(inv.tienda)) {
-                    // ok
-                } else if (inv.tienda === 'matriz' && centro.includes('Oficinas centrales')) {
-                    // ok
-                } else {
-                    alerta = '⚠️ Este activo pertenece a otra sucursal: ' + centro;
+                const perteneceATienda = centro === inv.tienda;
+                const perteneceACategoria = assetFound.categoria === inv.categoria;
+                if (!perteneceATienda) {
+                    alerta = `⚠️ Este activo pertenece a otra sucursal: ${centro}`;
+                } else if (!perteneceACategoria) {
+                    alerta = `⚠️ Este activo está catalogado en otra categoría: ${assetFound.categoria}`;
                 }
+                enUniverso = perteneceATienda && perteneceACategoria;
             } else {
-                const names = ['Laptop HP', 'Monitor LG', 'Silla Ejecutiva', 'Mesa de Trabajo', 'CPU Intel', 'Teclado Logitech'];
-                name = names[Math.floor(Math.random() * names.length)];
+                alerta = '⚠️ Código no encontrado en el catálogo de activos';
             }
 
-            const found = true;
-            const item = { code, name, found, timestamp: new Date().toLocaleTimeString(), centro, alerta };
+            const item = { code: codigo, name, found: true, timestamp: new Date().toLocaleTimeString(), centro, alerta, enUniverso };
             scanResults.push(item);
 
             if (inv.categoria === 'vehiculos') {
-                const responsable = prompt('Responsable del vehículo:', 'Rodolfo Cervantes') || 'N/A';
+                const responsable = prompt('Responsable del vehículo:', inv.responsable || '') || 'N/A';
                 const poliza = document.querySelector('.doc-check[data-doc="poliza"]')?.checked ? 'OK' : 'X';
                 const tarjeta = document.querySelector('.doc-check[data-doc="tarjeta"]')?.checked ? 'OK' : 'X';
                 const licencia = document.querySelector('.doc-check[data-doc="licencia"]')?.checked ? 'OK' : 'X';
@@ -2658,42 +2800,252 @@
             inv.items = scanResults.slice();
             if (inv.categoria === 'vehiculos') inv.vehiculos = vehiculos.slice();
             saveAllData();
-            let msg = found ? `✅ ${code} - ${name}` : `❌ ${code} - No encontrado`;
+            let msg = alerta ? `${codigo} - ${name}` : `✅ ${codigo} - ${name}`;
             if (alerta) msg += ' | ' + alerta;
-            showNotification(msg, found ? (alerta ? 'warning' : 'success') : 'error');
+            showNotification(msg, alerta ? 'warning' : 'success');
+        }
+
+        // ---- Escaneo por cámara (código de barras / QR) ----
+        let camaraStream = null;
+        let camaraDetectorInterval = null;
+
+        async function abrirCamaraScan() {
+            if (!inventarioActivo) {
+                showNotification('Primero inicia o continua un inventario', 'warning');
+                return;
+            }
+            if (!('BarcodeDetector' in window)) {
+                showNotification('Este navegador no soporta escaneo por cámara. Usa el campo de texto con un lector de código de barras o escribe el código a mano.', 'warning', 6000);
+                return;
+            }
+            openModal('modalCamaraScan');
+            const video = document.getElementById('camara-scan-video');
+            const statusEl = document.getElementById('camara-scan-status');
+            statusEl.textContent = 'Apunta la cámara al código de barras o QR del activo.';
+            try {
+                camaraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = camaraStream;
+                await video.play();
+                const detector = new BarcodeDetector({ formats: ['code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code', 'code_39'] });
+                camaraDetectorInterval = setInterval(async () => {
+                    try {
+                        const codes = await detector.detect(video);
+                        if (codes.length > 0) {
+                            const value = codes[0].rawValue;
+                            statusEl.textContent = `Detectado: ${value}`;
+                            registrarScan(value);
+                            cerrarCamaraScan();
+                        }
+                    } catch (err) { /* fotograma sin código legible, se ignora */ }
+                }, 400);
+            } catch (err) {
+                showNotification('No se pudo acceder a la cámara: ' + err.message, 'danger');
+                cerrarCamaraScan();
+            }
+        }
+
+        function cerrarCamaraScan() {
+            if (camaraDetectorInterval) { clearInterval(camaraDetectorInterval); camaraDetectorInterval = null; }
+            if (camaraStream) { camaraStream.getTracks().forEach(t => t.stop()); camaraStream = null; }
+            closeModal('modalCamaraScan');
         }
 
         function renderScanResults() {
             const container = document.getElementById('scan-results');
+            const resumenEl = document.getElementById('scan-resumen-live');
             if (!container) return;
+            const inv = inventarios.find(i => i.id === inventarioActivo);
+
+            if (inv && resumenEl) {
+                const r = calcularResumen(inv, scanResults);
+                resumenEl.innerHTML = `
+                    <span>📦 Universo: <strong>${r.universo.length}</strong></span>
+                    <span style="color:var(--success-color);">✅ Encontrados: <strong>${r.encontrados.length}</strong></span>
+                    <span style="color:var(--danger-color);">❌ Faltantes: <strong>${r.faltantes.length}</strong></span>
+                    <span style="color:var(--warning-color);">⚠️ Fuera de lugar: <strong>${r.sobrantes.length}</strong></span>
+                `;
+            } else if (resumenEl) {
+                resumenEl.innerHTML = '';
+            }
+
             if (scanResults.length === 0) {
-                container.innerHTML = `<p style="color:#888; text-align:center; padding:0.5rem;">Sin escaneos</p>`;
+                container.innerHTML = `<p style="color:#888; text-align:center; padding:0.5rem;">Sin escaneos todavía</p>`;
                 return;
             }
-            const foundCount = scanResults.filter(r => r.found).length;
-            const missingCount = scanResults.length - foundCount;
             container.innerHTML = `
-                <div style="max-height:200px; overflow-y:auto; font-size:0.8rem;">
+                <div style="max-height:220px; overflow-y:auto; font-size:0.8rem;">
                     ${scanResults.slice().reverse().map(r => `
                         <div style="display:flex; justify-content:space-between; padding:6px; border-bottom:1px solid var(--border-color);">
-                            <span><strong>${r.code}</strong> - ${r.name} ${r.centro ? '· '+r.centro : ''}</span>
+                            <span><strong>${r.code}</strong> - ${r.name} ${r.centro && r.centro !== 'N/A' ? '· '+r.centro : ''}</span>
                             <span>
-                                ${r.found ? '✅' : '❌'}
-                                <span style="color:${r.found ? 'var(--success-color)' : 'var(--danger-color)'};">${r.found ? 'Encontrado' : 'Faltante'}</span>
-                                ${r.alerta ? '<span style="color:var(--warning-color); margin-left:4px;">⚠️</span>' : ''}
+                                ${r.alerta ? '⚠️' : '✅'}
+                                <span style="color:${r.alerta ? 'var(--warning-color)' : 'var(--success-color)'};">${r.alerta ? 'Revisar' : 'Encontrado'}</span>
                                 <small style="color:#999; margin-left:6px;">${r.timestamp}</small>
                             </span>
                         </div>
+                        ${r.alerta ? `<div style="font-size:0.72rem; color:var(--warning-color); padding:0 6px 4px;">${r.alerta}</div>` : ''}
                     `).join('')}
-                </div>
-                <div style="margin-top:8px; font-size:0.75rem; color:#888;">
-                    Total: ${scanResults.length} | ✅ ${foundCount} encontrados | ❌ ${missingCount} faltantes
                 </div>
             `;
         }
 
         function updateScanCount() {
             document.getElementById('scan-count').textContent = scanResults.length;
+        }
+
+        // ============================================================
+        // INFORME EJECUTIVO DE AUDITORÍA (PDF / Word)
+        // ============================================================
+        function construirDatosInforme(inv) {
+            const r = inv.resumen || {};
+            const faltantes = inv.faltantesList || [];
+            const sobrantes = inv.sobrantesList || [];
+            const encontrados = (inv.items || []).filter(i => i.enUniverso !== undefined ? i.enUniverso : !i.alerta);
+            const fechaInicio = inv.fecha ? new Date(inv.fecha).toLocaleString('es-MX') : '-';
+            const fechaFin = r.fechaFin ? new Date(r.fechaFin).toLocaleString('es-MX') : '-';
+            const universoTotal = r.universoTotal ?? 0;
+            const pct = universoTotal ? Math.round(((r.encontradosTotal || 0) / universoTotal) * 100) : 0;
+            return { inv, r, faltantes, sobrantes, encontrados, fechaInicio, fechaFin, pct };
+        }
+
+        function descargarInformePDF(id) {
+            const inv = inventarios.find(i => i.id === id);
+            if (!inv) { showNotification('No se encontró el inventario', 'danger'); return; }
+            if (inv.estado !== 'finalizado') { showNotification('Solo se puede descargar el informe de una auditoría finalizada', 'warning'); return; }
+            const d = construirDatosInforme(inv);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+            const margin = 40;
+            let y = margin;
+
+            doc.setFontSize(16); doc.setFont(undefined, 'bold');
+            doc.text(razonSocial || 'Grupo Kuroda', margin, y); y += 18;
+            doc.setFontSize(12); doc.setFont(undefined, 'normal');
+            doc.text('Informe Ejecutivo de Auditoría de Inventario', margin, y); y += 22;
+
+            doc.setFontSize(9); doc.setTextColor(90);
+            doc.text(`Folio: ${inv.id.slice(0, 8).toUpperCase()}`, margin, y); y += 14;
+            doc.text(`Tienda / Centro: ${inv.tienda}`, margin, y); y += 14;
+            doc.text(`Categoría: ${inv.categoria}`, margin, y); y += 14;
+            doc.text(`Responsable del levantamiento: ${inv.responsable}`, margin, y); y += 14;
+            doc.text(`Fecha de inicio: ${d.fechaInicio}`, margin, y); y += 14;
+            doc.text(`Fecha de finalización: ${d.fechaFin}`, margin, y); y += 20;
+            doc.setTextColor(0);
+
+            doc.autoTable({
+                startY: y, margin: { left: margin, right: margin }, theme: 'grid',
+                head: [['Indicador', 'Valor']],
+                body: [
+                    ['Universo esperado', String(d.r.universoTotal ?? 0)],
+                    ['Activos encontrados', String(d.r.encontradosTotal ?? 0)],
+                    ['Activos faltantes', String(d.r.faltantesTotal ?? 0)],
+                    ['Fuera de lugar / no reconocidos', String(d.r.sobrantesTotal ?? 0)],
+                    ['% de cumplimiento', d.pct + '%']
+                ],
+                styles: { fontSize: 9 }, headStyles: { fillColor: [127, 90, 240] }
+            });
+            y = doc.lastAutoTable.finalY + 20;
+
+            doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(44, 132, 90);
+            doc.text('Activos encontrados', margin, y); y += 6; doc.setTextColor(0);
+            doc.autoTable({
+                startY: y + 6, margin: { left: margin, right: margin }, theme: 'striped',
+                head: [['Código', 'Nombre', 'Hora']],
+                body: d.encontrados.length ? d.encontrados.map(i => [i.code, i.name, i.timestamp || '-']) : [['-', 'Sin activos encontrados', '-']],
+                styles: { fontSize: 8 }, headStyles: { fillColor: [44, 182, 125] }
+            });
+            y = doc.lastAutoTable.finalY + 20;
+
+            if (y > 620) { doc.addPage(); y = margin; }
+            doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(200, 0, 50);
+            doc.text('Activos faltantes', margin, y); y += 6; doc.setTextColor(0);
+            doc.autoTable({
+                startY: y + 6, margin: { left: margin, right: margin }, theme: 'striped',
+                head: [['Código', 'Activo fijo', 'Nombre', 'Serie']],
+                body: d.faltantes.length ? d.faltantes.map(a => [a.codigo || '-', a.activoFijo || '-', a.nombre, a.serie || '-']) : [['-', '-', 'No hay faltantes ✅', '-']],
+                styles: { fontSize: 8 }, headStyles: { fillColor: [239, 71, 111] }
+            });
+            y = doc.lastAutoTable.finalY + 20;
+
+            if (d.sobrantes.length > 0) {
+                if (y > 620) { doc.addPage(); y = margin; }
+                doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(180, 130, 0);
+                doc.text('Activos fuera de lugar / a revisar', margin, y); y += 6; doc.setTextColor(0);
+                doc.autoTable({
+                    startY: y + 6, margin: { left: margin, right: margin }, theme: 'striped',
+                    head: [['Código', 'Nombre', 'Observación']],
+                    body: d.sobrantes.map(s => [s.codigo || '-', s.nombre || '-', s.alerta || '-']),
+                    styles: { fontSize: 8 }, headStyles: { fillColor: [249, 168, 37] }
+                });
+                y = doc.lastAutoTable.finalY + 30;
+            }
+
+            if (y > 680) { doc.addPage(); y = margin + 20; }
+            doc.setFontSize(9); doc.setTextColor(90);
+            doc.text('_____________________________', margin, y + 40);
+            doc.text('Firma del responsable del levantamiento', margin, y + 54);
+            doc.text('_____________________________', 320, y + 40);
+            doc.text('Vo.Bo. Administración', 320, y + 54);
+
+            doc.save(`Informe_Auditoria_${inv.tienda}_${inv.categoria}_${inv.id.slice(0, 6)}.pdf`);
+        }
+
+        function descargarInformeWord(id) {
+            const inv = inventarios.find(i => i.id === id);
+            if (!inv) { showNotification('No se encontró el inventario', 'danger'); return; }
+            if (inv.estado !== 'finalizado') { showNotification('Solo se puede descargar el informe de una auditoría finalizada', 'warning'); return; }
+            const d = construirDatosInforme(inv);
+            const html = `<html><head><meta charset="utf-8"><style>
+                body{font-family:Calibri,Arial,sans-serif; color:#1e1e2f;}
+                h1{font-size:20px; margin-bottom:0;}
+                h2{font-size:14px; margin:18px 0 4px;}
+                table{border-collapse:collapse; width:100%; margin:6px 0 18px;}
+                th,td{border:1px solid #ccc; padding:6px 8px; font-size:11px; text-align:left;}
+                th{background:#7f5af0; color:#fff;}
+                .meta td{border:none; padding:2px 0; font-size:12px;}
+            </style></head><body>
+                <h1>${razonSocial || 'Grupo Kuroda'}</h1>
+                <p style="color:#555;">Informe Ejecutivo de Auditoría de Inventario</p>
+                <table class="meta">
+                    <tr><td><strong>Folio:</strong></td><td>${inv.id.slice(0, 8).toUpperCase()}</td></tr>
+                    <tr><td><strong>Tienda / Centro:</strong></td><td>${inv.tienda}</td></tr>
+                    <tr><td><strong>Categoría:</strong></td><td>${inv.categoria}</td></tr>
+                    <tr><td><strong>Responsable:</strong></td><td>${inv.responsable}</td></tr>
+                    <tr><td><strong>Fecha de inicio:</strong></td><td>${d.fechaInicio}</td></tr>
+                    <tr><td><strong>Fecha de finalización:</strong></td><td>${d.fechaFin}</td></tr>
+                </table>
+                <table>
+                    <tr><th>Universo</th><th>Encontrados</th><th>Faltantes</th><th>Fuera de lugar</th><th>% Cumplimiento</th></tr>
+                    <tr><td>${d.r.universoTotal ?? 0}</td><td>${d.r.encontradosTotal ?? 0}</td><td>${d.r.faltantesTotal ?? 0}</td><td>${d.r.sobrantesTotal ?? 0}</td><td>${d.pct}%</td></tr>
+                </table>
+                <h2 style="color:#2cb67d;">Activos encontrados</h2>
+                <table><tr><th>Código</th><th>Nombre</th><th>Hora</th></tr>
+                    ${d.encontrados.length ? d.encontrados.map(i => `<tr><td>${i.code}</td><td>${i.name}</td><td>${i.timestamp || '-'}</td></tr>`).join('') : '<tr><td colspan="3">Sin activos encontrados</td></tr>'}
+                </table>
+                <h2 style="color:#ef476f;">Activos faltantes</h2>
+                <table><tr><th>Código</th><th>Activo fijo</th><th>Nombre</th><th>Serie</th></tr>
+                    ${d.faltantes.length ? d.faltantes.map(a => `<tr><td>${a.codigo || '-'}</td><td>${a.activoFijo || '-'}</td><td>${a.nombre}</td><td>${a.serie || '-'}</td></tr>`).join('') : '<tr><td colspan="4">No hay faltantes</td></tr>'}
+                </table>
+                ${d.sobrantes.length ? `<h2 style="color:#f9a825;">Activos fuera de lugar / a revisar</h2>
+                <table><tr><th>Código</th><th>Nombre</th><th>Observación</th></tr>
+                    ${d.sobrantes.map(s => `<tr><td>${s.codigo || '-'}</td><td>${s.nombre || '-'}</td><td>${s.alerta || '-'}</td></tr>`).join('')}
+                </table>` : ''}
+                <br><br>
+                <table class="meta" style="margin-top:30px;">
+                    <tr><td style="width:50%;">_____________________________<br>Firma del responsable del levantamiento</td>
+                        <td>_____________________________<br>Vo.Bo. Administración</td></tr>
+                </table>
+            </body></html>`;
+
+            const blob = htmlDocx.asBlob(html);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Informe_Auditoria_${inv.tienda}_${inv.categoria}_${inv.id.slice(0, 6)}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
         }
 
         function renderVehiculosTabla(data) {
