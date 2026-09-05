@@ -1263,18 +1263,39 @@
             <label>Tienda / Centro</label>
             <select id="modal-tienda-inv"></select>
             <label>Categoría</label>
-            <select id="modal-categoria-inv">
+            <select id="modal-categoria-inv" onchange="toggleVehTipoField()">
                 <option value="computo">Equipo de Cómputo</option>
                 <option value="mobiliario">Mobiliario</option>
                 <option value="herramienta">Herramienta</option>
                 <option value="vehiculos">Vehículos</option>
                 <option value="otros">Otros</option>
             </select>
+            <div id="modal-veh-tipo-wrap" style="display:none;">
+                <label>Tipo de levantamiento</label>
+                <select id="modal-veh-tipo">
+                    <option value="simple">Simple (igual que cómputo)</option>
+                    <option value="documentos">Con documentos vehiculares</option>
+                </select>
+            </div>
             <label>Responsable</label>
             <input type="text" id="modal-responsable-inv" placeholder="Nombre del encargado">
             <div class="modal-buttons">
                 <button class="btn-secondary" onclick="closeModal('modalNuevoInventario')">Cancelar</button>
                 <button class="btn-primary" onclick="crearInventario()"><i class="fas fa-play"></i> Iniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Responsable del Vehículo (variante con documentos) -->
+    <div class="modal-overlay" id="modalResponsableVehiculo">
+        <div class="modal-box" style="max-width:380px;">
+            <h3><i class="fas fa-user"></i> Responsable del vehículo</h3>
+            <p class="sub">Se guardará en la tabla de documentos vehiculares.</p>
+            <label>Nombre del responsable</label>
+            <input type="text" id="veh-resp-input" placeholder="Nombre completo" onkeypress="if(event.key==='Enter') confirmarResponsableVehiculo()">
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal('modalResponsableVehiculo')">Cancelar</button>
+                <button class="btn-primary" onclick="confirmarResponsableVehiculo()"><i class="fas fa-check"></i> Guardar</button>
             </div>
         </div>
     </div>
@@ -1418,8 +1439,8 @@
             <h3 id="modal-usuario-title"><i class="fas fa-user-edit"></i> Editar usuario</h3>
             <p class="sub">Deja la contraseña en blanco para no cambiarla.</p>
             <input type="hidden" id="edit-usuario-id">
-            <label>Nombre</label>
-            <div class="field-display" id="usuario-nombre-display">-</div>
+            <label>Nombre completo</label>
+            <input type="text" id="usuario-nombre" placeholder="Ej: Juan Pérez">
             <label>Usuario</label>
             <input type="text" id="usuario-username" placeholder="Ej: jperez">
             <label>Nueva contraseña</label>
@@ -2390,7 +2411,7 @@
             const title = document.getElementById('modal-usuario-title');
             const idField = document.getElementById('edit-usuario-id');
             const username = document.getElementById('usuario-username');
-            const nombreDisplay = document.getElementById('usuario-nombre-display');
+            const nombre = document.getElementById('usuario-nombre');
             const password = document.getElementById('usuario-password');
             const rol = document.getElementById('usuario-rol');
             const centroSelect = document.getElementById('usuario-centro');
@@ -2400,7 +2421,7 @@
                 title.textContent = '✏️ Editar usuario';
                 idField.value = data.id;
                 username.value = data.username;
-                nombreDisplay.textContent = data.nombreCompleto || data.username;
+                nombre.value = data.nombreCompleto || '';
                 password.value = '';
                 rol.value = data.role;
                 centroSelect.value = data.centro || '';
@@ -2415,7 +2436,7 @@
                 title.textContent = '👤 Nuevo Usuario';
                 idField.value = '';
                 username.value = '';
-                nombreDisplay.textContent = '-';
+                nombre.value = '';
                 password.value = '';
                 rol.value = 'user';
                 centroSelect.value = centros.length ? centros[0].nombre : '';
@@ -2452,6 +2473,7 @@
         async function guardarUsuario() {
             const id = document.getElementById('edit-usuario-id').value;
             const username = document.getElementById('usuario-username').value.trim();
+            const nombreCompleto = document.getElementById('usuario-nombre').value.trim() || username;
             const password = document.getElementById('usuario-password').value.trim();
             const role = document.getElementById('usuario-rol').value;
             // El centro por ahora es solo informativo (ver nota en renderUsuarios)
@@ -2466,7 +2488,7 @@
                 const { error: errUpd } = await supabaseClient.rpc('admin_update_user', {
                     target_id: id,
                     p_username: username,
-                    p_nombre_completo: username,
+                    p_nombre_completo: nombreCompleto,
                     p_centro_id: null,
                     p_activo: true
                 });
@@ -2509,7 +2531,7 @@
                     body: {
                         username,
                         password: password || 'Bastion2026!',
-                        nombreCompleto: username,
+                        nombreCompleto,
                         role
                     }
                 });
@@ -2524,6 +2546,12 @@
         }
 
         // ---- Inventarios ----
+        function toggleVehTipoField() {
+            const categoria = document.getElementById('modal-categoria-inv').value;
+            const wrap = document.getElementById('modal-veh-tipo-wrap');
+            wrap.style.display = categoria === 'vehiculos' ? 'block' : 'none';
+        }
+
         function crearInventario() {
             const tienda = document.getElementById('modal-tienda-inv').value;
             const categoria = document.getElementById('modal-categoria-inv').value;
@@ -2532,10 +2560,12 @@
                 alert('Completa todos los campos');
                 return;
             }
+            const vehTipo = categoria === 'vehiculos' ? document.getElementById('modal-veh-tipo').value : null;
             const newInv = {
                 id: crypto.randomUUID(),
                 tienda: tienda,
                 categoria: categoria,
+                vehTipo: vehTipo,
                 responsable: responsable,
                 fecha: new Date().toISOString(),
                 items: [],
@@ -2563,7 +2593,7 @@
             document.getElementById('scan-title').textContent = `📋 Inventario: ${inv.tienda} (${inv.categoria})`;
 
             const vehModule = document.getElementById('vehiculo-module');
-            if (inv.categoria === 'vehiculos') {
+            if (inv.categoria === 'vehiculos' && inv.vehTipo === 'documentos') {
                 vehModule.style.display = 'block';
                 vehiculos = inv.vehiculos || [];
                 renderVehiculosTabla(vehiculos);
@@ -2777,32 +2807,53 @@
             const item = { code: codigo, name, found: true, timestamp: new Date().toLocaleTimeString(), centro, alerta, enUniverso };
             scanResults.push(item);
 
-            if (inv.categoria === 'vehiculos') {
-                const responsable = prompt('Responsable del vehículo:', inv.responsable || '') || 'N/A';
-                const poliza = document.querySelector('.doc-check[data-doc="poliza"]')?.checked ? 'OK' : 'X';
-                const tarjeta = document.querySelector('.doc-check[data-doc="tarjeta"]')?.checked ? 'OK' : 'X';
-                const licencia = document.querySelector('.doc-check[data-doc="licencia"]')?.checked ? 'OK' : 'X';
-                const estatus = (poliza === 'OK' && tarjeta === 'OK' && licencia === 'OK') ? 'Completo' : 'Incompleto';
-                vehiculos.push({
-                    fecha: new Date().toLocaleDateString('es-MX'),
-                    equipo: name,
-                    responsable: responsable,
-                    poliza: poliza,
-                    tarjeta: tarjeta,
-                    licencia: licencia,
-                    estatus: estatus
-                });
-                renderVehiculosTabla(vehiculos);
-            }
-
             renderScanResults();
             updateScanCount();
             inv.items = scanResults.slice();
-            if (inv.categoria === 'vehiculos') inv.vehiculos = vehiculos.slice();
             saveAllData();
             let msg = alerta ? `${codigo} - ${name}` : `✅ ${codigo} - ${name}`;
             if (alerta) msg += ' | ' + alerta;
             showNotification(msg, alerta ? 'warning' : 'success');
+
+            // Variante "con documentos vehiculares": pide el responsable en un
+            // modal propio (el prompt() nativo del navegador no funciona bien
+            // dentro de la app). La variante "simple" no abre nada extra y se
+            // comporta igual que un levantamiento de cómputo.
+            if (inv.categoria === 'vehiculos' && inv.vehTipo === 'documentos') {
+                abrirModalResponsableVehiculo(name, inv.responsable || '');
+            }
+        }
+
+        // ---- Responsable del vehículo (variante "con documentos") ----
+        let vehiculoPendiente = null;
+        function abrirModalResponsableVehiculo(equipoNombre, responsableSugerido) {
+            vehiculoPendiente = { equipo: equipoNombre };
+            document.getElementById('veh-resp-input').value = responsableSugerido;
+            openModal('modalResponsableVehiculo');
+            setTimeout(() => document.getElementById('veh-resp-input').focus(), 50);
+        }
+
+        function confirmarResponsableVehiculo() {
+            if (!vehiculoPendiente) { closeModal('modalResponsableVehiculo'); return; }
+            const responsable = document.getElementById('veh-resp-input').value.trim() || 'N/A';
+            const poliza = document.querySelector('.doc-check[data-doc="poliza"]')?.checked ? 'OK' : 'X';
+            const tarjeta = document.querySelector('.doc-check[data-doc="tarjeta"]')?.checked ? 'OK' : 'X';
+            const licencia = document.querySelector('.doc-check[data-doc="licencia"]')?.checked ? 'OK' : 'X';
+            const estatus = (poliza === 'OK' && tarjeta === 'OK' && licencia === 'OK') ? 'Completo' : 'Incompleto';
+            vehiculos.push({
+                fecha: new Date().toLocaleDateString('es-MX'),
+                equipo: vehiculoPendiente.equipo,
+                responsable: responsable,
+                poliza: poliza,
+                tarjeta: tarjeta,
+                licencia: licencia,
+                estatus: estatus
+            });
+            renderVehiculosTabla(vehiculos);
+            const inv = inventarios.find(i => i.id === inventarioActivo);
+            if (inv) { inv.vehiculos = vehiculos.slice(); saveAllData(); }
+            vehiculoPendiente = null;
+            closeModal('modalResponsableVehiculo');
         }
 
         // ---- Escaneo por cámara (código de barras / QR) ----
@@ -3436,6 +3487,7 @@
             if (id === 'modalNuevoInventario') {
                 document.getElementById('modal-responsable-inv').value = currentUser ? currentUser.nombreCompleto || currentUser.username : 'admin';
                 actualizarSelectCentros();
+                toggleVehTipoField();
             }
             if (id === 'modalUsuario') {
                 actualizarSelectUsuarioCentro();
