@@ -834,6 +834,14 @@
             }
         }
 
+        /* ========== MÓDULO DE ESCANEO (levantamiento) ========== */
+        .scan-header { display:flex; justify-content:space-between; align-items:center; gap:0.6rem; margin-bottom:0.8rem; flex-wrap:wrap; }
+        .scan-header-actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
+        .scan-meta { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem; font-size:0.85rem; }
+        .scan-resumen { margin-top:1rem; display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.85rem; }
+        .scan-result-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px; border-bottom:1px solid var(--border-color); flex-wrap:wrap; }
+        .scan-result-status { white-space:nowrap; }
+
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .sidebar { width: 60px; padding: 0.8rem 0.4rem; font-size: 0.7rem; }
@@ -852,6 +860,21 @@
             .assets-container { grid-template-columns: 1fr; }
             .doc-checkboxes { flex-direction: column; gap: 0.5rem; }
             .modal-box { width: 95%; padding: 1rem; }
+
+            /* Levantamiento (escaneo) más claro en teléfono */
+            .scan-header { flex-direction: column; align-items: stretch; }
+            .scan-header-actions button { flex: 1; }
+            .scan-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; font-size: 0.8rem; }
+            .scan-resumen { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+            .scan-resumen span { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 10px; text-align: center; }
+            .scan-result-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+
+            /* Tablas -> tarjetas apiladas para no cortar columnas */
+            #inventarios-list table, #inventarios-list tbody, #inventarios-list tr, #inventarios-list td { display: block; width: 100%; }
+            #inventarios-list thead { display: none; }
+            #inventarios-list tr { margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; }
+            #inventarios-list td { border: none; padding: 5px 0; text-align: right; }
+            #inventarios-list td::before { content: attr(data-label); float: left; font-weight: 600; color: #888; }
         }
 
         /* ========== AJUSTES ========== */
@@ -938,11 +961,11 @@
             <form class="login-form" id="login-form" onsubmit="return login(event)">
                 <label>USUARIO</label>
                 <div class="input-group">
-                    <input type="text" id="username" placeholder="ej. admin" value="admin" autofocus>
+                    <input type="text" id="username" placeholder="ej. admin" autocomplete="username" autofocus>
                 </div>
                 <label>CONTRASEÑA</label>
                 <div class="input-group">
-                    <input type="password" id="password" placeholder="••••••••" value="1234">
+                    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
                     <span class="toggle-pwd" onclick="togglePasswordVisibility()">
                         <i class="far fa-eye" id="pwdIcon"></i>
                     </span>
@@ -1101,14 +1124,14 @@
                 </div>
                 <div id="scan-area" style="display:none; margin-top:1.5rem;">
                     <div class="widget-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                        <div class="scan-header">
                             <h3 style="margin:0; border:none; padding:0;" id="scan-title">Inventario en curso</h3>
-                            <div>
-                                <button class="btn-secondary" onclick="finalizarInventario()" style="margin-right:0.5rem;"><i class="fas fa-check"></i> Finalizar</button>
+                            <div class="scan-header-actions">
+                                <button class="btn-secondary" onclick="finalizarInventario()"><i class="fas fa-check"></i> Finalizar</button>
                                 <button class="btn-action" style="background:#dc3545; color:white;" onclick="cancelarInventario()"><i class="fas fa-times"></i> Cancelar</button>
                             </div>
                         </div>
-                        <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem;">
+                        <div class="scan-meta">
                             <span><strong>Tienda:</strong> <span id="scan-tienda">-</span></span>
                             <span><strong>Categoría:</strong> <span id="scan-categoria">-</span></span>
                             <span><strong>Escaneados:</strong> <span id="scan-count">0</span></span>
@@ -1118,7 +1141,7 @@
                             <button class="btn-primary" onclick="registrarScanManual()"><i class="fas fa-check"></i> Agregar</button>
                             <button class="btn-secondary" onclick="abrirCamaraScan()"><i class="fas fa-camera"></i> Usar cámara</button>
                         </div>
-                        <div id="scan-resumen-live" style="margin-top:1rem; display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.85rem;"></div>
+                        <div id="scan-resumen-live" class="scan-resumen"></div>
                         <div id="scan-results" style="margin-top:1rem;"></div>
                         <div id="vehiculo-module" style="display:none;" class="vehiculo-docs">
                             <h4>🚗 Documentos del Vehículo</h4>
@@ -2623,12 +2646,12 @@
             filtered.forEach(inv => {
                 const estadoCls = inv.estado === 'borrador' ? 'badge-process' : 'badge-done';
                 html += `<tr>
-                    <td>${inv.tienda}</td>
-                    <td>${inv.categoria}</td>
-                    <td>${new Date(inv.fecha).toLocaleDateString()}</td>
-                    <td>${inv.items.length}</td>
-                    <td><span class="status-badge ${estadoCls}">${inv.estado}</span></td>
-                    <td>
+                    <td data-label="Tienda">${inv.tienda}</td>
+                    <td data-label="Categoría">${inv.categoria}</td>
+                    <td data-label="Fecha">${new Date(inv.fecha).toLocaleDateString()}</td>
+                    <td data-label="Items">${inv.items.length}</td>
+                    <td data-label="Estado"><span class="status-badge ${estadoCls}">${inv.estado}</span></td>
+                    <td data-label="Acciones">
                         ${inv.estado === 'borrador' ? `<button class="btn-primary" style="padding:2px 8px; font-size:0.7rem;" onclick="abrirInventario('${inv.id}')"><i class="fas fa-play"></i> Continuar</button>` : `
                         <button class="btn-action" style="padding:2px 8px; font-size:0.7rem; color:var(--danger-color);" onclick="descargarInformePDF('${inv.id}')" title="Informe en PDF"><i class="fas fa-file-pdf"></i></button>
                         <button class="btn-action" style="padding:2px 8px; font-size:0.7rem; color:var(--info-color);" onclick="descargarInformeWord('${inv.id}')" title="Informe en Word"><i class="fas fa-file-word"></i></button>`}
@@ -2926,9 +2949,9 @@
             container.innerHTML = `
                 <div style="max-height:220px; overflow-y:auto; font-size:0.8rem;">
                     ${scanResults.slice().reverse().map(r => `
-                        <div style="display:flex; justify-content:space-between; padding:6px; border-bottom:1px solid var(--border-color);">
-                            <span><strong>${r.code}</strong> - ${r.name} ${r.centro && r.centro !== 'N/A' ? '· '+r.centro : ''}</span>
-                            <span>
+                        <div class="scan-result-row">
+                            <span class="scan-result-main"><strong>${r.code}</strong> - ${r.name} ${r.centro && r.centro !== 'N/A' ? '· '+r.centro : ''}</span>
+                            <span class="scan-result-status">
                                 ${r.alerta ? '⚠️' : '✅'}
                                 <span style="color:${r.alerta ? 'var(--warning-color)' : 'var(--success-color)'};">${r.alerta ? 'Revisar' : 'Encontrado'}</span>
                                 <small style="color:#999; margin-left:6px;">${r.timestamp}</small>
