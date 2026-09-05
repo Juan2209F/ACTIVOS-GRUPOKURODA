@@ -203,23 +203,62 @@
             height: 100vh;
             overflow: hidden;
         }
-        #dashboard.active { display: flex; }
+        #dashboard.active { display: block; }
 
-        /* ========== SIDEBAR ========== */
+        /* ========== SIDEBAR (colapsada: solo iconos; se expande al pasar el cursor) ========== */
         .sidebar {
-            width: 220px;
+            width: 78px;
+            position: fixed;
+            top: 16px; left: 16px; bottom: 16px;
+            z-index: 50;
             background: var(--sidebar-bg);
             color: var(--text-light);
             display: flex;
             flex-direction: column;
             padding: 1.2rem 0.8rem;
-            flex-shrink: 0;
-            height: calc(100vh - 32px);
-            margin: 16px 0 16px 16px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
+            overflow-x: hidden;
             overflow-y: auto;
             font-size: 0.8rem;
+            transition: width 0.25s ease, box-shadow 0.25s ease;
+        }
+        /* Solo se expande con hover real (mouse); en táctil se queda colapsada */
+        @media (hover: hover) and (pointer: fine) {
+            .sidebar:hover {
+                width: 220px;
+                box-shadow: 0 24px 40px rgba(0,0,0,.25);
+                z-index: 60;
+            }
+            .sidebar:hover .brand,
+            .sidebar:hover .nav-item,
+            .sidebar:hover .dark-toggle,
+            .sidebar:hover .supabase-status {
+                justify-content: flex-start;
+            }
+            .sidebar:hover .brand span,
+            .sidebar:hover .nav-item span,
+            .sidebar:hover .dark-toggle span,
+            .sidebar:hover #supabase-status-text,
+            .sidebar:hover .nav-item .badge {
+                opacity: 1;
+                transition-delay: 0.08s;
+            }
+        }
+        .sidebar .brand,
+        .sidebar .nav-item,
+        .sidebar .dark-toggle,
+        .sidebar .supabase-status {
+            justify-content: center;
+        }
+        .sidebar .brand span,
+        .nav-item span,
+        .dark-toggle span,
+        #supabase-status-text,
+        .nav-item .badge {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
         }
         .sidebar .brand {
             display: flex;
@@ -345,7 +384,7 @@
 
         /* ========== MAIN CONTENT ========== */
         .main-content {
-            flex: 1;
+            margin-left: 112px;
             padding: 1.5rem;
             overflow-y: auto;
             height: 100vh;
@@ -875,7 +914,7 @@
 
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
-            .sidebar { width: 60px; padding: 0.8rem 0.4rem; font-size: 0.7rem; }
+            .sidebar { width: 60px; padding: 0.8rem 0.4rem; font-size: 0.7rem; top: 8px; left: 8px; bottom: 8px; }
             .sidebar .brand { font-size: 0; padding: 0 0 0.8rem; }
             .sidebar .brand i { font-size: 1.2rem; }
             .sidebar .brand span { display: none; }
@@ -884,7 +923,7 @@
             .nav-item .badge { display: none; }
             .dark-toggle span { display: none; }
             .dark-toggle .toggle-track { width: 28px; height: 16px; }
-            .main-content { padding: 1rem; }
+            .main-content { margin-left: 76px; padding: 1rem; }
             .kpi-grid { grid-template-columns: 1fr 1fr; }
             .dashboard-widgets { grid-template-columns: 1fr; }
             .login-container { padding: 1.5rem; }
