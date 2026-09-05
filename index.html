@@ -1466,6 +1466,8 @@
             <input type="text" id="usuario-nombre" placeholder="Ej: Juan Pérez">
             <label>Usuario</label>
             <input type="text" id="usuario-username" placeholder="Ej: jperez">
+            <label>Puesto</label>
+            <input type="text" id="usuario-puesto" placeholder="Ej: Auditor Jr">
             <label>Nueva contraseña</label>
             <input type="text" id="usuario-password" placeholder="Dejar en blanco para no cambiar">
             <label>Rol</label>
@@ -2364,7 +2366,7 @@
             if (!tbody) return;
             const { data, error } = await supabaseClient
                 .from('usuarios2')
-                .select('id, username, nombre_completo, role, activo, centro_id')
+                .select('id, username, nombre_completo, role, activo, centro_id, puesto')
                 .order('created_at', { ascending: true });
             if (error) {
                 showNotification('No se pudo cargar la lista de usuarios: ' + error.message, 'danger');
@@ -2376,6 +2378,7 @@
                 nombreCompleto: u.nombre_completo,
                 role: u.role,
                 activo: u.activo,
+                puesto: u.puesto || '',
                 centro: ''
             }));
             tbody.innerHTML = '';
@@ -2435,6 +2438,7 @@
             const idField = document.getElementById('edit-usuario-id');
             const username = document.getElementById('usuario-username');
             const nombre = document.getElementById('usuario-nombre');
+            const puesto = document.getElementById('usuario-puesto');
             const password = document.getElementById('usuario-password');
             const rol = document.getElementById('usuario-rol');
             const centroSelect = document.getElementById('usuario-centro');
@@ -2445,6 +2449,7 @@
                 idField.value = data.id;
                 username.value = data.username;
                 nombre.value = data.nombreCompleto || '';
+                puesto.value = data.puesto || '';
                 password.value = '';
                 rol.value = data.role;
                 centroSelect.value = data.centro || '';
@@ -2460,6 +2465,7 @@
                 idField.value = '';
                 username.value = '';
                 nombre.value = '';
+                puesto.value = '';
                 password.value = '';
                 rol.value = 'user';
                 centroSelect.value = centros.length ? centros[0].nombre : '';
@@ -2497,6 +2503,7 @@
             const id = document.getElementById('edit-usuario-id').value;
             const username = document.getElementById('usuario-username').value.trim();
             const nombreCompleto = document.getElementById('usuario-nombre').value.trim() || username;
+            const puesto = document.getElementById('usuario-puesto').value.trim();
             const password = document.getElementById('usuario-password').value.trim();
             const role = document.getElementById('usuario-rol').value;
             // El centro por ahora es solo informativo (ver nota en renderUsuarios)
@@ -2508,12 +2515,16 @@
 
             if (id) {
                 // --- Editar usuario existente ---
+                // Se envía p_puesto explícitamente porque en la base hay dos
+                // versiones de admin_update_user (con y sin ese parámetro) y
+                // sin este dato Postgres no puede elegir cuál usar.
                 const { error: errUpd } = await supabaseClient.rpc('admin_update_user', {
                     target_id: id,
                     p_username: username,
                     p_nombre_completo: nombreCompleto,
                     p_centro_id: null,
-                    p_activo: true
+                    p_activo: true,
+                    p_puesto: puesto
                 });
                 if (errUpd) {
                     showNotification('No se pudo actualizar: ' + errUpd.message, 'danger');
@@ -2555,6 +2566,7 @@
                         username,
                         password: password || 'Bastion2026!',
                         nombreCompleto,
+                        puesto,
                         role
                     }
                 });
