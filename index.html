@@ -385,8 +385,11 @@
         }
 
         /* ========== MAIN CONTENT ========== */
+        #dashboard { width: 100%; min-height: 100vh; }
         .main-content {
             margin-left: 112px;
+            width: calc(100% - 112px);
+            box-sizing: border-box;
             padding: 1.5rem;
             overflow-x: hidden;
             overflow-y: auto;
@@ -927,7 +930,7 @@
             .nav-item .badge { display: none; }
             .dark-toggle span { display: none; }
             .dark-toggle .toggle-track { width: 28px; height: 16px; }
-            .main-content { margin-left: 76px; padding: 1rem; }
+            .main-content { margin-left: 76px; width: calc(100% - 76px); padding: 1rem; }
             .kpi-grid { grid-template-columns: 1fr 1fr; }
             .dashboard-widgets { grid-template-columns: 1fr; }
             .login-container { padding: 1.5rem; }
@@ -965,7 +968,7 @@
         /* ========== RESPONSIVE: teléfonos pequeños ========== */
         @media (max-width: 420px) {
             .sidebar { width: 52px; padding: 0.6rem 0.3rem; top: 6px; left: 6px; bottom: 6px; }
-            .main-content { margin-left: 64px; padding: 0.75rem; }
+            .main-content { margin-left: 64px; width: calc(100% - 64px); padding: 0.75rem; }
             .kpi-grid { grid-template-columns: 1fr; }
             .kpi-card { padding: 0.8rem 1rem; }
             .topbar-user { padding: 8px 10px; }
