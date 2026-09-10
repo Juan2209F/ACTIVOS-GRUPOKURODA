@@ -1917,6 +1917,7 @@
             document.getElementById('login-error').style.display = 'none';
             const container = document.getElementById('notificationContainer');
             if (container) container.innerHTML = '';
+            actualizarTopbarUsuario();
         }
 
         async function showDashboard() {
@@ -3541,6 +3542,37 @@
             document.getElementById('session-usuario').textContent = currentUser.username;
             document.getElementById('session-rol').textContent = currentUser.role === 'admin' ? 'Administrador' : 'Usuario';
             document.getElementById('session-centro').textContent = currentUser.centro || '-';
+            actualizarTopbarUsuario();
+        }
+
+        // Rellena la tarjeta de usuario de la barra superior (nombre, puesto
+        // y avatar con iniciales) a partir de currentUser.
+        function actualizarTopbarUsuario() {
+            const nombreEl = document.getElementById('topbar-user-nombre');
+            const puestoEl = document.getElementById('topbar-user-puesto');
+            const avatarEl = document.getElementById('topbar-user-avatar');
+            if (!nombreEl || !puestoEl || !avatarEl) return;
+
+            if (!currentUser) {
+                nombreEl.textContent = '-';
+                puestoEl.textContent = '-';
+                avatarEl.textContent = '-';
+                return;
+            }
+
+            const nombre = currentUser.nombreCompleto || currentUser.username || '-';
+            const puesto = currentUser.puesto || (currentUser.role === 'admin' ? 'Administrador' : 'Usuario');
+
+            nombreEl.textContent = nombre;
+            puestoEl.textContent = puesto;
+
+            const iniciales = nombre
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(p => p[0].toUpperCase())
+                .join('') || '?';
+            avatarEl.textContent = iniciales;
         }
 
         function setTheme(theme) {
