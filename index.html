@@ -374,9 +374,9 @@
             margin-bottom: 1rem; padding: 12px 20px;
             background: var(--card-bg); border-radius: var(--border-radius); box-shadow: var(--shadow);
         }
-        .topbar-user-info { text-align: right; line-height: 1.25; }
-        .topbar-user-name { display: block; font-weight: 700; font-size: 0.85rem; color: var(--text-main); }
-        .topbar-user-puesto { display: block; font-size: 0.68rem; color: var(--active-bg); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .topbar-user-info { text-align: right; line-height: 1.25; min-width: 0; overflow: hidden; }
+        .topbar-user-name { display: block; font-weight: 700; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .topbar-user-puesto { display: block; font-size: 0.68rem; color: var(--active-bg); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .topbar-user-avatar {
             width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--active-bg), var(--active-bg2)); color: #fff;
             display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
@@ -451,6 +451,7 @@
             border-radius: var(--border-radius);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
+            overflow-x: auto;
         }
         .widget-card h3 {
             font-size: 0.9rem;
@@ -931,6 +932,17 @@
             .doc-checkboxes { flex-direction: column; gap: 0.5rem; }
             .modal-box { width: 95%; padding: 1rem; }
 
+            /* Tarjeta de usuario en la barra superior: se ajusta al ancho disponible */
+            .topbar-user { padding: 10px 12px; gap: 8px; top: 8px; }
+            .topbar-user-info { max-width: calc(100vw - 76px - 2rem - 50px); }
+            .topbar-user-name { font-size: 0.78rem; }
+            .topbar-user-puesto { font-size: 0.62rem; }
+            .topbar-user-avatar { width: 32px; height: 32px; font-size: 0.72rem; }
+
+            /* Tablas genéricas sin tratamiento especial: scroll horizontal en vez de romper el layout */
+            .widget-card table { min-width: 480px; }
+            #inventarios-list table { min-width: 0; }
+
             /* Levantamiento (escaneo) más claro en teléfono */
             .scan-header { flex-direction: column; align-items: stretch; }
             .scan-header-actions button { flex: 1; }
@@ -945,6 +957,19 @@
             #inventarios-list tr { margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; }
             #inventarios-list td { border: none; padding: 5px 0; text-align: right; }
             #inventarios-list td::before { content: attr(data-label); float: left; font-weight: 600; color: #888; }
+        }
+
+        /* ========== RESPONSIVE: teléfonos pequeños ========== */
+        @media (max-width: 420px) {
+            .sidebar { width: 52px; padding: 0.6rem 0.3rem; top: 6px; left: 6px; bottom: 6px; }
+            .main-content { margin-left: 64px; padding: 0.75rem; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .kpi-card { padding: 0.8rem 1rem; }
+            .topbar-user { padding: 8px 10px; }
+            .topbar-user-puesto { display: none; }
+            .topbar-user-info { max-width: calc(100vw - 64px - 1.5rem - 44px); }
+            .topbar-user-avatar { width: 28px; height: 28px; font-size: 0.68rem; }
+            h2 { font-size: 1.1rem; }
         }
 
         /* ========== AJUSTES ========== */
