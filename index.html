@@ -347,11 +347,38 @@
 
         /* ========== BARRA SUPERIOR: USUARIO EN SESIÓN ========== */
         .topbar-user {
-            position: sticky; top: 16px; z-index: 5;
+            position: sticky; top: 16px; z-index: 20;
             display: flex; justify-content: flex-end; align-items: center; gap: 10px;
-            margin-bottom: 1rem; padding: 12px 20px;
+            margin-bottom: 1.5rem; padding: 12px 20px;
             background: var(--card-bg); border-radius: var(--border-radius); box-shadow: var(--shadow);
         }
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+        .notif-bell {
+            position: relative; width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid var(--border-color); background: var(--input-bg);
+            color: var(--text-main); cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+        }
+        .notif-bell:hover { background: var(--sidebar-hover); color: white; }
+        .notif-badge {
+            position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 3px;
+            background: var(--danger-color); color: white; font-size: 0.62rem; font-weight: 700;
+            border-radius: 999px; display: none; align-items: center; justify-content: center; line-height: 1;
+        }
+        .notif-badge.show { display: flex; }
+        .notif-panel {
+            position: absolute; top: 54px; right: 0; width: min(340px, 92vw); max-height: 70vh; overflow-y: auto;
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18); z-index: 30; display: none;
+        }
+        .notif-panel.show { display: block; }
+        .notif-panel-header { padding: 0.8rem 1rem; font-weight: 700; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        .notif-item { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-main); }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item .notif-title { font-weight: 600; margin-bottom: 2px; }
+        .notif-item .notif-sub { color: #888; font-size: 0.72rem; margin-bottom: 6px; }
+        .notif-item .notif-actions { display: flex; gap: 6px; }
+        .notif-empty { padding: 1.2rem; text-align: center; color: #888; font-size: 0.8rem; }
         .topbar-user-info { text-align: right; line-height: 1.25; min-width: 0; overflow: hidden; }
         .topbar-user-name { display: block; font-weight: 700; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .topbar-user-puesto { display: block; font-size: 0.68rem; color: var(--active-bg); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -484,8 +511,10 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
+            position: relative; z-index: 1;
         }
-        .controls-group { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+        .controls-group { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
+        .controls-group select, .controls-group input { min-height: 38px; }
         .btn-primary {
             background: linear-gradient(135deg, var(--active-bg), var(--active-bg2));
             color: white;
@@ -939,6 +968,13 @@
             #inventarios-list tr { margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 10px; }
             #inventarios-list td { border: none; padding: 5px 0; text-align: right; }
             #inventarios-list td::before { content: attr(data-label); float: left; font-weight: 600; color: #888; }
+
+            /* Toolbars y filtros: apilados y a ancho completo, sin quedar pegados a la tarjeta de usuario */
+            .toolbar { flex-direction: column; align-items: stretch; margin-top: 0.4rem; }
+            .toolbar .controls-group { width: 100%; }
+            .toolbar .controls-group select, .toolbar .controls-group input, .toolbar > button { width: 100%; }
+            .notif-panel { position: fixed; top: 64px; left: 8px; right: 8px; width: auto; max-width: none; }
+            input, select, textarea, button { font-size: 16px; }
         }
 
         /* ========== RESPONSIVE: teléfonos pequeños ========== */
@@ -1117,6 +1153,16 @@
         <!-- MAIN CONTENT -->
         <main class="main-content">
             <div class="topbar-user">
+                <div class="topbar-actions">
+                    <button type="button" class="notif-bell" onclick="toggleNotifPanel()" title="Notificaciones">
+                        <i class="fas fa-bell"></i>
+                        <span class="notif-badge" id="notif-badge">0</span>
+                    </button>
+                    <div class="notif-panel" id="notif-panel">
+                        <div class="notif-panel-header"><i class="fas fa-bell"></i> Notificaciones</div>
+                        <div id="notif-panel-body"></div>
+                    </div>
+                </div>
                 <div class="topbar-user-info">
                     <span class="topbar-user-name" id="topbar-user-nombre">-</span>
                     <span class="topbar-user-puesto" id="topbar-user-puesto">-</span>
@@ -1182,6 +1228,7 @@
                     </div>
                     <div class="controls-group">
                         <button class="btn-primary" onclick="resetAssetForm(); openModal('modalActivo')"><i class="fas fa-plus"></i> Nuevo</button>
+                        <button class="btn-action" onclick="exportarActivosCentro(null)"><i class="fas fa-file-excel"></i> Exportar</button>
                         <button class="btn-action" onclick="toggleView('grid')" id="view-grid-btn" style="background:var(--active-bg); color:white;"><i class="fas fa-th"></i></button>
                         <button class="btn-action" onclick="toggleView('list')" id="view-list-btn"><i class="fas fa-list"></i></button>
                     </div>
@@ -1477,13 +1524,30 @@
             <input type="text" id="activo-asignado" placeholder="Ej: Laura Méndez">
             <label>Fecha de compra</label>
             <input type="date" id="activo-fecha-compra">
-            <label>Valor (MXN)</label>
-            <input type="number" id="activo-valor" placeholder="28400">
+            <label>Proveedor</label>
+            <input type="text" id="activo-proveedor" placeholder="Ej: Office Depot">
+            <label>Factura</label>
+            <input type="text" id="activo-factura" placeholder="Ej: F-2026-00123">
             <label>Notas</label>
             <textarea id="activo-notas" rows="3" placeholder="Equipo de dirección de operaciones."></textarea>
             <div class="modal-buttons">
                 <button class="btn-secondary" onclick="closeModal('modalActivo')">Cancelar</button>
                 <button class="btn-primary" onclick="saveAsset()"><i class="fas fa-save"></i> Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Solicitar Baja -->
+    <div class="modal-overlay" id="modalSolicitarBaja">
+        <div class="modal-box" style="max-width:min(420px,95vw);">
+            <h3><i class="fas fa-ban"></i> Solicitar baja de activo</h3>
+            <p class="sub">Se enviará a auditoría para su aprobación. El activo seguirá activo hasta que se apruebe.</p>
+            <input type="hidden" id="baja-activo-index">
+            <label>Motivo de la baja</label>
+            <textarea id="baja-motivo" rows="3" placeholder="Ej: Equipo dañado sin reparación posible"></textarea>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeModal('modalSolicitarBaja')">Cancelar</button>
+                <button class="btn-primary" onclick="confirmarSolicitudBaja()"><i class="fas fa-paper-plane"></i> Enviar solicitud</button>
             </div>
         </div>
     </div>
@@ -1555,6 +1619,7 @@
             <input type="text" id="usuario-username" placeholder="Ej: jperez">
             <label>Puesto</label>
             <input type="text" id="usuario-puesto" placeholder="Ej: Auditor Jr">
+            <p class="sub" style="margin-top:-0.6rem;">Si el puesto incluye la palabra "Auditor", esa persona podrá aprobar o rechazar bajas de activos.</p>
             <label>Nueva contraseña</label>
             <input type="text" id="usuario-password" placeholder="Dejar en blanco para no cambiar">
             <label>Rol</label>
@@ -1603,6 +1668,7 @@
         let inventarios = [];
         let scanResults = [];
         let vehiculos = [];
+        let solicitudesBaja = [];
         let inventarioActivo = null;
         let razonSocial = 'Grupo Kuroda';
 
@@ -1701,7 +1767,8 @@
                 fecha_compra: a.fechaCompra || null,
                 numero_inventario: a.numInventario || '',
                 cuenta_contable: a.cuentaContable || '',
-                valor: a.valor || 0, notas: a.notas || '',
+                valor: a.valor || 0, proveedor: a.proveedor || '', factura: a.factura || '',
+                notas: a.notas || '',
                 foto_url: a.foto || null
             };
         }
@@ -1715,8 +1782,34 @@
                 razonSocial: r.razon_social || '', asignado: r.asignado_a || '',
                 fechaCompra: r.fecha_compra || '', numInventario: r.numero_inventario || '',
                 cuentaContable: r.cuenta_contable || '', valor: r.valor || 0,
+                proveedor: r.proveedor || '', factura: r.factura || '',
                 notas: r.notas || '', foto: r.foto_url || null
             };
+        }
+
+        // ---- Solicitudes de baja (requieren aprobación de auditoría) ----
+        function bajaARow(s) {
+            return {
+                id: s.id, activo_id: s.activoId || null, activo_nombre: s.activoNombre || '',
+                motivo: s.motivo || '', solicitado_por: s.solicitadoPor || '',
+                solicitado_por_id: s.solicitadoPorId || null, fecha: s.fecha || new Date().toISOString(),
+                estado: s.estado || 'pendiente', resuelto_por: s.resueltoPor || null,
+                fecha_resuelto: s.fechaResuelto || null
+            };
+        }
+        function rowABaja(r) {
+            return {
+                id: r.id, activoId: r.activo_id, activoNombre: r.activo_nombre || '',
+                motivo: r.motivo || '', solicitadoPor: r.solicitado_por || '',
+                solicitadoPorId: r.solicitado_por_id, fecha: r.fecha, estado: r.estado || 'pendiente',
+                resueltoPor: r.resuelto_por || null, fechaResuelto: r.fecha_resuelto || null
+            };
+        }
+
+        // Un "auditor" es admin, o cualquier usuario cuyo puesto incluya la palabra "auditor"
+        // (no requiere un rol nuevo en la base de datos).
+        function esAuditor(u) {
+            return !!u && (u.role === 'admin' || (u.puesto || '').toLowerCase().includes('auditor'));
         }
         function movARow(m) {
             const asset = assets.find(a => a.serie === m.serie) || assets.find(a => a.nombre === m.activoNombre);
@@ -1849,6 +1942,15 @@
             assets = (assetsData || []).map(rowAAsset);
             movimientos = (movData || []).map(rowAMov);
             inventarios = (invData || []).map(rowAInv);
+
+            // Tabla opcional: si aún no se creó en Supabase, seguimos sin romper la app.
+            try {
+                const { data: bajaData, error: e6 } = await supabaseClient.from('solicitudes_baja').select('*').order('fecha', { ascending: false });
+                if (e6) throw e6;
+                solicitudesBaja = (bajaData || []).map(rowABaja);
+            } catch (err) {
+                solicitudesBaja = [];
+            }
         }
 
         // ============================================================
@@ -1967,6 +2069,7 @@
                     sincronizarTabla('inventarios', inventarios.map(invARow))
                 ]);
                 await supabaseClient.from('app_config').upsert([{ key: 'razon_social', value: razonSocial }], { onConflict: 'key' });
+                try { await sincronizarTabla('solicitudes_baja', solicitudesBaja.map(bajaARow)); } catch (errBaja) { /* tabla opcional aún no creada */ }
                 marcarConexionOk();
             } catch (err) {
                 console.error(err);
@@ -1991,6 +2094,7 @@
             actualizarSelectMovimientos();
             actualizarDatalistSeries();
             actualizarSelectUsuarioCentro();
+            renderNotificaciones();
         }
 
         function updateKPIs() {
@@ -2053,7 +2157,8 @@
                     </div>
                     <div class="asset-actions">
                         <button class="btn-action" onclick="editAsset(${index})"><i class="fas fa-edit"></i> Editar</button>
-                        <button class="btn-action" style="color:var(--danger-color);" onclick="deleteAsset(${index})"><i class="fas fa-trash"></i></button>
+                        ${asset.estado !== 'Dado de baja' ? `<button class="btn-action" style="color:var(--danger-color);" onclick="solicitarBajaActivo(${index})" title="Solicitar baja a auditoría"><i class="fas fa-ban"></i> Dar de baja</button>` : ''}
+                        <button class="btn-action" style="color:var(--danger-color);" onclick="deleteAsset(${index})" title="Eliminar registro"><i class="fas fa-trash"></i></button>
                         <div class="file-upload-wrapper">
                             <button class="btn-action" style="width:100%;"><i class="fas fa-upload"></i> Foto</button>
                             <input type="file" accept="image/*" onchange="uploadPhoto(${index}, event)">
@@ -2091,7 +2196,8 @@
             document.getElementById('activo-centro').value = a.centro || '';
             document.getElementById('activo-asignado').value = a.asignado || '';
             document.getElementById('activo-fecha-compra').value = a.fechaCompra || '';
-            document.getElementById('activo-valor').value = a.valor || '';
+            document.getElementById('activo-proveedor').value = a.proveedor || '';
+            document.getElementById('activo-factura').value = a.factura || '';
             document.getElementById('activo-notas').value = a.notas || '';
             openModal('modalActivo');
         }
@@ -2115,7 +2221,8 @@
             const centro = document.getElementById('activo-centro').value;
             const asignado = document.getElementById('activo-asignado').value.trim();
             const fechaCompra = document.getElementById('activo-fecha-compra').value;
-            const valor = parseFloat(document.getElementById('activo-valor').value) || 0;
+            const proveedor = document.getElementById('activo-proveedor').value.trim();
+            const factura = document.getElementById('activo-factura').value.trim();
             const notas = document.getElementById('activo-notas').value.trim();
 
             if (!serie || !nombre) {
@@ -2123,13 +2230,30 @@
                 return;
             }
 
+            // No permitir dar de alta un activo que ya existe (misma serie o mismo activo fijo)
+            const yaExiste = assets.some((a, i) => {
+                if (index && i === parseInt(index)) return false; // permitir guardar el mismo registro al editar
+                const mismaSerie = serie && a.serie && a.serie.trim().toLowerCase() === serie.toLowerCase();
+                const mismoFijo = activoFijo && a.activoFijo && a.activoFijo.trim().toLowerCase() === activoFijo.toLowerCase();
+                return mismaSerie || mismoFijo;
+            });
+            if (yaExiste) {
+                showNotification('⚠️ Ya existe un activo registrado con esa serie o activo fijo', 'danger', 4000);
+                return;
+            }
+
+            const estadoAnterior = index ? (assets[parseInt(index)].estado || '') : '';
+            const pideBajaDirecta = estado === 'Dado de baja' && estadoAnterior !== 'Dado de baja';
+            const estadoFinal = (pideBajaDirecta && !esAuditor(currentUser)) ? estadoAnterior : estado;
+
             const assetData = {
-                serie, activoFijo, nombre, categoria, estado, marca, modelo, centro,
-                asignado, fechaCompra, valor, notas, foto: null
+                serie, activoFijo, nombre, categoria, estado: estadoFinal || 'Disponible', marca, modelo, centro,
+                asignado, fechaCompra, valor: 0, proveedor, factura, notas, foto: null
             };
 
             if (index) {
                 const idx = parseInt(index);
+                assetData.foto = assets[idx].foto || null;
                 assets[idx] = { ...assets[idx], ...assetData };
             } else {
                 const codigo = 'BST-' + Date.now().toString(36).toUpperCase();
@@ -2140,6 +2264,10 @@
             closeModal('modalActivo');
             renderAssets();
             resetAssetForm();
+
+            if (pideBajaDirecta && !esAuditor(currentUser)) {
+                showNotification('El cambio a "Dado de baja" requiere aprobación de auditoría. Usa el botón "Dar de baja" en la tarjeta del activo.', 'info', 5000);
+            }
         }
 
         function resetAssetForm() {
@@ -2155,9 +2283,122 @@
             document.getElementById('activo-centro').value = centros.length ? centros[0].nombre : '';
             document.getElementById('activo-asignado').value = '';
             document.getElementById('activo-fecha-compra').value = '';
-            document.getElementById('activo-valor').value = '';
+            document.getElementById('activo-proveedor').value = '';
+            document.getElementById('activo-factura').value = '';
             document.getElementById('activo-notas').value = '';
             actualizarSelectCentros();
+        }
+
+        // ---- Dar de baja (requiere aprobación de auditoría) ----
+        function solicitarBajaActivo(index) {
+            document.getElementById('baja-activo-index').value = index;
+            document.getElementById('baja-motivo').value = '';
+            openModal('modalSolicitarBaja');
+        }
+
+        function confirmarSolicitudBaja() {
+            const index = parseInt(document.getElementById('baja-activo-index').value);
+            const motivo = document.getElementById('baja-motivo').value.trim();
+            const asset = assets[index];
+            if (!asset) { closeModal('modalSolicitarBaja'); return; }
+            if (!motivo) { alert('⚠️ Describe el motivo de la baja'); return; }
+
+            if (esAuditor(currentUser)) {
+                // Auditor/administrador: aplica la baja de inmediato, sin trámite.
+                asset.estado = 'Dado de baja';
+                renderAssets();
+            } else {
+                solicitudesBaja.push({
+                    id: crypto.randomUUID(), activoId: asset.id, activoNombre: asset.nombre,
+                    motivo, solicitadoPor: currentUser ? (currentUser.nombreCompleto || currentUser.username) : '',
+                    solicitadoPorId: currentUser ? currentUser.id : null,
+                    fecha: new Date().toISOString(), estado: 'pendiente'
+                });
+                saveAllData();
+            }
+            renderNotificaciones();
+            closeModal('modalSolicitarBaja');
+            showNotification(esAuditor(currentUser) ? '✅ Activo dado de baja' : '📩 Solicitud de baja enviada a auditoría', 'success');
+        }
+
+        function aprobarBaja(id) {
+            if (!esAuditor(currentUser)) return;
+            const sol = solicitudesBaja.find(s => s.id === id);
+            if (!sol) return;
+            const asset = assets.find(a => a.id === sol.activoId);
+            if (asset) asset.estado = 'Dado de baja';
+            sol.estado = 'aprobada';
+            sol.resueltoPor = currentUser.nombreCompleto || currentUser.username;
+            sol.fechaResuelto = new Date().toISOString();
+            renderAssets();
+            renderNotificaciones();
+            saveAllData();
+            showNotification('✅ Baja aprobada', 'success');
+        }
+
+        function rechazarBaja(id) {
+            if (!esAuditor(currentUser)) return;
+            const sol = solicitudesBaja.find(s => s.id === id);
+            if (!sol) return;
+            sol.estado = 'rechazada';
+            sol.resueltoPor = currentUser.nombreCompleto || currentUser.username;
+            sol.fechaResuelto = new Date().toISOString();
+            renderNotificaciones();
+            saveAllData();
+            showNotification('Solicitud de baja rechazada', 'info');
+        }
+
+        // ---- Campanita de notificaciones ----
+        function toggleNotifPanel() {
+            document.getElementById('notif-panel')?.classList.toggle('show');
+        }
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('notif-panel');
+            const bell = document.querySelector('.notif-bell');
+            if (panel && panel.classList.contains('show') && !panel.contains(e.target) && !bell?.contains(e.target)) {
+                panel.classList.remove('show');
+            }
+        });
+
+        function renderNotificaciones() {
+            const badge = document.getElementById('notif-badge');
+            const body = document.getElementById('notif-panel-body');
+            if (!badge || !body) return;
+
+            const pendientes = solicitudesBaja.filter(s => s.estado === 'pendiente');
+            const items = [];
+
+            if (esAuditor(currentUser)) {
+                pendientes.forEach(s => {
+                    items.push(`
+                        <div class="notif-item">
+                            <div class="notif-title"><i class="fas fa-ban" style="color:var(--danger-color);"></i> Baja de "${s.activoNombre}"</div>
+                            <div class="notif-sub">${s.solicitadoPor || 'Usuario'} · ${s.motivo}</div>
+                            <div class="notif-actions">
+                                <button class="btn-primary" style="padding:4px 10px; font-size:0.72rem;" onclick="aprobarBaja('${s.id}')">Aprobar</button>
+                                <button class="btn-secondary" style="padding:4px 10px; font-size:0.72rem;" onclick="rechazarBaja('${s.id}')">Rechazar</button>
+                            </div>
+                        </div>
+                    `);
+                });
+            } else if (currentUser) {
+                solicitudesBaja
+                    .filter(s => s.solicitadoPorId === currentUser.id && s.estado !== 'pendiente')
+                    .slice(0, 5)
+                    .forEach(s => {
+                        items.push(`
+                            <div class="notif-item">
+                                <div class="notif-title">Baja de "${s.activoNombre}" ${s.estado === 'aprobada' ? '✅ aprobada' : '❌ rechazada'}</div>
+                                <div class="notif-sub">${s.motivo}</div>
+                            </div>
+                        `);
+                    });
+            }
+
+            const countBadge = esAuditor(currentUser) ? pendientes.length : 0;
+            badge.textContent = countBadge;
+            badge.classList.toggle('show', countBadge > 0);
+            body.innerHTML = items.length ? items.join('') : `<div class="notif-empty">Sin notificaciones por ahora.</div>`;
         }
 
         function actualizarSelectCentros() {
@@ -2267,6 +2508,7 @@
                             <div class="acciones">
                                 <span class="contador">${activosCount} activos</span>
                                 <button class="btn-accion btn-ver" onclick="verActivosCentro('${c.nombre}')"><i class="fas fa-eye"></i> Ver inventario</button>
+                                <button class="btn-accion btn-editar" onclick="exportarActivosCentro('${c.nombre.replace(/'/g, "\\'")}')"><i class="fas fa-file-excel"></i> Exportar</button>
                                 <button class="btn-accion btn-editar" onclick="editarCentro('${c.id}')"><i class="fas fa-edit"></i> Editar</button>
                                 <button class="btn-accion btn-eliminar" onclick="eliminarCentro('${c.id}')"><i class="fas fa-trash"></i></button>
                             </div>
@@ -3240,6 +3482,28 @@
                     <td><span class="status-badge ${v.estatus === 'Completo' ? 'badge-done' : 'badge-process'}">${v.estatus}</span></td>
                 </tr>
             `).join('');
+        }
+
+        // Genera un .xlsx con los activos de una sucursal (o todos, si nombreCentro es null)
+        function exportarActivosCentro(nombreCentro) {
+            const lista = nombreCentro ? assets.filter(a => a.centro === nombreCentro) : assets;
+            if (lista.length === 0) {
+                showNotification('No hay activos para exportar', 'warning');
+                return;
+            }
+            const filas = lista.map(a => ({
+                'Activo fijo': a.activoFijo || '', 'Serie': a.serie || '', 'Nombre': a.nombre || '',
+                'Categoría': a.categoria || '', 'Estado': a.estado || '', 'Marca': a.marca || '',
+                'Modelo': a.modelo || '', 'Centro': a.centro || '', 'Asignado a': a.asignado || '',
+                'Fecha de compra': a.fechaCompra || '', 'Proveedor': a.proveedor || '', 'Factura': a.factura || '',
+                'Notas': a.notas || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(filas);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Activos');
+            const nombreArchivo = `activos_${(nombreCentro || 'todas_las_sucursales').replace(/[^\w]+/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, nombreArchivo);
+            showNotification('✅ Excel exportado correctamente', 'success');
         }
 
         function exportarExcelVehiculos() {
