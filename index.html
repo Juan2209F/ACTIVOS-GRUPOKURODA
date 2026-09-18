@@ -1225,6 +1225,16 @@
                 <div class="toolbar">
                     <div class="controls-group">
                         <input type="text" placeholder="Buscar por nombre, serie, activo fijo..." id="search-activo">
+                        <select id="filtro-categoria-activo" onchange="filtrarActivos()">
+                            <option value="">Todas las categorías</option>
+                            <option value="computo">Equipo de cómputo</option>
+                            <option value="mobiliario">Mobiliario</option>
+                            <option value="herramienta">Herramienta</option>
+                            <option value="vehiculos">Vehículos</option>
+                            <option value="electrodomestico">Electrodoméstico</option>
+                            <option value="inmueble">Inmueble / terreno</option>
+                            <option value="otros">Otros</option>
+                        </select>
                     </div>
                     <div class="controls-group">
                         <button class="btn-primary" onclick="resetAssetForm(); openModal('modalActivo')"><i class="fas fa-plus"></i> Nuevo</button>
@@ -2145,6 +2155,7 @@
             assets.forEach((asset, index) => {
                 const card = document.createElement('div');
                 card.className = 'asset-card';
+                card.dataset.categoria = asset.categoria || '';
                 const fotoHtml = asset.foto ? `<img src="${asset.foto}" alt="Foto">` : `<i class="fas fa-camera fa-2x"></i>`;
                 const estadoCls = asset.estado === 'Asignado' ? 'badge-done' : 'badge-process';
                 card.innerHTML = `
@@ -2167,6 +2178,7 @@
                 `;
                 container.appendChild(card);
             });
+            filtrarActivos();
             saveAllData();
         }
 
@@ -2416,13 +2428,17 @@
         }
 
         // Filtro de búsqueda incluyendo Activo fijo
-        document.getElementById('search-activo')?.addEventListener('input', function() {
-            const q = this.value.toLowerCase().trim();
+        function filtrarActivos() {
+            const q = (document.getElementById('search-activo')?.value || '').toLowerCase().trim();
+            const cat = document.getElementById('filtro-categoria-activo')?.value || '';
             document.querySelectorAll('.asset-card').forEach(card => {
                 const text = card.textContent.toLowerCase();
-                card.style.display = text.includes(q) ? '' : 'none';
+                const coincideTexto = !q || text.includes(q);
+                const coincideCategoria = !cat || card.dataset.categoria === cat;
+                card.style.display = (coincideTexto && coincideCategoria) ? '' : 'none';
             });
-        });
+        }
+        document.getElementById('search-activo')?.addEventListener('input', filtrarActivos);
 
         function toggleView(view) {
             const container = document.getElementById('assets-grid');
